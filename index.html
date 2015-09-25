@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href='http:///maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel="stylesheet" href='src/brutusin-json-forms.css'/>
+        <link rel="stylesheet" href="lib/codemirror.css">
+        <style>
+            .CodeMirror {
+                height: 400px;
+            }
+        </style>
+
+        <script src='http://code.jquery.com/jquery-1.11.3.min.js'></script>
+        <script src='http:///maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'></script>
+        <script src="src/brutusin-json-forms.js"></script>
+        <script src="lib/codemirror.js"></script>
+        <script src="lib/codemirror-javascript.js"></script>
+
+        <script lang="javascript">
+            var codeMirrors = new Object();
+            var input = new Object();
+            var inputString = new Object();
+            var demos = [
+                ["Simple",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
+                    true],
+                ["Objects, arrays, enums, default, required",
+                {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"pageNum":{"type":"integer","title":"Page number","description":"Page number to be queried, 1-based","default":1,"required":true},"pageSize":{"type":"integer","title":"Page size","description":"Number of records per page","required":true,"default":50,"enum":[10,25,50,100]},"selectedFacetValues":{"type":"array","title":"Query terms","items":{"type":"object","properties":{"facetName":{"type":"string","title":"Field name","required":true},"matchAllNull":{"type":"boolean","title":"Match nulls"},"matchAllNotNull":{"type":"boolean","title":"Match not nulls"},"facetValues":{"type":"array","title":"Field values","items":{"type":"object","properties":{"value":{"type":"string","title":"Value"}}}},"included":{"type":"boolean","title":"Included"}}}},"sorts":{"type":"array","title":"Sorting","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name"},"ascending":{"type":"boolean","title":"Ascending"}}}}}},
+                null],
+                ["Complex",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","additionalProperties":{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"string"}}},"properties":{"free":{"type":"any","required":true},"pageSize":{"type":"integer","title":"Page size","description":"Number of records per page","required":false,"default":3,"enum":[1,2,3,4]},"indexId":{"dependsOn":["pageSize"]},"selectedFacetValues":{"type":"array","title":"selectedFacetValues","items":{"type":"object","properties":{"facetName":{"type":"string","title":"facetName","default":"aFacetName","required":true},"matchAllNotNull":{"type":"boolean","title":"match All Not Null"},"facetValues":{"type":"array","title":"facetValues","items":{"type":"object","properties":{"value":{"type":"string","title":"value"}}}},"matchAllNull":{"type":"boolean","title":"matchAllNull"},"included":{"type":"boolean","title":"included"}}}},"sorts":{"type":"array","title":"sorts","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"fieldName"},"ascending":{"type":"boolean","title":"ascending"}}}},"item":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name","description":"Field name"},"matchType":{"type":"string","title":"matchType","required":true},"fieldValue":{"type":"boolean","title":"fieldValue"}}},"fieldFilters":{"type":"array","title":"Field filters","description":"Query filters to be applied","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name","description":"Field name"},"matchType":{"type":"string","title":"matchType","required":true},"fieldValue":{"type":"boolean","title":"fieldValue"}}}},"pageNum":{"type":"integer","title":"pageNum","required":true}}},
+                    {"free": {"hola": 5, "pp": "s"}, "indexId": true, "fieldFilters": [{"fieldName": "1", "fieldValue": true}, {"fieldName": "331", "fieldValue": "false"}], "aloha": {"name": "nacho", "age": 36}, "pageNum": 1, "perropachon": {"name": "nacho", "age": 88}, "selectedFacetValues": [{}]}]
+            ];
+            var selectedTab = "schema";
+
+            function selectExample(selectedExampleIndex) {
+                input.schema = demos[selectedExampleIndex][1];
+                input.data = demos[selectedExampleIndex][2];
+                inputString.schema = JSON.stringify(input.schema, null, 2);
+                inputString.data = input.data ? JSON.stringify(input.data, null, 2) : "";
+                if (codeMirrors[selectedTab]) {
+                    codeMirrors[selectedTab].setValue(inputString[selectedTab]);
+                }
+            }
+            selectExample(0);
+            function generateForm() {
+                var schema;
+                var data;
+                inputString[selectedTab] = codeMirrors[selectedTab].getValue();
+                try {
+                    eval("schema=" + inputString.schema);
+                    if (inputString.data) {
+                        eval("data=" + inputString.data);
+                    } else {
+                        data = null;
+                    }
+                } catch (err) {
+                    $("#jsonAlert").show();
+                    return;
+                }
+                $('#formLink').click();
+                var bf = BrutusinForm(schema);
+                bf.setElementDecorator(function (element) {
+                    if (element.tagName) {
+                        var tagName = element.tagName.toLowerCase();
+                        if (tagName === "input" && element.type !== "checkbox" || tagName === "textarea") {
+                            element.className += " form-control";
+                        } else if (tagName === "select") {
+                            element.className += " chosen-select form-control";
+                        } else if (tagName === "button") {
+                            element.className += "btn btn-primary  btn-xs";
+                        } else if (tagName === "form") {
+                            element.className += " form-inline";
+                        }
+                    }
+                    if (element.title) {
+                        element.setAttribute("data-toggle", "tooltip");
+                    }
+                });
+
+                var container = document.getElementById('container');
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+                bf.render(container, data);
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
+            }
+
+            var bf = BrutusinForm(input.schema);
+            bf.setSchemaResolver(function (names, data) {
+                if (data.pageSize == 1) {
+                    return {"$.indexId": {}};
+                } else if (data.pageSize == 2) {
+                    return {"$.indexId": {
+                            "type": "boolean",
+                            "title": "Un booleano",
+                            "required": true,
+                        }};
+                } else {
+                    return {"$.indexId": {
+                            "type": "string",
+                            "title": "Index Id",
+                            "enum": [
+                                "Index1",
+                                "Index2"
+                            ]
+                        }};
+                }
+            });</script>
+
+    </head>
+    <body>
+        <div class="container" >
+            <h1><code>brutusin:json-forms</code> demo</h1>
+
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseInput" aria-expanded="true" aria-controls="collapseInput">
+                                Input
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseInput" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <label for="examples">Predefined examples:</label>
+                            <select class="form-control" id="examples" onchange="selectExample(selectedIndex)">
+                                <script>
+                                    for (var i = 0; i < demos.length; i++) {
+                                        document.write("<option>" + demos[i][0] + "</option>");
+                                    }
+                                </script>
+                            </select>
+                            <br>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#schema" aria-controls="schema" role="tab" data-toggle="tab">Schema</a></li>
+                                <li role="presentation"><a href="#data" aria-controls="data" role="tab" data-toggle="tab">Initial data</a></li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="schema"></div>
+                                <div role="tabpanel" class="tab-pane" id="data"></div>
+                            </div>
+                            <div class="alert alert-danger in" role="alert" id="jsonAlert" style="display:none">
+                                <a href="#" onclick='$("#jsonAlert").hide();' class="close" >&times;</a>
+                                <strong>Error!</strong> There was a problem parsing the input JSON.
+                            </div>
+
+                        </div>
+
+                        <div class="panel-footer">
+                            <button class="btn btn-primary" onclick="generateForm()">Create form</button> 
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a class="collapsed" id="formLink" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseForm" aria-expanded="false" aria-controls="collapseForm">
+                                Generated form
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseForm" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div id='container' class="panel-body"></div>
+                        <div class="panel-footer">
+                            <button class="btn btn-primary" onclick="alert(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="alert(bf.validate())">validate()</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <script lang="javascript">
+
+            codeMirrors["schema"] = CodeMirror(document.getElementById("schema"), {
+                value: JSON.stringify(demos[0][1], null, 4),
+                mode: "javascript",
+                lineNumbers: true
+            });
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                selectedTab = $(e.target).attr("aria-controls");
+                var pt = $(e.relatedTarget);
+                var prevTab;
+                if (pt) {
+                    prevTab = pt.attr("aria-controls");
+                    inputString[prevTab] = codeMirrors[prevTab].getValue();
+                }
+                if (!codeMirrors[selectedTab]) {
+                    codeMirrors[selectedTab] = CodeMirror(document.getElementById(selectedTab), {
+                        mode: "javascript",
+                        lineNumbers: true
+                    });
+                }
+                codeMirrors[selectedTab].setValue(inputString[selectedTab]);
+            });
+
+        </script>
+    </div>
+</body>
+</html> 
