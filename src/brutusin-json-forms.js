@@ -15,11 +15,36 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-function BrutusinForm(schema, id) {
+var BrutusinForms = new Object();
+
+/**
+ * Callback function to be notified after an HTML has been rendered (passed as parameter).
+ * @type type
+ */
+BrutusinForms.decorator = null;
+
+/**
+ * Callback function to be notified after a form has been rendered (passed as parameter).
+ * @type type
+ */
+BrutusinForms.postRender = null;
+
+/**
+ * BrutusinForms instances created in the document
+ * @type Array
+ */
+BrutusinForms.instances = new Array();
+
+/**
+ * BrutusinForms factory method
+ * @param {type} schema schema object
+ * @param {type} id Id of the HTML contained element
+ * @returns {BrutusinForms.create.obj|Object|Object.create.obj}
+ */
+BrutusinForms.create = function (schema, id) {
     var obj = new Object();
     var renderers = new Object();
     var schemaResolver;
-    var decorator;
     var schemaMap = new Object();
     var dependencyMap = new Object();
     var renderInfoMap = new Object();
@@ -90,8 +115,8 @@ function BrutusinForm(schema, id) {
     }
 
     function appendChild(parent, child) {
-        if (decorator) {
-            decorator(child);
+        if (BrutusinForms.decorator) {
+            BrutusinForms.decorator(child);
         }
         parent.appendChild(child);
     }
@@ -101,6 +126,7 @@ function BrutusinForm(schema, id) {
             to[propName] = from[propName];
         }
     }
+
     function createPseudoSchema(schema) {
         var pseudoSchema = new Object();
         copyProperty(schema, pseudoSchema, "type");
@@ -112,6 +138,15 @@ function BrutusinForm(schema, id) {
         return pseudoSchema;
 
     }
+
+    function cleanSchemaMap(name) {
+        for (var prop in schemaMap) {
+            if (name.startsWith(prop)) {
+                delete schemaMap[prop];
+            }
+        }
+    }
+
     function populateSchemaMap(name, schema) {
         if (schema.type === "object") {
             var pseudoSchema = createPseudoSchema(schema);
@@ -239,7 +274,8 @@ function BrutusinForm(schema, id) {
         var schemas = schemaResolver(arr, obj.getData());
         for (var id in schemas) {
             if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
-                schemaMap[id] = schemas[id];
+                cleanSchemaMap(id);
+                populateSchemaMap(id, schemas[id]);
                 var renderInfo = renderInfoMap[id];
                 if (renderInfo) {
                     var initValue = null;
@@ -347,7 +383,23 @@ function BrutusinForm(schema, id) {
         };
         if (s.description) {
             input.title = s.description;
+            input.placeholder = s.description;
         }
+//        if (s.pattern) {
+//            input.pattern = s.pattern;
+//        }
+//        if (s.required) {
+//            input.required = true;
+//        }
+//        if (s.pattern) {
+//            input.pattern = s.pattern;
+//        }
+//        if (s.minimum) {
+//            input.min = s.minimum;
+//        }
+//        if (s.maximum) {
+//            input.max = s.maximum;
+//        }
         input.onchange();
         input.id = getInputId();
         inputCounter++;
@@ -368,7 +420,7 @@ function BrutusinForm(schema, id) {
             }
             onDependecyChanged(id);
         };
-        if (typeof initialValue === "boolean") {
+        if (initialValue === true) {
             input.checked = true;
         }
         input.id = getInputId();
@@ -592,7 +644,7 @@ function BrutusinForm(schema, id) {
         clear(container);
 
         var r = renderers[s.type];
-        if (r) {
+        if (r && !s.dependsOn) {
             if (s.title) {
                 renderTitle(titleContainer, s.title, s);
             } else if (propertyProvider) {
@@ -609,7 +661,7 @@ function BrutusinForm(schema, id) {
         }
         var form = document.createElement("form");
         form.className = "brutusin-form";
-        form.onsubmit = function () {
+        form.onsubmit = function (event) {
             return false;
         };
         if (container) {
@@ -627,7 +679,11 @@ function BrutusinForm(schema, id) {
             render(null, form, "$", null, null, initialValue);
         }
         rendered = true;
+        if (BrutusinForms.postRender) {
+            BrutusinForms.postRender(obj);
+        }
     };
+
     function validate(element) {
         if (element.validationFailed) {
             element.focus();
@@ -648,10 +704,6 @@ function BrutusinForm(schema, id) {
     obj.setSchemaResolver = function (f) {
         schemaResolver = f;
     };
-    obj.setElementDecorator = function (f) {
-        decorator = f;
-    };
-
     obj.getData = function () {
         if (!container) {
             return null;
@@ -660,5 +712,7 @@ function BrutusinForm(schema, id) {
             ;
         }
     };
+
+    BrutusinForms.instances[BrutusinForms.instances.length] = obj;
     return obj;
 }

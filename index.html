@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href='http:///maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
-        <link rel="stylesheet" href='src/brutusin-json-forms.css'/>
+        <link rel="stylesheet" href='lib/bootstrap.min.css'/>
         <link rel="stylesheet" href="lib/codemirror.css">
+        <link rel="stylesheet" href='src/brutusin-json-forms.css'/>
         <style>
             .CodeMirror {
-                height: 400px;
+                height: 400px; 
             }
         </style>
 
-        <script src='http://code.jquery.com/jquery-1.11.3.min.js'></script>
-        <script src='http:///maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'></script>
-        <script src="src/brutusin-json-forms.js"></script>
+        <script src='lib/jquery-1.11.3.min.js'></script>
+        <script src='lib/bootstrap.min.js'></script>
         <script src="lib/codemirror.js"></script>
         <script src="lib/codemirror-javascript.js"></script>
+        <script src="src/brutusin-json-forms.js"></script>
+        <script src="src/brutusin-json-forms-bootstrap.js"></script>
+        <script src="src/brutusin-json-forms-jsonsrv.js"></script>
 
         <script lang="javascript">
             var codeMirrors = new Object();
@@ -23,15 +25,19 @@
             var demos = [
                 ["Simple",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
-                    true],
+                    null],
                 ["Objects, arrays, enums, default, required",
-                {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"pageNum":{"type":"integer","title":"Page number","description":"Page number to be queried, 1-based","default":1,"required":true},"pageSize":{"type":"integer","title":"Page size","description":"Number of records per page","required":true,"default":50,"enum":[10,25,50,100]},"selectedFacetValues":{"type":"array","title":"Query terms","items":{"type":"object","properties":{"facetName":{"type":"string","title":"Field name","required":true},"matchAllNull":{"type":"boolean","title":"Match nulls"},"matchAllNotNull":{"type":"boolean","title":"Match not nulls"},"facetValues":{"type":"array","title":"Field values","items":{"type":"object","properties":{"value":{"type":"string","title":"Value"}}}},"included":{"type":"boolean","title":"Included"}}}},"sorts":{"type":"array","title":"Sorting","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name"},"ascending":{"type":"boolean","title":"Ascending"}}}}}},
-                null],
-                ["Complex",
-                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","additionalProperties":{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"string"}}},"properties":{"free":{"type":"any","required":true},"pageSize":{"type":"integer","title":"Page size","description":"Number of records per page","required":false,"default":3,"enum":[1,2,3,4]},"indexId":{"dependsOn":["pageSize"]},"selectedFacetValues":{"type":"array","title":"selectedFacetValues","items":{"type":"object","properties":{"facetName":{"type":"string","title":"facetName","default":"aFacetName","required":true},"matchAllNotNull":{"type":"boolean","title":"match All Not Null"},"facetValues":{"type":"array","title":"facetValues","items":{"type":"object","properties":{"value":{"type":"string","title":"value"}}}},"matchAllNull":{"type":"boolean","title":"matchAllNull"},"included":{"type":"boolean","title":"included"}}}},"sorts":{"type":"array","title":"sorts","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"fieldName"},"ascending":{"type":"boolean","title":"ascending"}}}},"item":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name","description":"Field name"},"matchType":{"type":"string","title":"matchType","required":true},"fieldValue":{"type":"boolean","title":"fieldValue"}}},"fieldFilters":{"type":"array","title":"Field filters","description":"Query filters to be applied","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name","description":"Field name"},"matchType":{"type":"string","title":"matchType","required":true},"fieldValue":{"type":"boolean","title":"fieldValue"}}}},"pageNum":{"type":"integer","title":"pageNum","required":true}}},
-                    {"free": {"hola": 5, "pp": "s"}, "indexId": true, "fieldFilters": [{"fieldName": "1", "fieldValue": true}, {"fieldName": "331", "fieldValue": "false"}], "aloha": {"name": "nacho", "age": 36}, "pageNum": 1, "perropachon": {"name": "nacho", "age": 88}, "selectedFacetValues": [{}]}]
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"pageNum":{"type":"integer","title":"Page number","description":"Page number to be queried, 1-based","default":1,"required":true},"pageSize":{"type":"integer","title":"Page size","description":"Number of records per page","required":true,"default":50,"enum":[10,25,50,100]},"selectedFacetValues":{"type":"array","title":"Query terms","items":{"type":"object","properties":{"facetName":{"type":"string","title":"Field name","description":"Indexed field name","required":true},"matchAllNull":{"type":"boolean","title":"Match nulls"},"matchAllNotNull":{"type":"boolean","title":"Match not nulls"},"facetValues":{"type":"array","title":"Field values","items":{"type":"object","properties":{"value":{"type":"string","title":"Value"}}}},"included":{"type":"boolean","title":"Included"}}}},"sorts":{"type":"array","title":"Sorting","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name"},"ascending":{"type":"boolean","title":"Ascending"}}}}}},
+                    null],
+                ["Initial data",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"pageNum":{"type":"integer","title":"Page number","description":"Page number to be queried, 1-based","default":1,"required":true},"pageSize":{"type":"integer","title":"Page size","description":"Number of records per page","required":true,"default":50,"enum":[10,25,50,100]},"selectedFacetValues":{"type":"array","title":"Query terms","items":{"type":"object","properties":{"facetName":{"type":"string","title":"Field name","description":"Indexed field name","required":true},"matchAllNull":{"type":"boolean","title":"Match nulls"},"matchAllNotNull":{"type":"boolean","title":"Match not nulls"},"facetValues":{"type":"array","title":"Field values","items":{"type":"object","properties":{"value":{"type":"string","title":"Value"}}}},"included":{"type":"boolean","title":"Included"}}}},"sorts":{"type":"array","title":"Sorting","items":{"type":"object","properties":{"fieldName":{"type":"string","title":"Field name"},"ascending":{"type":"boolean","title":"Ascending"}}}}}},
+                    { "pageNum": 1, "pageSize": 50, "selectedFacetValues": [ { "facetName": "id", "matchAllNull": false, "matchAllNotNull": true, "facetValues": [ { "value": "1223" } ], "included": false } ], "sorts": [ { "fieldName": "name", "ascending": true } ] }],
+                ["Additional properties",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","additionalProperties":{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"string"}}}},
+                    {"aloha": {"name": "nacho", "age": 36}}]
             ];
             var selectedTab = "schema";
+            var bf;
 
             function selectExample(selectedExampleIndex) {
                 input.schema = demos[selectedExampleIndex][1];
@@ -59,56 +65,15 @@
                     return;
                 }
                 $('#formLink').click();
-                var bf = BrutusinForm(schema);
-                bf.setElementDecorator(function (element) {
-                    if (element.tagName) {
-                        var tagName = element.tagName.toLowerCase();
-                        if (tagName === "input" && element.type !== "checkbox" || tagName === "textarea") {
-                            element.className += " form-control";
-                        } else if (tagName === "select") {
-                            element.className += " chosen-select form-control";
-                        } else if (tagName === "button") {
-                            element.className += "btn btn-primary  btn-xs";
-                        } else if (tagName === "form") {
-                            element.className += " form-inline";
-                        }
-                    }
-                    if (element.title) {
-                        element.setAttribute("data-toggle", "tooltip");
-                    }
-                });
-
+                bf = BrutusinForms.create(schema);
                 var container = document.getElementById('container');
                 while (container.firstChild) {
                     container.removeChild(container.firstChild);
                 }
                 bf.render(container, data);
-                $(function () {
-                    $('[data-toggle="tooltip"]').tooltip();
-                });
             }
 
-            var bf = BrutusinForm(input.schema);
-            bf.setSchemaResolver(function (names, data) {
-                if (data.pageSize == 1) {
-                    return {"$.indexId": {}};
-                } else if (data.pageSize == 2) {
-                    return {"$.indexId": {
-                            "type": "boolean",
-                            "title": "Un booleano",
-                            "required": true,
-                        }};
-                } else {
-                    return {"$.indexId": {
-                            "type": "string",
-                            "title": "Index Id",
-                            "enum": [
-                                "Index1",
-                                "Index2"
-                            ]
-                        }};
-                }
-            });</script>
+        </script>
 
     </head>
     <body>
@@ -167,13 +132,12 @@
                     <div id="collapseForm" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
                         <div id='container' class="panel-body"></div>
                         <div class="panel-footer">
-                            <button class="btn btn-primary" onclick="alert(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="alert(bf.validate())">validate()</button>
+                            <button class="btn btn-primary" onclick="document.write(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="alert(bf.validate())">validate()</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
 
 
         <script lang="javascript">
@@ -198,8 +162,8 @@
                     });
                 }
                 codeMirrors[selectedTab].setValue(inputString[selectedTab]);
-            });
-
+            }
+            );
         </script>
     </div>
 </body>

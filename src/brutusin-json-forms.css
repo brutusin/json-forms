@@ -18,6 +18,7 @@
 
 form.brutusin-form table,input, select, textarea{
     width: 100% !important;
+    min-width: 80px;
 }
 form.brutusin-form input[type=checkbox]{
     width: auto !important;
