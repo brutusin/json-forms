@@ -54,6 +54,7 @@ BrutusinForms.create = function (schema, id) {
     var rendered = false;
     var withInitialValue = false;
     var inputCounter = 0;
+    var SCHEMA_ANY = {"type": "any"};
 
     populateSchemaMap("$", schema);
     validateDepencyMapIsAcyclic();
@@ -103,6 +104,9 @@ BrutusinForms.create = function (schema, id) {
         } else if (object instanceof Object) {
             var clone = new Object();
             for (var prop in object) {
+                if (prop.startsWith("$") && prop.endsWith("$")) {
+                    continue;
+                }
                 var value = removeEmptiesAndNulls(object[prop]);
                 if (value !== null) {
                     clone[prop] = value;
@@ -157,10 +161,14 @@ BrutusinForms.create = function (schema, id) {
                 pseudoSchema.properties[prop] = childProp;
                 populateSchemaMap(childProp, schema.properties[prop]);
             }
-            if (schema.additionalProperties && schema.additionalProperties) {
+            if (schema.additionalProperties) {
                 var childProp = name + "[*]";
                 pseudoSchema.additionalProperties = childProp;
-                populateSchemaMap(childProp, schema.additionalProperties);
+                if (schema.additionalProperties.hasOwnProperty("type")) {
+                    populateSchemaMap(childProp, schema.additionalProperties);
+                } else {
+                    populateSchemaMap(childProp, SCHEMA_ANY);
+                }
             }
         } else if (schema.type === "array") {
             var pseudoSchema = createPseudoSchema(schema);
@@ -217,21 +225,30 @@ BrutusinForms.create = function (schema, id) {
         }
     }
 
+    /**
+     * Used in object properties
+     * @param {type} propname
+     * @returns {BrutusinForms.create.createStaticPropertyProvider.ret|Object|Object.create.createStaticPropertyProvider.ret}
+     */
     function createStaticPropertyProvider(propname) {
         var ret = new Object();
         ret.getValue = function () {
             return propname;
         };
-        ret.onChange = function (oldName) {
+        ret.onchange = function (oldName) {
         };
         return ret;
     }
 
-    function createPropertyProvider(f) {
+    /**
+     * Used in object additionalProperties and arrays
+     * @param {type} propname
+     * @returns {BrutusinForms.create.createStaticPropertyProvider.ret|Object|Object.create.createStaticPropertyProvider.ret}
+     */
+    function createPropertyProvider(getValue, onchange) {
         var ret = new Object();
-        ret.getValue = f;
-        ret.onChange = function (oldName) {
-        };
+        ret.getValue = getValue;
+        ret.onchange = onchange;
         return ret;
     }
 
@@ -368,7 +385,9 @@ BrutusinForms.create = function (schema, id) {
             }
             if (validationFailed) {
                 input.validationFailed = true;
-                input.className += " error";
+                if (!input.className.includes(" error")) {
+                    input.className += " error";
+                }
                 value = null;
             } else {
                 input.validationFailed = false;
@@ -442,15 +461,51 @@ BrutusinForms.create = function (schema, id) {
         var innerTd1 = document.createElement("td");
         var innerTd2 = document.createElement("td");
         //td1.innerHTML="<table><tr><td style='vertical-align:middle'> <input type='text' class='form-control'></td><td style='vertical-align:middle'><button class='btn btn-primary  btn-xs'>x</button></td></tr></table>"
-
+        var keyForBlank = "$" + Object.keys(current).length + "$";
         var td2 = document.createElement("td");
         td2.className = "prop-value";
         var nameInput = document.createElement("input");
         nameInput.type = "text";
-        var pp = createPropertyProvider(function () {
-            return nameInput.value;
-        });
+        var pp = createPropertyProvider(
+                function () {
+                    if (nameInput.value) {
+                        return nameInput.value;
+                    } else {
+                        return keyForBlank;
+                    }
+                },
+                function (oldPropertyName) {
+                    if (!oldPropertyName) {
+                        oldPropertyName = keyForBlank;
+                    }
+                    current[pp.getValue()] = current[oldPropertyName];
+                    delete current[oldPropertyName];
+
+                });
+        nameInput.onkeyup = function () {
+            if (nameInput.previousValue !== nameInput.value) {
+                if (current.hasOwnProperty(nameInput.value)) {
+                    nameInput.validationFailed = true;
+                    if (!nameInput.className.includes(" error")) {
+                        nameInput.className += " error";
+                    }
+                } else {
+                    nameInput.validationFailed = false;
+                    nameInput.className = nameInput.className.replace(" error", "");
+                }
+            }
+            if (!nameInput.value) {
+                nameInput.validationFailed = true;
+                if (!nameInput.className.includes(" error")) {
+                    nameInput.className += " error";
+                }
+            }
+        };
         nameInput.onblur = function () {
+            if (!nameInput.value) {
+                nameInput.focus();
+                return;
+            }
             if (nameInput.previousValue !== nameInput.value) {
                 if (current.hasOwnProperty(nameInput.value)) {
                     nameInput.focus();
@@ -459,6 +514,23 @@ BrutusinForms.create = function (schema, id) {
                 pp.onchange(nameInput.previousValue);
                 nameInput.previousValue = nameInput.value;
             }
+
+//             if (nameInput.previousValue !== nameInput.value && current.hasOwnProperty(nameInput.value) || !nameInput.value) {
+//                validationFailed = true;
+//            }
+//            if (validationFailed) {
+//                nameInput.validationFailed = true;
+//                nameInput.className += " error";
+//                nameInput.focus();
+//                return;
+//            } else {
+//                nameInput.validationFailed = false;
+//                nameInput.className = input.className.replace(" error", "");
+//            }
+//            if (nameInput.previousValue !== nameInput.value) {
+//                pp.onchange(nameInput.previousValue);
+//                nameInput.previousValue = nameInput.value;
+//            }
         };
 
         var removeButton = document.createElement("button");
@@ -480,6 +552,7 @@ BrutusinForms.create = function (schema, id) {
         appendChild(tbody, tr);
         appendChild(table, tbody);
         render(null, td2, id + "[*]", current, pp, initialValue);
+        nameInput.onkeyup();
         if (name) {
             nameInput.value = name;
             nameInput.onblur();
@@ -496,14 +569,6 @@ BrutusinForms.create = function (schema, id) {
             if (propertyProvider.getValue() || propertyProvider.getValue() === 0) {
                 parentObject[propertyProvider.getValue()] = current;
             }
-        }
-        if (propertyProvider) {
-            propertyProvider.onchange = function (oldPropertyName) {
-                delete parentObject[oldPropertyName];
-                if (propertyProvider.getValue()) {
-                    parentObject[propertyProvider.getValue()] = current;
-                }
-            };
         }
         var table = document.createElement("table");
         table.className = "object";
