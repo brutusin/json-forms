@@ -16,6 +16,34 @@
   - [Authors](#authors)
   - [License](#license)
 
+## Features
+* Dynamic schemas support
+* Extensible
+* Customizable
+* No external libraries needed
+* Validation
+* Multiple forms per document supported
+
+## Usage
+Include the main script
+```html
+<link rel="stylesheet" href='src/brutusin-json-forms.css'/>
+<script src="src/brutusin-json-forms.js"></script>
+```
+Optionally, include the bootstrap extension
+```html
+<script src="src/brutusin-json-forms-bootstrap.js"></script>
+```
+Create the javascript `BrutusinForms` instance, being `schema` an javascript `object` representing the schema structure
+```javascript
+var bf = BrutusinForms.create(schema);
+```
+And finally render the schema inside a container, with optional JSON initial `data` preloaded
+```javascript
+var container = document.getElementById('container');
+bf.render(container, data);
+```
+
 ## Demo
 http://brutusin.org/json-forms/
 
