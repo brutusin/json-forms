@@ -27,8 +27,8 @@
 ## Usage
 Include the main library dependencies:
 ```html
-<link rel="stylesheet" href='src/brutusin-json-forms.css'/>
-<script src="src/brutusin-json-forms.js"></script>
+<link rel="stylesheet" href='http://brutusin.org/json-forms/src/brutusin-json-forms.css'/>
+<script src="http://brutusin.org/json-forms/src/brutusin-json-forms.js"></script>
 ```
 Optionally, include the bootstrap extension (requires bootstrap):
 ```html
