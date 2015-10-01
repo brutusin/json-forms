@@ -25,20 +25,20 @@
 * Multiple forms per document supported
 
 ## Usage
-Include the main script
+Include the main library dependencies:
 ```html
 <link rel="stylesheet" href='src/brutusin-json-forms.css'/>
 <script src="src/brutusin-json-forms.js"></script>
 ```
-Optionally, include the bootstrap extension
+Optionally, include the bootstrap extension (requires bootstrap):
 ```html
 <script src="src/brutusin-json-forms-bootstrap.js"></script>
 ```
-Create the javascript `BrutusinForms` instance, being `schema` an javascript `object` representing the schema structure
+Create the javascript `BrutusinForms` instance, being `schema` a javascript `object` representing the schema structure:
 ```javascript
 var bf = BrutusinForms.create(schema);
 ```
-And finally render the schema inside a container, with optional JSON initial `data` preloaded
+And finally, render the form inside a container, with optional JSON initial `data` preloaded:
 ```javascript
 var container = document.getElementById('container');
 bf.render(container, data);
