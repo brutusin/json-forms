@@ -9,6 +9,8 @@
   - [Features](#features)
   - [Usage](#usage)
   - [Demo](#demo)
+  - [Dynamic schemas](#dynamic-schemas)
+  - [API](#api)
   - [Extensions](#extensions)
   - [TODO](#todo)
   - [See also](#see-also)
@@ -18,8 +20,7 @@
 
 ## Features
 * Dynamic schemas support
-* Extensible
-* Customizable
+* Extensible and customizable
 * No external libraries needed
 * Validation
 * Multiple forms per document supported
@@ -47,6 +48,8 @@ bf.render(container, data);
 ## Demo
 http://brutusin.org/json-forms/
 
+## Dynamic schemas
+
 ## API
 ### Static members:
 
@@ -55,7 +58,7 @@ Member|Description
 `BrutusinForms.create(schema)`|BrutusinForms factory method
 `BrutusinForms.decorator(htmlElement)`|Callback function to be notified after an HTML element has been rendered (passed as parameter)
 `BrutusinForms.postRender(instance)`|Callback function to be notified after a BrutusinForms instance has been rendered (passed as parameter)
-`BrutusinForms.instances`|Array containing the BrutusinForms instances created in the document
+`BrutusinForms.instances`|Array containing all the BrutusinForms instances created in the document by the factory method.
 
 ### Instance members:
 
@@ -65,6 +68,9 @@ Member|Description
 `bf.validate()`| Returns `true` if the input data entered by the user passes validation
 `bf.getData()`| Returns the javascript object with the data entered by the user
 `bf.schemaResolver(schemaIdArray, data)`| Schema resolver for dynamic schemas
+
+## Extensions
+
 
 ##See also
 
