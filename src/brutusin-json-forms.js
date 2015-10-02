@@ -18,7 +18,7 @@
 var BrutusinForms = new Object();
 
 /**
- * Callback function to be notified after an HTML has been rendered (passed as parameter).
+ * Callback function to be notified after an HTML element has been rendered (passed as parameter).
  * @type type
  */
 BrutusinForms.decorator = null;
@@ -38,13 +38,11 @@ BrutusinForms.instances = new Array();
 /**
  * BrutusinForms factory method
  * @param {type} schema schema object
- * @param {type} id Id of the HTML contained element
  * @returns {BrutusinForms.create.obj|Object|Object.create.obj}
  */
-BrutusinForms.create = function (schema, id) {
+BrutusinForms.create = function (schema) {
     var obj = new Object();
     var renderers = new Object();
-    var schemaResolver;
     var schemaMap = new Object();
     var dependencyMap = new Object();
     var renderInfoMap = new Object();
@@ -285,10 +283,10 @@ BrutusinForms.create = function (schema, id) {
 
     function onDependecyChanged(name) {
         var arr = dependencyMap[name];
-        if (!arr || !schemaResolver) {
+        if (!arr || !obj.schemaResolver) {
             return;
         }
-        var schemas = schemaResolver(arr, obj.getData());
+        var schemas = obj.schemaResolver(arr, obj.getData());
         for (var id in schemas) {
             if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
                 cleanSchemaMap(id);
@@ -718,7 +716,12 @@ BrutusinForms.create = function (schema, id) {
             r(container, id, parentObject, propertyProvider, initialValue);
         }
     }
-
+    /**
+     * Renders the form inside the the container, with the specified data preloaded
+     * @param {type} c container
+     * @param {type} initialValue json data
+     * @returns {undefined}
+     */
     obj.render = function (c, initialValue) {
         container = c;
         if (initialValue !== null && typeof initialValue !== "undefined") {
@@ -765,9 +768,6 @@ BrutusinForms.create = function (schema, id) {
     }
     obj.validate = function () {
         return validate(container);
-    };
-    obj.setSchemaResolver = function (f) {
-        schemaResolver = f;
     };
     obj.getData = function () {
         if (!container) {

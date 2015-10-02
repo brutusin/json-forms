@@ -19,7 +19,7 @@ if ("undefined" == typeof BrutusinForms) {
     throw new Error("brutusin-json-forms-jsonsrv.js requires brutusin-json-forms.js");
 }
 
-BrutusinForms.getJsonsrvResolver = function (jsonsrvUrl, serviceId) {
+BrutusinForms.createJsonsrvResolver = function (jsonsrvUrl, serviceId) {
     return function (names, data) {
         var payload = new Object();
         payload.serviceId = serviceId;
