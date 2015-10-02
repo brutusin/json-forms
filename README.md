@@ -8,8 +8,8 @@
 - [org.brutusin:json-forms](#)
   - [Features](#features)
   - [Usage](#usage)
-  - [Extensions](#extensions)
   - [Demo](#demo)
+  - [Extensions](#extensions)
   - [TODO](#todo)
   - [See also](#see-also)
   - [Support, bugs and requests](#support-bugs-and-requests)
@@ -46,6 +46,21 @@ bf.render(container, data);
 
 ## Demo
 http://brutusin.org/json-forms/
+
+## API
+### Static members:
+|Member|Description|
+|`BrutusinForms.create(schema)`|BrutusinForms factory method|
+|`BrutusinForms.decorator(htmlElement)`|Callback function to be notified after an HTML element has been rendered (passed as parameter)|
+|`BrutusinForms.postRender(instance)`|Callback function to be notified after a BrutusinForms instance has been rendered (passed as parameter)|
+|`BrutusinForms.instances`|Array containing the BrutusinForms instances created in the document|
+
+### Instance members:
+|Member|Description|
+|`bf.render(container, data)`| Renders the form inside the the container, with the specified data preloaded|
+|`bf.validate()`| Returns `true` if the input data entered by the user passes validation|
+|`bf.getData()`| Returns the javascript object with the data entered by the user
+|`bf.setSchemaResolver(f)`| Sets `f` as the schema resolver for dynamic schemas. Being `f=funtion(nameArray, data)`
 
 ##See also
 
