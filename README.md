@@ -46,7 +46,7 @@ bf.render(container, data);
 ```
 
 ## Demo
-![http://brutusin.org/json-forms/](http://brutusin.org/json-forms/img/json-forms.png)
+[![demo](http://brutusin.org/json-forms/img/json-forms.png)](http://brutusin.org/json-forms/)
 http://brutusin.org/json-forms/
 
 ## Dynamic schemas
