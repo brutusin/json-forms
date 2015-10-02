@@ -53,6 +53,7 @@ BrutusinForms.create = function (schema) {
     var withInitialValue = false;
     var inputCounter = 0;
     var SCHEMA_ANY = {"type": "any"};
+    var formId = "BrutusinForms#" + BrutusinForms.instances.length;
 
     populateSchemaMap("$", schema);
     validateDepencyMapIsAcyclic();
@@ -316,11 +317,7 @@ BrutusinForms.create = function (schema) {
     };
 
     function getInputId() {
-        if (id) {
-            return id + "_" + inputCounter;
-        } else {
-            return inputCounter;
-        }
+        return formId + "_" + inputCounter;
     }
 
     renderers["string"] = function (container, id, parentObject, propertyProvider, initialValue) {
