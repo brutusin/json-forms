@@ -49,6 +49,7 @@ http://brutusin.org/json-forms/
 
 ## API
 ### Static members:
+
 |Member|Description|
 |`BrutusinForms.create(schema)`|BrutusinForms factory method|
 |`BrutusinForms.decorator(htmlElement)`|Callback function to be notified after an HTML element has been rendered (passed as parameter)|
@@ -56,6 +57,7 @@ http://brutusin.org/json-forms/
 |`BrutusinForms.instances`|Array containing the BrutusinForms instances created in the document|
 
 ### Instance members:
+
 |Member|Description|
 |`bf.render(container, data)`| Renders the form inside the the container, with the specified data preloaded|
 |`bf.validate()`| Returns `true` if the input data entered by the user passes validation|
