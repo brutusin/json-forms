@@ -51,10 +51,11 @@ http://brutusin.org/json-forms/
 ### Static members:
 
 |Member|Description|
-|`BrutusinForms.create(schema)`|BrutusinForms factory method|
-|`BrutusinForms.decorator(htmlElement)`|Callback function to be notified after an HTML element has been rendered (passed as parameter)|
-|`BrutusinForms.postRender(instance)`|Callback function to be notified after a BrutusinForms instance has been rendered (passed as parameter)|
-|`BrutusinForms.instances`|Array containing the BrutusinForms instances created in the document|
+------| -------
+`BrutusinForms.create(schema)`|BrutusinForms factory method
+`BrutusinForms.decorator(htmlElement)`|Callback function to be notified after an HTML element has been rendered (passed as parameter)
+`BrutusinForms.postRender(instance)`|Callback function to be notified after a BrutusinForms instance has been rendered (passed as parameter)
+`BrutusinForms.instances`|Array containing the BrutusinForms instances created in the document
 
 ### Instance members:
 
