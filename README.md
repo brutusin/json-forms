@@ -59,6 +59,7 @@ Dynamic schemas are built upon two main blocks:
 * Brutusin DSL for path expressions, for identifying subschemas.
 
 ### `dependsOn` schema extension
+### Dynamic schema resolution
 
 ## API
 ### Static members:
