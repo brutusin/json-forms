@@ -56,7 +56,7 @@ This enables to create **dynamic forms** that vary their shape depending on the 
 
 Dynamic schemas are built upon two main blocks: 
 * Custom (non-standard) schema property called `dependsOn`, to build the subschemas dependency graph 
-* Brutusin DSL for path expressions, for identifying subschemas.
+* [Brutusin DSL for path expressions](https://github.com/brutusin/json#path-expressions), for identifying subschemas.
 
 ### `dependsOn` schema extension
 ### Dynamic schema resolution
