@@ -34,9 +34,8 @@ BrutusinForms.decorator = function (element) {
     }
     if (element.title) {
         element.setAttribute("data-toggle", "tooltip");
+        $(element).tooltip({
+            container: 'body'
+        });
     }
-};
-
-BrutusinForms.postRender = function (bf) {
-    $('[data-toggle="tooltip"]').tooltip();
 };
