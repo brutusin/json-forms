@@ -16,6 +16,9 @@
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 
+div.tooltip-inner {
+    max-width: 350px;
+}
 form.brutusin-form table,input, select, textarea{
     width: 100% !important;
     min-width: 80px;
@@ -26,7 +29,6 @@ form.brutusin-form input[type=checkbox]{
 form.brutusin-form  textarea{
     height: 8em;
 }
-
 form.brutusin-form table table{
     border-left:  solid 1px;
     border-color: lightgray;
@@ -41,26 +43,21 @@ form.brutusin-form td.prop-name {
     text-align: right;
 
 }
-
 form.brutusin-form td.add-prop-name table {
     text-align: right;
     border: none;
 }
-
 form.brutusin-form td.add-prop-name table td {
     vertical-align: middle;
 }
-
 form.brutusin-form td.prop-value {
     width: 100%;   
     text-align: left;
 }
-
 form.brutusin-form td.item-index{
     font-size: 0.8em;
     color: lightgray;
 }
-
 form.brutusin-form .error {
     border-color: red;
 }
