@@ -30,12 +30,20 @@ BrutusinForms.decorator = function (element) {
             element.className += "btn btn-primary  btn-xs";
         } else if (tagName === "form") {
             element.className += " form-inline";
+        } else if (tagName === "label") {
+            if (element.title) {
+                var span = document.createElement("span");
+                span.className = "glyphicon glyphicon-info-sign"
+                span.setAttribute("data-toggle", "popover");
+                span.setAttribute("data-trigger", "focus");
+                span.setAttribute("data-content", element.title);
+                span.title = "Help";
+                $(element).popover({
+                    placement: 'top',
+                    container: 'body'
+                });
+                element.parentNode.appendChild(span);
+            }
         }
-    }
-    if (element.title) {
-        element.setAttribute("data-toggle", "tooltip");
-        $(element).tooltip({
-            container: 'body'
-        });
     }
 };

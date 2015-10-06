@@ -135,10 +135,10 @@ BrutusinForms.create = function (schema) {
     }
 
     function appendChild(parent, child) {
-        if (BrutusinForms.decorator) {
-            BrutusinForms.decorator(child);
-        }
         parent.appendChild(child);
+        if (BrutusinForms.decorator) {
+            BrutusinForms.decorator(child, parent);
+        }
     }
 
     function copyProperty(from, to, propName) {
