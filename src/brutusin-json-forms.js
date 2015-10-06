@@ -384,6 +384,7 @@ BrutusinForms.create = function (schema) {
             input = document.createElement("input");
             if (s.type === "integer" || s.type === "number") {
                 input.type = "number";
+                input.step = "any";
                 if (typeof value !== "number") {
                     value = null;
                 }
@@ -628,6 +629,7 @@ BrutusinForms.create = function (schema) {
         var td1 = document.createElement("td");
         td1.className = "item-index";
         var td2 = document.createElement("td");
+        td2.className = "item-action";
         var td3 = document.createElement("td");
         td3.className = "item-value";
         var removeButton = document.createElement("button");

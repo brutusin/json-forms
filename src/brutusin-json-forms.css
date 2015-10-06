@@ -41,7 +41,6 @@ form.brutusin-form td {
 }
 form.brutusin-form td.prop-name {
     text-align: right;
-
 }
 form.brutusin-form td.add-prop-name table {
     text-align: right;
@@ -57,6 +56,11 @@ form.brutusin-form td.prop-value {
 form.brutusin-form td.item-index{
     font-size: 0.8em;
     color: lightgray;
+    width: 25px;
+    text-align: right;
+}
+form.brutusin-form td.item-action{
+    width: 30px;
 }
 form.brutusin-form .error {
     border-color: red;
