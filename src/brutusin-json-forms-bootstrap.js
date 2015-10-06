@@ -19,7 +19,7 @@ if ("undefined" == typeof BrutusinForms) {
     throw new Error("brutusin-json-forms-bootstrap.js requires brutusin-json-forms.js");
 }
 
-BrutusinForms.decorator = function (element) {
+BrutusinForms.decorator = function (element, schema) {
     if (element.tagName) {
         var tagName = element.tagName.toLowerCase();
         if (tagName === "input" && element.type !== "checkbox" || tagName === "textarea") {
@@ -30,20 +30,18 @@ BrutusinForms.decorator = function (element) {
             element.className += "btn btn-primary  btn-xs";
         } else if (tagName === "form") {
             element.className += " form-inline";
-        } else if (tagName === "label") {
-            if (element.title) {
-                var span = document.createElement("span");
-                span.className = "glyphicon glyphicon-info-sign"
-                span.setAttribute("data-toggle", "popover");
-                span.setAttribute("data-trigger", "focus");
-                span.setAttribute("data-content", element.title);
-                span.title = "Help";
-                $(element).popover({
-                    placement: 'top',
-                    container: 'body'
-                });
-                element.parentNode.appendChild(span);
-            }
         }
+    }
+    if (element.title) {
+        element.setAttribute("data-toggle", "popover");
+        element.setAttribute("data-trigger", "focus");
+        element.setAttribute("data-content", element.title);
+        if (schema) {
+            element.title = schema.title;
+        }
+        $(element).popover({
+            placement: 'top',
+            container: 'body'
+        });
     }
 };

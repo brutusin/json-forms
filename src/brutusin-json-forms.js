@@ -134,10 +134,10 @@ BrutusinForms.create = function (schema) {
         }
     }
 
-    function appendChild(parent, child) {
+    function appendChild(parent, child, schema) {
         parent.appendChild(child);
         if (BrutusinForms.decorator) {
-            BrutusinForms.decorator(child, parent);
+            BrutusinForms.decorator(child, schema);
         }
     }
 
@@ -226,17 +226,17 @@ BrutusinForms.create = function (schema) {
                     titleLabel.htmlFor = getInputId();
                 }
                 var titleNode = document.createTextNode(title + ":");
-                appendChild(titleLabel, titleNode);
+                appendChild(titleLabel, titleNode, schema);
                 if (schema.description) {
                     titleLabel.title = schema.description;
                 }
                 if (schema.required) {
                     var sup = document.createElement("sup");
-                    appendChild(sup, document.createTextNode("*"));
-                    appendChild(titleLabel, sup);
+                    appendChild(sup, document.createTextNode("*"), schema);
+                    appendChild(titleLabel, sup, schema);
                     titleLabel.className = "required";
                 }
-                appendChild(container, titleLabel);
+                appendChild(container, titleLabel, schema);
             }
         }
     }
@@ -362,16 +362,16 @@ BrutusinForms.create = function (schema) {
                 var option = document.createElement("option");
                 var textNode = document.createTextNode("");
                 option.value = "";
-                appendChild(option, textNode)
-                appendChild(input, option);
+                appendChild(option, textNode, s)
+                appendChild(input, option, s);
             }
             var selectedIndex = 0;
             for (var i = 0; i < s.enum.length; i++) {
                 var option = document.createElement("option");
                 var textNode = document.createTextNode(s.enum[i]);
                 option.value = s.enum[i];
-                appendChild(option, textNode);
-                appendChild(input, option);
+                appendChild(option, textNode, s);
+                appendChild(input, option, s);
                 if (value && s.enum[i] === value) {
                     selectedIndex = i;
                     if (!s.required) {
@@ -446,7 +446,7 @@ BrutusinForms.create = function (schema) {
         input.onchange();
         input.id = getInputId();
         inputCounter++;
-        appendChild(container, input);
+        appendChild(container, input, s);
         return parentObject;
     };
 
@@ -473,10 +473,12 @@ BrutusinForms.create = function (schema) {
             input.title = s.description;
         }
         input.onchange();
-        appendChild(container, input);
+        appendChild(container, input, s);
     };
 
     function addAdditionalProperty(current, table, id, name, value) {
+        var schemaId = getSchemaId(id);
+        var s = getSchema(schemaId);
         var tbody = table.tBodies[0];
         var tr = document.createElement("tr");
         var td1 = document.createElement("td");
@@ -542,23 +544,23 @@ BrutusinForms.create = function (schema) {
         };
 
         var removeButton = document.createElement("button");
-        appendChild(removeButton, document.createTextNode("x"));
+        appendChild(removeButton, document.createTextNode("x"), s);
         removeButton.onclick = function () {
             delete current[nameInput.value];
             table.deleteRow(tr.rowIndex);
             nameInput.value = null;
             pp.onchange(nameInput.previousValue);
         };
-        appendChild(innerTd1, nameInput);
-        appendChild(innerTd2, removeButton);
-        appendChild(innerTr, innerTd1);
-        appendChild(innerTr, innerTd2);
-        appendChild(innerTab, innerTr);
-        appendChild(td1, innerTab);
-        appendChild(tr, td1);
-        appendChild(tr, td2);
-        appendChild(tbody, tr);
-        appendChild(table, tbody);
+        appendChild(innerTd1, nameInput, s);
+        appendChild(innerTd2, removeButton, s);
+        appendChild(innerTr, innerTd1, s);
+        appendChild(innerTr, innerTd2, s);
+        appendChild(innerTab, innerTr, s);
+        appendChild(td1, innerTab, s);
+        appendChild(tr, td1, s);
+        appendChild(tr, td2, s);
+        appendChild(tbody, tr, s);
+        appendChild(table, tbody, s);
         render(null, td2, id, current, pp, value);
         nameInput.onkeyup();
         if (name) {
@@ -581,7 +583,7 @@ BrutusinForms.create = function (schema) {
         var table = document.createElement("table");
         table.className = "object";
         var tbody = document.createElement("tbody");
-        appendChild(table, tbody);
+        appendChild(table, tbody, s);
         for (var prop in s.properties) {
             var tr = document.createElement("tr");
             var td1 = document.createElement("td");
@@ -589,9 +591,9 @@ BrutusinForms.create = function (schema) {
             var propId = id + "." + prop;
             var td2 = document.createElement("td");
             td2.className = "prop-value";
-            appendChild(tbody, tr);
-            appendChild(tr, td1);
-            appendChild(tr, td2);
+            appendChild(tbody, tr, s);
+            appendChild(tr, td1, s);
+            appendChild(tr, td2, s);
             var pp = createStaticPropertyProvider(prop);
             var propInitialValue = null;
             if (value) {
@@ -601,13 +603,13 @@ BrutusinForms.create = function (schema) {
         }
         if (s.additionalProperties) {
             var div = document.createElement("div");
-            appendChild(div, table);
+            appendChild(div, table, s);
             var addButton = document.createElement("button");
             addButton.onclick = function () {
                 addAdditionalProperty(current, table, id + "[*]");
             };
-            appendChild(addButton, document.createTextNode("Add"));
-            appendChild(div, addButton);
+            appendChild(addButton, document.createTextNode("Add"), s);
+            appendChild(div, addButton, s);
             if (value) {
                 for (var p in value) {
                     if (s.properties.hasOwnProperty(p)) {
@@ -616,13 +618,15 @@ BrutusinForms.create = function (schema) {
                     addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p]);
                 }
             }
-            appendChild(container, div);
+            appendChild(container, div, s);
         } else {
-            appendChild(container, table);
+            appendChild(container, table, s);
         }
     };
 
     function addItem(current, table, id, value) {
+        var schemaId = getSchemaId(id);
+        var s = getSchema(schemaId);
         var tbody = document.createElement("tbody");
         var tr = document.createElement("tr");
         tr.className = "item";
@@ -633,7 +637,7 @@ BrutusinForms.create = function (schema) {
         var td3 = document.createElement("td");
         td3.className = "item-value";
         var removeButton = document.createElement("button");
-        appendChild(removeButton, document.createTextNode("x"));
+        appendChild(removeButton, document.createTextNode("x"), s);
         var computRowCount = function () {
             for (var i = 0; i < table.rows.length; i++) {
                 var row = table.rows[i];
@@ -645,14 +649,14 @@ BrutusinForms.create = function (schema) {
             table.deleteRow(tr.rowIndex);
             computRowCount();
         };
-        appendChild(td2, removeButton);
+        appendChild(td2, removeButton, s);
         var number = document.createTextNode(table.rows.length + 1);
-        appendChild(td1, number);
-        appendChild(tr, td1);
-        appendChild(tr, td2);
-        appendChild(tr, td3);
-        appendChild(tbody, tr);
-        appendChild(table, tbody);
+        appendChild(td1, number, s);
+        appendChild(tr, td1, s);
+        appendChild(tr, td2, s);
+        appendChild(tr, td3, s);
+        appendChild(tbody, tr, s);
+        appendChild(table, tbody, s);
         var pp = createPropertyProvider(function () {
             return tr.rowIndex;
         });
@@ -660,6 +664,8 @@ BrutusinForms.create = function (schema) {
     }
 
     renderers["array"] = function (container, id, parentObject, propertyProvider, value) {
+        var schemaId = getSchemaId(id);
+        var s = getSchema(schemaId);
         var current = new Array();
         if (!parentObject) {
             data = current;
@@ -677,21 +683,21 @@ BrutusinForms.create = function (schema) {
         var div = document.createElement("div");
         var table = document.createElement("table");
         table.className = "array";
-        appendChild(div, table);
-        appendChild(container, div);
+        appendChild(div, table, s);
+        appendChild(container, div, s);
         var addButton = document.createElement("button");
         addButton.onclick = function () {
             addItem(current, table, id + "[#]", null);
         };
-        appendChild(addButton, document.createTextNode("Add item"));
-        appendChild(div, table);
-        appendChild(div, addButton);
+        appendChild(addButton, document.createTextNode("Add item"), s);
+        appendChild(div, table, s);
+        appendChild(div, addButton, s);
         if (value && value instanceof Array) {
             for (var i = 0; i < value.length; i++) {
                 addItem(current, table, id + "[" + i + "]", value[i]);
             }
         }
-        appendChild(container, div);
+        appendChild(container, div, s);
     };
 
     function clear(container) {
