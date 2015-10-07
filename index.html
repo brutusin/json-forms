@@ -26,11 +26,8 @@
             var inputString = new Object();
             var title;
             var desc;
-            var selectedDemo = 0;
-            try {
-                selectedDemo = parseInt(getParam("demo"));
-            } catch (e) {
-            }
+            var selectedDemo = parseInt(getParam("demo"));
+
             var demos = [
                 ["Dynamic schemas",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"species": {"title": "Species supported", "description": "Changes in this property trigger the resolution of the actual (depending on the values being selected) schema of a dependent property", "type": "string", "enum": ["human", "dog", "cat"], "required": true}, "subspecies": {"dependsOn": ["species"]}}},
@@ -59,6 +56,9 @@
                     "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported"]
 
             ];
+            if (isNaN(selectedDemo) || selectedDemo < 0 || selectedDemo >= demos.length) {
+                selectedDemo = 0;
+            }
             var selectedTab = "schema";
             var bf;
 
@@ -80,7 +80,7 @@
                 title = demos[selectedExampleIndex][0];
                 desc = markdown.toHTML(demos[selectedExampleIndex][4]);
             }
-            
+
             selectExample(selectedDemo);
             function generateForm() {
                 var schema;
