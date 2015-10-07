@@ -27,6 +27,11 @@
             var title;
             var desc;
             var demos = [
+                ["Dynamic schemas",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"species": {"title": "Species supported", "type": "string", "enum": ["human", "dog", "cat"], "required": true}, "subspecies": {"dependsOn": ["species"]}}},
+                    null,
+                    "function (names, data) {\n    var ret = new Object();\n    var schema = new Object();\n    if (data.species === \"human\") {\n        schema.type = \"null\"; // no such property for humans\n    } else {\n        schema.type = \"string\";\n        if (data.species === \"dog\") {\n            schema.title = \"Dog breed\";\n            schema.enum = [\"bulldog\", \"labrador\"]\n        } else {\n            schema.title = \"Cat breed\";\n            schema.enum = [\"siamese\", \"persian\"]\n        }\n    }\n    ret[\"$.subspecies\"] = schema;\n    return ret;\n}",
+                    "Example of [dynamic schemas](https://github.com/brutusin/json-forms#dynamic-schemas) in action"],
                 ["Simple",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
                     null,
@@ -46,12 +51,8 @@
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"type": "object", "additionalProperties": {"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"type": "object", "additionalProperties": true}}},
                     null,
                     null,
-                    "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported"],
-                ["Dynamic schemas",
-                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"species":{"title":"Species supported","type":"string","enum":["human","dog","cat"],"required":true},"subspecies":{"dependsOn":["species"]}}},
-                    null,
-                    "function (names, data) {\n    var ret = new Object();\n    var schema = new Object();\n    if (data.species === \"human\") {\n        schema.type = \"null\"; // no such property for humans\n    } else {\n        schema.type = \"string\";\n        if (data.species === \"dog\") {\n            schema.title = \"Dog breed\";\n            schema.enum = [\"bulldog\", \"labrador\"]\n        } else {\n            schema.title = \"Cat breed\";\n            schema.enum = [\"siamese\", \"persian\"]\n        }\n    }\n    ret[\"$.subspecies\"] = schema;\n    return ret;\n}",
-                    "Example of [dynamic-schemas](https://github.com/brutusin/json-forms#dynamic-schemas) in action"]
+                    "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported"]
+                
             ];
             var selectedTab = "schema";
             var bf;
@@ -62,7 +63,7 @@
                 eval("input.resolver=" + demos[selectedExampleIndex][3]);
                 inputString.schema = JSON.stringify(input.schema, null, 2);
                 inputString.data = input.data ? JSON.stringify(input.data, null, 2) : "";
-                inputString.resolver = demos[selectedExampleIndex][3];
+                inputString.resolver = demos[selectedExampleIndex][3] ? demos[selectedExampleIndex][3] : "";
                 if (codeMirrors[selectedTab]) {
                     codeMirrors[selectedTab].setValue(inputString[selectedTab]);
                 }
