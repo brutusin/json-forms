@@ -59,7 +59,7 @@ BrutusinForms.decorator = function (element, schema) {
                 element.parentNode.appendChild(helpLink);
             }
         }
-        if (tagName === "input" || tagName === "textarea" || tagName === "select") {
+        if (element.title && (tagName === "input" || tagName === "textarea" || tagName === "select")) {
             element.setAttribute("data-toggle", "tooltip");
             element.setAttribute("data-trigger", "focus");
             if ("undefined" === typeof markdown) {
