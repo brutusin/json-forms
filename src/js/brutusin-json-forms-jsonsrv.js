@@ -40,6 +40,3 @@ BrutusinForms.createJsonsrvResolver = function (jsonsrvUrl, serviceId) {
         return schema;
     };
 }
-
-
-

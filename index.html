@@ -24,19 +24,34 @@
             var codeMirrors = new Object();
             var input = new Object();
             var inputString = new Object();
+            var title;
+            var desc;
             var demos = [
                 ["Simple",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
-                    null],
+                    null,
+                    null,
+                    "Example showing that root object in the schema is not required to be an object"],
                 ["Objects, arrays, enums, default, required",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
-                    null],
+                    null,
+                    null,
+                    "Example covering several common features"],
                 ["Initial data",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
-                    {"pageNum": 1, "pageSize": 50, "selectedFacetValues": [{"facetName": "id", "matchAllNull": false, "matchAllNotNull": true, "facetValues": [{"value": "1223"}], "included": false}], "sorts": [{"fieldName": "name", "ascending": true}]}],
+                    {"pageNum": 1, "pageSize": 50, "selectedFacetValues": [{"facetName": "id", "matchAllNull": false, "matchAllNotNull": true, "facetValues": [{"value": "1223"}], "included": false}], "sorts": [{"fieldName": "name", "ascending": true}]},
+                    null,
+                    "Example of a form created with initial data preloaded. Same schema as the previous example."],
                 ["Additional properties",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"type": "object", "additionalProperties": {"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"type": "object", "additionalProperties": true}}},
-                    null]
+                    null,
+                    null,
+                    "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported"],
+                ["Dynamic schemas",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"species":{"title":"Species supported","type":"string","enum":["human","dog","cat"],"required":true},"subspecies":{"dependsOn":["species"]}}},
+                    null,
+                    "function (names, data) {\n    var ret = new Object();\n    var schema = new Object();\n    if (data.species === \"human\") {\n        schema.type = \"null\"; // no such property for humans\n    } else {\n        schema.type = \"string\";\n        if (data.species === \"dog\") {\n            schema.title = \"Dog breed\";\n            schema.enum = [\"bulldog\", \"labrador\"]\n        } else {\n            schema.title = \"Cat breed\";\n            schema.enum = [\"siamese\", \"persian\"]\n        }\n    }\n    ret[\"$.subspecies\"] = schema;\n    return ret;\n}",
+                    "Example of [dynamic-schemas](https://github.com/brutusin/json-forms#dynamic-schemas) in action"]
             ];
             var selectedTab = "schema";
             var bf;
@@ -44,34 +59,66 @@
             function selectExample(selectedExampleIndex) {
                 input.schema = demos[selectedExampleIndex][1];
                 input.data = demos[selectedExampleIndex][2];
+                eval("input.resolver=" + demos[selectedExampleIndex][3]);
                 inputString.schema = JSON.stringify(input.schema, null, 2);
                 inputString.data = input.data ? JSON.stringify(input.data, null, 2) : "";
+                inputString.resolver = demos[selectedExampleIndex][3];
                 if (codeMirrors[selectedTab]) {
                     codeMirrors[selectedTab].setValue(inputString[selectedTab]);
                 }
+                title = demos[selectedExampleIndex][0];
+                desc = markdown.toHTML(demos[selectedExampleIndex][4]);
             }
             selectExample(0);
             function generateForm() {
                 var schema;
                 var data;
+                var message;
+                var resolver;
+                var tabId;
                 inputString[selectedTab] = codeMirrors[selectedTab].getValue();
+                $("#jsonAlert").hide();
                 try {
+                    message = "The was a syntax error in the schema JSON";
+                    tabId = "schema";
                     eval("schema=" + inputString.schema);
                     if (inputString.data) {
+                        message = "The was a syntax error in the initial data JSON";
+                        tabId = "data";
                         eval("data=" + inputString.data);
                     } else {
                         data = null;
                     }
+                    if (inputString.resolver) {
+                        tabId = "resolver";
+                        message = "The was a syntax error in the resolver code";
+                        eval("resolver=" + inputString.resolver);
+                        if ("function" !== typeof resolver) {
+                            throw "Schema resolver does not evaluate to a function";
+                        }
+                    }
                 } catch (err) {
+                    document.getElementById('error-message').innerHTML = message + (err ? ". " + err : "");
+                    $('[href=#' + tabId + ']').tab('show');
                     $("#jsonAlert").show();
                     return;
                 }
                 $('#formLink').click();
                 bf = BrutusinForms.create(schema);
+                if (resolver) {
+                    bf.schemaResolver = resolver;
+                }
                 var container = document.getElementById('container');
                 while (container.firstChild) {
                     container.removeChild(container.firstChild);
                 }
+                if (title) {
+                    document.getElementById('example-title').innerHTML = title;
+                }
+                if (desc) {
+                    document.getElementById('example-desc').innerHTML = desc;
+                }
+
                 bf.render(container, data);
             }
 
@@ -108,15 +155,17 @@
                             <ul class="nav nav-tabs" role="tablist">
                                 <li role="presentation" class="active"><a href="#schema" aria-controls="schema" role="tab" data-toggle="tab">Schema</a></li>
                                 <li role="presentation"><a href="#data" aria-controls="data" role="tab" data-toggle="tab">Initial data</a></li>
+                                <li role="presentation"><a href="#resolver" aria-controls="resolver" role="tab" data-toggle="tab">Schema resolver</a></li>
                             </ul>
                             <!-- Tab panes -->
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane active" id="schema"></div>
                                 <div role="tabpanel" class="tab-pane" id="data"></div>
+                                <div role="tabpanel" class="tab-pane" id="resolver"></div>
                             </div>
                             <div class="alert alert-danger in" role="alert" id="jsonAlert" style="display:none">
                                 <a href="#" onclick='$("#jsonAlert").hide();' class="close" >&times;</a>
-                                <strong>Error!</strong> There was a problem parsing the input JSON.
+                                <strong>Error!</strong> <span id="error-message"></span>
                             </div>
 
                         </div>
@@ -135,7 +184,8 @@
                         </h4>
                     </div>
                     <div id="collapseForm" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                        <div id='container' class="panel-body"></div>
+                        <div class="alert alert-info" role="alert"><strong id="example-title"></strong><div id="example-desc"></div></div>
+                        <div id='container' style="padding-left:12px;padding-right:12px;padding-bottom: 12px;"></div>
                         <div class="panel-footer">
                             <button class="btn btn-primary" onclick="alert(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="alert(bf.validate())">validate()</button>
                         </div>
