@@ -26,7 +26,7 @@
             var inputString = new Object();
             var title;
             var desc;
-            var selectedDemo = parseInt(getParam("demo"));
+            var selectedDemo = parseInt(window.location.hash.substring(1));
 
             var demos = [
                 ["Dynamic schemas",
@@ -61,11 +61,6 @@
             }
             var selectedTab = "schema";
             var bf;
-
-            function getParam(name) {
-                if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
-                    return decodeURIComponent(name[1]);
-            }
 
             function selectExample(selectedExampleIndex) {
                 input.schema = demos[selectedExampleIndex][1];
