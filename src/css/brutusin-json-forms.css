@@ -15,10 +15,6 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-
-div.tooltip-inner {
-    max-width: 350px;
-}
 form.brutusin-form table,input, select, textarea{
     width: 100% !important;
     min-width: 80px;

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href='lib/bootstrap.min.css'/>
-        <link rel="stylesheet" href="lib/codemirror.css">
-        <link rel="stylesheet" href='src/brutusin-json-forms.css'/>
+        <link rel="stylesheet" href='lib/bootstrap/css/bootstrap.min.css'/>
+
+        <link rel="stylesheet" href="lib/codemirror/codemirror.css">
+        <link rel="stylesheet" href='src/css/brutusin-json-forms.css'/>
         <style>
             .CodeMirror {
                 height: 400px; 
@@ -11,12 +12,13 @@
         </style>
 
         <script src='lib/jquery-1.11.3.min.js'></script>
-        <script src='lib/bootstrap.min.js'></script>
-        <script src="lib/codemirror.js"></script>
-        <script src="lib/codemirror-javascript.js"></script>
-        <script src="src/brutusin-json-forms.js"></script>
-        <script src="src/brutusin-json-forms-bootstrap.js"></script>
-        <script src="src/brutusin-json-forms-jsonsrv.js"></script>
+        <script src='lib/bootstrap/js/bootstrap.min.js'></script>
+        <script src="lib/codemirror/codemirror.js"></script>
+        <script src="lib/codemirror/codemirror-javascript.js"></script>
+        <script src="lib/markdown.min.js"></script>
+        <script src="src/js/brutusin-json-forms.js"></script>
+        <script src="src/js/brutusin-json-forms-bootstrap.js"></script>
+        <script src="src/js/brutusin-json-forms-jsonsrv.js"></script>
 
         <script lang="javascript">
             var codeMirrors = new Object();
@@ -27,13 +29,13 @@
                     {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
                     null],
                 ["Objects, arrays, enums, default, required",
-                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, 1-based", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
                     null],
                 ["Initial data",
-                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, 1-based", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
                     {"pageNum": 1, "pageSize": 50, "selectedFacetValues": [{"facetName": "id", "matchAllNull": false, "matchAllNotNull": true, "facetValues": [{"value": "1223"}], "included": false}], "sorts": [{"fieldName": "name", "ascending": true}]}],
                 ["Additional properties",
-                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"fixed":{"type":"object","additionalProperties":{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"string"}}}},"free":{"type":"object","additionalProperties":true}}},
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"type": "object", "additionalProperties": {"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"type": "object", "additionalProperties": true}}},
                     null]
             ];
             var selectedTab = "schema";
@@ -77,7 +79,7 @@
 
     </head>
     <body>
-        <a href="//github.com/brutusin/json-forms"><img style="position: absolute; top: 0; right: 0; border: 0; width: 149px; height: 149px;" src="//brutusin.org/images/forkme.png" alt="Fork me on GitHub"></a>
+        <a href="https://github.com/brutusin/json-forms"><img style="position: absolute; top: 0; right: 0; border: 0; width: 149px; height: 149px;" src="https://brutusin.org/images/forkme.png" alt="Fork me on GitHub"></a>
         <div class="container" >
             <h1><img alt="Butusin" src="https://avatars0.githubusercontent.com/u/10341159?v=3&s=200" style="border: 0; width: 50px; height: 50px;"/><code>brutusin:json-forms</code> demo</h1>
             <blockquote>
