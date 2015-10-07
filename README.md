@@ -78,7 +78,7 @@ Member|Description
 `bf.render(container, data)`| Renders the form inside the the container, with the specified data preloaded
 `bf.validate()`| Returns `true` if the input data entered by the user passes validation
 `bf.getData()`| Returns the javascript object with the data entered by the user
-`bf.schemaResolver(schemaIdArray, data)`| Schema resolver for [dynamic schemas](#dynamic- schemas)
+`bf.schemaResolver(schemaIdArray, data)`| Schema resolver for [dynamic schemas](#dynamic-schemas)
 
 ## Extensions
 
