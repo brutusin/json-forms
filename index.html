@@ -26,12 +26,17 @@
             var inputString = new Object();
             var title;
             var desc;
+            var selectedDemo = 0;
+            try {
+                selectedDemo = parseInt(getParam("demo"));
+            } catch (e) {
+            }
             var demos = [
                 ["Dynamic schemas",
-                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"species": {"title": "Species supported", "type": "string", "enum": ["human", "dog", "cat"], "required": true}, "subspecies": {"dependsOn": ["species"]}}},
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"species": {"title": "Species supported", "description": "Changes in this property trigger the resolution of the actual (depending on the values being selected) schema of a dependent property", "type": "string", "enum": ["human", "dog", "cat"], "required": true}, "subspecies": {"dependsOn": ["species"]}}},
                     null,
                     "function (names, data) {\n    var ret = new Object();\n    var schema = new Object();\n    if (data.species === \"human\") {\n        schema.type = \"null\"; // no such property for humans\n    } else {\n        schema.type = \"string\";\n        if (data.species === \"dog\") {\n            schema.title = \"Dog breed\";\n            schema.enum = [\"bulldog\", \"labrador\"]\n        } else {\n            schema.title = \"Cat breed\";\n            schema.enum = [\"siamese\", \"persian\"]\n        }\n    }\n    ret[\"$.subspecies\"] = schema;\n    return ret;\n}",
-                    "Example of [dynamic schemas](https://github.com/brutusin/json-forms#dynamic-schemas) in action"],
+                    "Example of [dynamic schemas](https://github.com/brutusin/json-forms#dynamic-schemas) in action. Notice the usage of `dependsOn` (*Schema* tab), and the specific implementation of `bf.schemaResolver` (*Schema resolver* tab)"],
                 ["Simple",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
                     null,
@@ -52,10 +57,15 @@
                     null,
                     null,
                     "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported"]
-                
+
             ];
             var selectedTab = "schema";
             var bf;
+
+            function getParam(name) {
+                if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
+                    return decodeURIComponent(name[1]);
+            }
 
             function selectExample(selectedExampleIndex) {
                 input.schema = demos[selectedExampleIndex][1];
@@ -70,7 +80,8 @@
                 title = demos[selectedExampleIndex][0];
                 desc = markdown.toHTML(demos[selectedExampleIndex][4]);
             }
-            selectExample(0);
+            
+            selectExample(selectedDemo);
             function generateForm() {
                 var schema;
                 var data;
@@ -148,7 +159,7 @@
                             <select class="form-control" id="examples" onchange="selectExample(selectedIndex)">
                                 <script>
                                     for (var i = 0; i < demos.length; i++) {
-                                        document.write("<option>" + demos[i][0] + "</option>");
+                                        document.write("<option " + (selectedDemo === i ? "selected=true" : "") + ">" + demos[i][0] + "</option>");
                                     }
                                 </script>
                             </select>
@@ -199,7 +210,7 @@
         <script lang="javascript">
 
             codeMirrors["schema"] = CodeMirror(document.getElementById("schema"), {
-                value: JSON.stringify(demos[0][1], null, 4),
+                value: JSON.stringify(demos[selectedDemo][1], null, 4),
                 mode: "javascript",
                 lineNumbers: true
             });
