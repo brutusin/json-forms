@@ -67,7 +67,7 @@ Dynamic schemas are built upon two main blocks:
 Member|Description
 ------| -------
 `BrutusinForms.create(schema)`|BrutusinForms factory method
-`BrutusinForms.decorator(htmlElement)`|Callback function to be notified after an HTML element has been rendered (passed as parameter)
+`BrutusinForms.decorator(htmlElement, schema)`|Callback function to be notified after an HTML element has been rendered (passed as parameter). See [brutusin-json-forms-bootstrap.js](src/js/brutusin-json-forms-bootstrap.js) for an example of *bootstrap* decorator.
 `BrutusinForms.postRender(instance)`|Callback function to be notified after a BrutusinForms instance has been rendered (passed as parameter)
 `BrutusinForms.instances`|Array containing all the BrutusinForms instances created in the document by the factory method.
 
