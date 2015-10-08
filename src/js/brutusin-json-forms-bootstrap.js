@@ -82,7 +82,7 @@ BrutusinForms.decorator = function (element, schema) {
             });
         }
         // https://github.com/silviomoreto/bootstrap-select
-        if("undefined" === typeof Selectpicker && tagName === "select"){
+        if("undefined" !== typeof Selectpicker && tagName === "select"){
             element.className+=" selectpicker";
             element.setAttribute("data-live-search",true);
             $(element).selectpicker();
