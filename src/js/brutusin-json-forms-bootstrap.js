@@ -21,6 +21,9 @@ if ("undefined" === typeof BrutusinForms) {
 if ("undefined" === typeof markdown && window.console) {
     console.warn("Include markdown.js (https://github.com/evilstreak/markdown-js) to add markdown support in property description popups");
 }
+if ("undefined" === typeof Selectpicker && window.console) {
+    console.warn("Include bootstrap-select.js (https://github.com/silviomoreto/bootstrap-select) to turn native selects into bootstrap components");
+}
 
 BrutusinForms.decorator = function (element, schema) {
     if (element.tagName) {
@@ -77,6 +80,12 @@ BrutusinForms.decorator = function (element, schema) {
                 container: 'body',
                 html: !("undefined" === typeof markdown)
             });
+        }
+        // https://github.com/silviomoreto/bootstrap-select
+        if("undefined" === typeof Selectpicker && tagName === "select"){
+            element.className+=" selectpicker";
+            element.setAttribute("data-live-search",true);
+            $(element).selectpicker();
         }
     }
 };
