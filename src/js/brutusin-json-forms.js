@@ -40,25 +40,21 @@ if (!String.prototype.includes) {
 }
 
 var BrutusinForms = new Object();
-
 /**
  * Callback function to be notified after an HTML element has been rendered (passed as parameter).
  * @type type
  */
 BrutusinForms.decorator = null;
-
 /**
  * Callback function to be notified after a form has been rendered (passed as parameter).
  * @type type
  */
 BrutusinForms.postRender = null;
-
 /**
  * BrutusinForms instances created in the document
  * @type Array
  */
 BrutusinForms.instances = new Array();
-
 /**
  * BrutusinForms factory method
  * @param {type} schema schema object
@@ -77,10 +73,186 @@ BrutusinForms.create = function (schema) {
     var inputCounter = 0;
     var SCHEMA_ANY = {"type": "any"};
     var formId = "BrutusinForms#" + BrutusinForms.instances.length;
-
     populateSchemaMap("$", schema);
     validateDepencyMapIsAcyclic();
 
+    var Expression = new Object();
+    Expression.parse = function (exp) {
+        if (exp === null || exp.length === 0 || exp === ".") {
+            exp = "$";
+        }
+        var queue = new Array();
+        var tokens = parseTokens(exp);
+        var isInBracket = false;
+        var numInBracket = 0;
+        var sb = "";
+        for (var i = 0; i < tokens.length; i++) {
+            var token = tokens[i];
+            if (token === "[") {
+                if (isInBracket) {
+                    throw ("Error parsing expression '" + exp + "': Nested [ found");
+                }
+                isInBracket = true;
+                numInBracket = 0;
+                sb = sb + token;
+            } else if (token === "]") {
+                if (!isInBracket) {
+                    throw ("Error parsing expression '" + exp + "': Unbalanced ] found");
+                }
+                isInBracket = false;
+                sb = sb + token;
+                queue[queue.length] = sb;
+                sb = "";
+            } else {
+                if (isInBracket) {
+                    if (numInBracket > 0) {
+                        throw ("Error parsing expression '" + exp + "': Multiple tokens found inside a bracket");
+                    }
+                    sb = sb + token;
+                    numInBracket++;
+                } else {
+                    queue[queue.length] = token;
+                }
+            }
+            if (i === tokens.length - 1) {
+                if (isInBracket) {
+                    throw ("Error parsing expression '" + exp + "': Unbalanced [ found");
+                }
+            }
+        }
+        var ret = new Object();
+        ret.exp = exp;
+        ret.queue = queue;
+        ret.visit = function (data, visitor) {
+            function visit(name, queue, data, parentData, property) {
+                if (data == null) {
+                    return;
+                }
+                var currentToken = queue.shift();
+                if (currentToken === "$") {
+                    name = "$";
+                    var currentToken = queue.shift();
+                }
+                if (!currentToken) {
+                    visitor(data, parentData, property);
+                } else if (Array.isArray(data)) {
+                    if (!currentToken.startsWith("[")) {
+                        throw ("Node '" + name + "' is of type array");
+                    }
+                    var element = currentToken.substring(1, currentToken.length - 1);
+                    if (element.equals("#")) {
+                        for (var i = 0; i < data.length; i++) {
+                            var child = data[i];
+                            visit(name + currentToken, queue.slice(0), child, data, i);
+                            visit(name + "[" + i + "]", queue.slice(0), child, data, i);
+                        }
+                    } else if (element === "$") {
+                        var child = data[data.length - 1];
+                        visit(name + currentToken, queue.slice(0), child, data, data.length - 1);
+                    } else {
+                        var index = parseInt(element);
+                        if (isNaN(index)) {
+                            throw ("Element '" + element + "' of node '" + name + "' is not an integer, or the '$' last element symbol,  or the wilcard symbol '#'");
+                        }
+                        if (index < 0) {
+                            throw ("Element '" + element + "' of node '" + name + "' is lower than zero");
+                        }
+                        var child = data[index];
+                        visit(name + currentToken, queue.slice(0), child, data, index);
+                    }
+                } else if ("object" === typeof data) {
+                    if (currentToken === "[*]") {
+                        for (var p in data) {
+                            var child = data[p];
+                            visit(name + currentToken, queue.slice(0), child, data, p);
+                            visit(name + "[\"" + p + "\"]", queue.slice(0), child, data, p);
+                        }
+                    } else {
+                        var child;
+                        if (currentToken.startsWith("[")) {
+                            var element = currentToken.substring(1, currentToken.length - 1);
+                            if (element.startsWith("\"") || element.startsWith("'")) {
+                                element = element.substring(1, element.length() - 1);
+                            } else {
+                                throw ("Element '" + element + "' of node '" + name + "' must be a string expression or wilcard '*'");
+                            }
+                            name = name + currentToken;
+                            child = data[element];
+                        } else {
+                            if (name.length > 0) {
+                                name = name + "." + currentToken;
+                            } else {
+                                name = currentToken;
+                            }
+                            child = data[currentToken];
+                        }
+                        visit(name, queue, child, data, currentToken);
+                    }
+                } else if ("boolean" === typeof data
+                        || "number" === typeof data
+                        || "string" === typeof data) {
+                    throw ("Node is leaf but still are tokens remaining: " + currentToken);
+                } else {
+                    throw ("Node type '" + typeof data + "' not supported for index field '" + name + "'");
+                }
+            }
+            visit(ret.exp, ret.queue, data);
+        }
+        return ret;
+        function parseTokens(exp) {
+            if (exp === null) {
+                return null;
+            }
+            var ret = new Array();
+            var commentChar = null;
+            var start = 0;
+            for (var i = 0; i < exp.length; i++) {
+                if (exp.charAt(i) === '"') {
+                    if (commentChar === null) {
+                        commentChar = '"';
+                    } else if (commentChar === '"') {
+                        commentChar = null;
+                        ret[ret.length] = exp.substring(start, i + 1).trim();
+                        start = i + 1;
+                    }
+                } else if (exp.charAt(i) === '\'') {
+                    if (commentChar === null) {
+                        commentChar = '\'';
+                    } else if (commentChar === '\'') {
+                        commentChar = null;
+                        ret[ret.length] = exp.substring(start, i + 1).trim();
+                        start = i + 1;
+                    }
+                } else if (exp.charAt(i) === '[') {
+                    if (commentChar === null) {
+                        if (start !== i) {
+                            ret[ret.length] = exp.substring(start, i).trim();
+                        }
+                        ret[ret.length] = "[";
+                        start = i + 1;
+                    }
+                } else if (exp.charAt(i) === ']') {
+                    if (commentChar === null) {
+                        if (start !== i) {
+                            ret[ret.length] = exp.substring(start, i).trim();
+                        }
+                        ret[ret.length] = "]";
+                        start = i + 1;
+                    }
+                } else if (exp.charAt(i) === '.') {
+                    if (commentChar === null) {
+                        if (start !== i) {
+                            ret[ret.length] = exp.substring(start, i).trim();
+                        }
+                        start = i + 1;
+                    }
+                } else if (i === exp.length - 1) {
+                    ret[ret.length] = exp.substring(start, i + 1).trim();
+                }
+            }
+            return ret;
+        }
+    }
 
     function validateDepencyMapIsAcyclic() {
         var visitInfo = new Object();
@@ -95,6 +267,7 @@ BrutusinForms.create = function (schema) {
     }
 
     function dfs(iteration, visitInfo, id) {
+     //   console.log(iteration + " " + id);
         if (visitInfo[id] === iteration) {
             error = "Schema dependency graph has cycles";
             return;
@@ -162,16 +335,23 @@ BrutusinForms.create = function (schema) {
         copyProperty(schema, pseudoSchema, "required");
         copyProperty(schema, pseudoSchema, "enum");
         return pseudoSchema;
-
     }
 
-    function cleanSchemaMap(name) {
+    function cleanSchemaMap(schemaId) {
         for (var prop in schemaMap) {
-            if (name.startsWith(prop)) {
+            if (schemaId.startsWith(prop)) {
                 delete schemaMap[prop];
             }
         }
     }
+
+    function cleanData(schemaId) {
+        var expression = Expression.parse(schemaId);
+        expression.visit(data, function (data, parent, property) {
+            delete parent[property];
+        });
+    }
+
 
     function populateSchemaMap(name, schema) {
         if (schema.type === "object") {
@@ -328,6 +508,7 @@ BrutusinForms.create = function (schema) {
         for (var id in schemas) {
             if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
                 cleanSchemaMap(id);
+                cleanData(id);
                 populateSchemaMap(id, schemas[id]);
                 var renderInfo = renderInfoMap[id];
                 if (renderInfo) {
@@ -340,15 +521,12 @@ BrutusinForms.create = function (schema) {
     renderers["integer"] = function (container, id, parentObject, propertyProvider, value) {
         renderers["string"](container, id, parentObject, propertyProvider, value);
     };
-
     renderers["number"] = function (container, id, parentObject, propertyProvider, value) {
         renderers["string"](container, id, parentObject, propertyProvider, value);
     };
-
     renderers["any"] = function (container, id, parentObject, propertyProvider, value) {
         renderers["string"](container, id, parentObject, propertyProvider, value);
     };
-
     function getInputId() {
         return formId + "_" + inputCounter;
     }
@@ -455,7 +633,6 @@ BrutusinForms.create = function (schema) {
         appendChild(container, input, s);
         return parentObject;
     };
-
     renderers["boolean"] = function (container, id, parentObject, propertyProvider, value) {
         var schemaId = getSchemaId(id);
         var s = getSchema(schemaId);
@@ -481,7 +658,6 @@ BrutusinForms.create = function (schema) {
         input.onchange();
         appendChild(container, input, s);
     };
-
     function addAdditionalProperty(current, table, id, name, value) {
         var schemaId = getSchemaId(id);
         var s = getSchema(schemaId);
@@ -513,7 +689,6 @@ BrutusinForms.create = function (schema) {
                     }
                     current[pp.getValue()] = current[oldPropertyName];
                     delete current[oldPropertyName];
-
                 });
         nameInput.onkeyup = function () {
             if (nameInput.previousValue !== nameInput.value) {
@@ -548,7 +723,6 @@ BrutusinForms.create = function (schema) {
                 nameInput.previousValue = nameInput.value;
             }
         };
-
         var removeButton = document.createElement("button");
         appendChild(removeButton, document.createTextNode("x"), s);
         removeButton.onclick = function () {
@@ -629,7 +803,6 @@ BrutusinForms.create = function (schema) {
             appendChild(container, table, s);
         }
     };
-
     function addItem(current, table, id, value) {
         var schemaId = getSchemaId(id);
         var s = getSchema(schemaId);
@@ -705,7 +878,6 @@ BrutusinForms.create = function (schema) {
         }
         appendChild(container, div, s);
     };
-
     function clear(container) {
         if (container) {
             while (container.firstChild) {
@@ -725,7 +897,6 @@ BrutusinForms.create = function (schema) {
         renderInfoMap[schemaId].value = value;
         clear(titleContainer);
         clear(container);
-
         var r = renderers[s.type];
         if (r && !s.dependsOn) {
             if (s.title) {
@@ -776,7 +947,6 @@ BrutusinForms.create = function (schema) {
             BrutusinForms.postRender(obj);
         }
     };
-
     function validate(element) {
         if (element.validationFailed) {
             element.focus();
@@ -802,7 +972,6 @@ BrutusinForms.create = function (schema) {
             ;
         }
     };
-
     BrutusinForms.instances[BrutusinForms.instances.length] = obj;
     return obj;
 }
