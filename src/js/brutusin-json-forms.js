@@ -267,7 +267,7 @@ BrutusinForms.create = function (schema) {
     }
 
     function dfs(iteration, visitInfo, id) {
-     //   console.log(iteration + " " + id);
+     // console.log(iteration + " " + id);
         if (visitInfo[id] === iteration) {
             error = "Schema dependency graph has cycles";
             return;
