@@ -61,6 +61,7 @@ BrutusinForms.instances = new Array();
  * @returns {BrutusinForms.create.obj|Object|Object.create.obj}
  */
 BrutusinForms.create = function (schema) {
+    var SCHEMA_ANY = {"type": "any"};
     var obj = new Object();
     var renderers = new Object();
     var schemaMap = new Object();
@@ -71,7 +72,6 @@ BrutusinForms.create = function (schema) {
     var error;
     var initialValue;
     var inputCounter = 0;
-    var SCHEMA_ANY = {"type": "any"};
     var formId = "BrutusinForms#" + BrutusinForms.instances.length;
     populateSchemaMap("$", schema);
     validateDepencyMapIsAcyclic();
@@ -256,32 +256,31 @@ BrutusinForms.create = function (schema) {
 
     function validateDepencyMapIsAcyclic() {
         var visitInfo = new Object();
-        var i = 0;
         for (var id in dependencyMap) {
             if (visitInfo.hasOwnProperty(id)) {
                 continue;
             }
-            dfs(i, visitInfo, id);
-            i++;
+            dfs(visitInfo, new Object(), id);
         }
     }
 
-    function dfs(iteration, visitInfo, id) {
-     // console.log(iteration + " " + id);
-        if (visitInfo[id] === iteration) {
+    function dfs(visitInfo, stack, id) {
+        if (stack.hasOwnProperty(id)) {
             error = "Schema dependency graph has cycles";
             return;
         }
-        if (visitInfo[id] < iteration) {
+        stack[id] = null;
+        if (visitInfo.hasOwnProperty(id)) {
             return;
         }
-        visitInfo[id] = iteration;
+        visitInfo[id] = null;
         var arr = dependencyMap[id];
         if (arr) {
             for (var i = 0; i < arr.length; i++) {
-                dfs(iteration, visitInfo, arr[i]);
+                dfs(visitInfo, stack, arr[i]);
             }
         }
+        delete stack[id];
     }
 
     function removeEmptiesAndNulls(object) {
