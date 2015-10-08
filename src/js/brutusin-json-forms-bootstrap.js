@@ -63,27 +63,28 @@ BrutusinForms.decorator = function (element, schema) {
                 element.parentNode.appendChild(helpLink);
             }
         }
-        if (element.title && (tagName === "input" || tagName === "textarea" || tagName === "select")) {
-            element.setAttribute("data-toggle", "tooltip");
-            element.setAttribute("data-trigger", "focus");
-            if ("undefined" === typeof markdown) {
-                element.setAttribute("data-content", element.title);
-            } else {
-                element.setAttribute("data-content", markdown.toHTML(element.title));
-            }
-            if (schema.title) {
-                element.title = schema.title;
-            } else {
-                element.title = "Help";
-            }
-            $(element).popover({
-                placement: 'top',
-                container: 'body',
-                html: !("undefined" === typeof markdown)
-            });
-        }
+//        if (element.title && (tagName === "input" || tagName === "textarea" || tagName === "select")) {
+//            element.setAttribute("data-toggle", "tooltip");
+//            element.setAttribute("data-trigger", "focus");
+//            if ("undefined" === typeof markdown) {
+//                element.setAttribute("data-content", element.title);
+//            } else {
+//                element.setAttribute("data-content", markdown.toHTML(element.title));
+//            }
+//            if (schema.title) {
+//                element.title = schema.title;
+//            } else {
+//                element.title = "Help";
+//            }
+//            $(element).popover({
+//                placement: 'top',
+//                container: 'body',
+//                html: !("undefined" === typeof markdown)
+//            });
+//        }
         // https://github.com/silviomoreto/bootstrap-select
         if (!("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === typeof $.fn.selectpicker) && tagName === "select") {
+            element.title="";
             element.className += " selectpicker";
             element.setAttribute("data-live-search", true);
             $(element).selectpicker();
