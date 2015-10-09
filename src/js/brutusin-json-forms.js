@@ -576,6 +576,8 @@ BrutusinForms.create = function (schema) {
                 if (typeof value !== "number") {
                     value = null;
                 }
+            } if (s.format === "email") {
+                input.type = "email";
             } else {
                 input.type = "text";
             }
@@ -584,6 +586,7 @@ BrutusinForms.create = function (schema) {
             }
         }
         input.schema = schemaId;
+        input.setAttribute("autocorrect","off");
         input.onchange = function () {
             var value;
             var validationFailed = false;
