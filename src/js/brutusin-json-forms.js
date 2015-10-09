@@ -41,10 +41,15 @@ if (!String.prototype.includes) {
 
 var BrutusinForms = new Object();
 /**
- * Callback function to be notified after an HTML element has been rendered (passed as parameter).
+ * Callback functions to be notified after an HTML element has been rendered (passed as parameter).
  * @type type
  */
-BrutusinForms.decorator = null;
+BrutusinForms.decorators = new Array();
+
+BrutusinForms.addDecorator = function (f) {
+    BrutusinForms.decorators[BrutusinForms.decorators.length] = f;
+}
+
 /**
  * Callback function to be notified after a form has been rendered (passed as parameter).
  * @type type
@@ -314,8 +319,8 @@ BrutusinForms.create = function (schema) {
 
     function appendChild(parent, child, schema) {
         parent.appendChild(child);
-        if (BrutusinForms.decorator) {
-            BrutusinForms.decorator(child, schema);
+        for (var i = 0; i < BrutusinForms.decorators.length; i++) {
+            BrutusinForms.decorators[i](child, schema);
         }
     }
 
@@ -668,7 +673,6 @@ BrutusinForms.create = function (schema) {
         var innerTr = document.createElement("tr");
         var innerTd1 = document.createElement("td");
         var innerTd2 = document.createElement("td");
-        //td1.innerHTML="<table><tr><td style='vertical-align:middle'> <input type='text' class='form-control'></td><td style='vertical-align:middle'><button class='btn btn-primary  btn-xs'>x</button></td></tr></table>"
         var keyForBlank = "$" + Object.keys(current).length + "$";
         var td2 = document.createElement("td");
         td2.className = "prop-value";

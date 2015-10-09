@@ -26,7 +26,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
     console.warn("Include bootstrap-select.js (https://github.com/silviomoreto/bootstrap-select) to turn native selects into bootstrap components");
 }
 
-BrutusinForms.decorator = function (element, schema) {
+BrutusinForms.addDecorator(function (element, schema) {
     if (element.tagName) {
         var tagName = element.tagName.toLowerCase();
         if (tagName === "input" && element.type !== "checkbox" || tagName === "textarea") {
@@ -90,4 +90,4 @@ BrutusinForms.decorator = function (element, schema) {
             $(element).selectpicker();
         }
     }
-};
+});
