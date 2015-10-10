@@ -576,7 +576,7 @@ BrutusinForms.create = function (schema) {
                 if (typeof value !== "number") {
                     value = null;
                 }
-            } if (s.format === "email") {
+            } else if (s.format === "email") {
                 input.type = "email";
             } else {
                 input.type = "text";
