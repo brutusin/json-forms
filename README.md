@@ -3,7 +3,7 @@
 
 `org.brutusin:json-forms` is a javascript library that generates HTML forms from JSON Schemas.
 
-`Documentation in progress`
+`Documentation in progress` 
 
 **Table of Contents:** 
 
