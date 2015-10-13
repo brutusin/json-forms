@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name=viewport content='width=450'>
+
+        <link rel="stylesheet" href='lib/bootstrap/css/bootstrap.min.css'/>
+        <link rel="stylesheet" href="lib/codemirror/codemirror.css">
+        <link rel="stylesheet" href="lib/bootstrap-select/css/bootstrap-select.min.css">
+        <link rel="stylesheet" href="lib/octicons/octicons.css">
+		<link rel="stylesheet" href='dist/css/brutusin-json-forms.min.css'/>
+			
+        <style>
+            img {
+                max-width: 100%
+            }
+            .CodeMirror {
+                height: 400px; 
+            }
+        </style>
+
+        <script src='lib/jquery-1.11.3.min.js'></script>
+        <script src='lib/bootstrap/js/bootstrap.min.js'></script>
+        <script src="lib/codemirror/codemirror.js"></script>
+        <script src="lib/codemirror/codemirror-javascript.js"></script>
+        <script src="lib/markdown.min.js"></script>
+        <script src="lib/bootstrap-select/js/bootstrap-select.min.js"></script>
+        <script src="lib/bootstrap-select/js/i18n/defaults-en_US.min.js"></script>
+        <script src="dist/js/brutusin-json-forms.min.js"></script>
+        <script src="dist/js/brutusin-json-forms-bootstrap.min.js"></script>
+
+        <script lang="javascript">
+            var codeMirrors = new Object();
+            var input = new Object();
+            var inputString = new Object();
+            var title;
+            var desc;
+            var selectedDemo = parseInt(window.location.hash.substring(1));
+
+            var demos = [
+                ["Dynamic schemas",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"species":{"title":"Species supported","description":"Changes in this property (`$.species`) trigger the resolution of the actual (depending on the values being selected) schema of a dependent property (`$.subspecies`)","type":"string","enum":["human","dog","cat"],"required":true},"subspecies":{"dependsOn":["species"]}}},
+                    null,
+                    "function (names, data) {\n    var ret = new Object();\n    var schema = new Object();\n    if (data.species === \"human\") {\n        schema.type = \"null\"; // no such property for humans\n    } else {\n        schema.type = \"string\";\n        if (data.species === \"dog\") {\n            schema.title = \"Dog breed\";\n            schema.enum = [\"bulldog\", \"labrador\"]\n        } else {\n            schema.title = \"Cat breed\";\n            schema.enum = [\"siamese\", \"persian\"]\n        }\n    }\n    ret[\"$.subspecies\"] = schema;\n    return ret;\n}",
+                    "Example of [dynamic schemas](https://github.com/brutusin/json-forms#dynamic-schemas) in action. Notice the usage of `dependsOn` (*Schema* tab), and the specific implementation of `bf.schemaResolver` (*Schema resolver* tab)"],
+                ["Simple",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "title": "A boolean", "description": "A simple boolean data type as schema root", "type": "boolean"},
+                    null,
+                    null,
+                    "Example showing that root object in the schema is not required to be an object"],
+                ["Objects, arrays, enums, default, required",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
+                    null,
+                    null,
+                    "Example covering several common features"],
+                ["Initial data",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
+                    {"pageNum": 1, "pageSize": 50, "selectedFacetValues": [{"facetName": "id", "matchAllNull": false, "matchAllNotNull": true, "facetValues": [{"value": "1223"}], "included": false}], "sorts": [{"fieldName": "name", "ascending": true}]},
+                    null,
+                    "Example of a form created with initial data preloaded. Same schema as the previous example."],
+                ["Additional properties",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties","type": "object", "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "additionalProperties": true}}},
+                    null,
+                    null,
+                    "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported"]
+
+            ];
+            if (isNaN(selectedDemo) || selectedDemo < 0 || selectedDemo >= demos.length) {
+                selectedDemo = 0;
+            }
+            var selectedTab = "schema";
+            var bf;
+
+            function selectExample(selectedExampleIndex) {
+                input.schema = demos[selectedExampleIndex][1];
+                input.data = demos[selectedExampleIndex][2];
+                eval("input.resolver=" + demos[selectedExampleIndex][3]);
+                inputString.schema = JSON.stringify(input.schema, null, 2);
+                inputString.data = input.data ? JSON.stringify(input.data, null, 2) : "";
+                inputString.resolver = demos[selectedExampleIndex][3] ? demos[selectedExampleIndex][3] : "";
+                if (codeMirrors[selectedTab]) {
+                    codeMirrors[selectedTab].setValue(inputString[selectedTab]);
+                }
+                title = demos[selectedExampleIndex][0];
+                desc = markdown.toHTML(demos[selectedExampleIndex][4]);
+            }
+
+            selectExample(selectedDemo);
+            function generateForm() {
+                var schema;
+                var data;
+                var message;
+                var resolver;
+                var tabId;
+                inputString[selectedTab] = codeMirrors[selectedTab].getValue();
+                $("#jsonAlert").hide();
+                try {
+                    message = "The was a syntax error in the schema JSON";
+                    tabId = "schema";
+                    eval("schema=" + inputString.schema);
+                    if (inputString.data) {
+                        message = "The was a syntax error in the initial data JSON";
+                        tabId = "data";
+                        eval("data=" + inputString.data);
+                    } else {
+                        data = null;
+                    }
+                    if (inputString.resolver) {
+                        tabId = "resolver";
+                        message = "The was a syntax error in the resolver code";
+                        eval("resolver=" + inputString.resolver);
+                        if ("function" !== typeof resolver) {
+                            throw "Schema resolver does not evaluate to a function";
+                        }
+                    }
+                } catch (err) {
+                    document.getElementById('error-message').innerHTML = message + (err ? ". " + err : "");
+                    $('[href=#' + tabId + ']').tab('show');
+                    $("#jsonAlert").show();
+                    return;
+                }
+                $('#formLink').click();
+                bf = BrutusinForms.create(schema);
+                if (resolver) {
+                    bf.schemaResolver = resolver;
+                }
+                var container = document.getElementById('container');
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+                if (title) {
+                    document.getElementById('example-title').innerHTML = title;
+                }
+                if (desc) {
+                    document.getElementById('example-desc').innerHTML = desc;
+                }
+
+                bf.render(container, data);
+            }
+
+        </script>
+
+    </head>
+    <body>
+        <a href="https://github.com/brutusin/json-forms/tree/gh-pages"><img style="position: absolute; top: 0; right: 0; border: 0; width: 149px; height: 149px;" src="img/forkme.png" alt="Fork me on GitHub"></a>
+        <div class="container" >
+            <h1><img alt="Butusin" src="https://avatars0.githubusercontent.com/u/10341159?v=3&s=200" style="border: 0; width: 50px; height: 50px;"/><code>brutusin:json-forms</code> demo</h1>
+
+            <blockquote>
+                <p><b>JSON Schema to HTML form generator.</b> Source code and documentation available at <a href="https://github.com/brutusin/json-forms"><span class="octicon octicon-logo-github"></span></a></p>
+            </blockquote>
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseInput" aria-expanded="true" aria-controls="collapseInput">
+                                Input
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseInput" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <label for="examples">Predefined examples:</label>
+                            <select class="form-control" id="examples" onchange="selectExample(selectedIndex)">
+                                <script>
+                                    for (var i = 0; i < demos.length; i++) {
+                                        document.write("<option " + (selectedDemo === i ? "selected=true" : "") + ">" + demos[i][0] + "</option>");
+                                    }
+                                </script>
+                            </select>
+                            <br>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#schema" aria-controls="schema" role="tab" data-toggle="tab">Schema</a></li>
+                                <li role="presentation"><a href="#data" aria-controls="data" role="tab" data-toggle="tab">Initial data</a></li>
+                                <li role="presentation"><a href="#resolver" aria-controls="resolver" role="tab" data-toggle="tab">Schema resolver</a></li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="schema"></div>
+                                <div role="tabpanel" class="tab-pane" id="data"></div>
+                                <div role="tabpanel" class="tab-pane" id="resolver"></div>
+                            </div>
+                            <div class="alert alert-danger in" role="alert" id="jsonAlert" style="display:none">
+                                <a href="#" onclick='$("#jsonAlert").hide();' class="close" >&times;</a>
+                                <strong>Error!</strong> <span id="error-message"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="panel-footer">
+                            <button class="btn btn-primary" onclick="generateForm()">Create form</button> 
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a class="collapsed" id="formLink" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseForm" aria-expanded="false" aria-controls="collapseForm">
+                                Generated form
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseForm" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="alert alert-info" role="alert"><strong id="example-title"></strong><div id="example-desc"></div></div>
+                        <div id='container' style="padding-left:12px;padding-right:12px;padding-bottom: 12px;"></div>
+                        <div class="panel-footer">
+                            <button class="btn btn-primary" onclick="alert(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="alert(bf.validate())">validate()</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script lang="javascript">
+
+            codeMirrors["schema"] = CodeMirror(document.getElementById("schema"), {
+                value: JSON.stringify(demos[selectedDemo][1], null, 4),
+                mode: "javascript",
+                lineNumbers: true
+            });
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                selectedTab = $(e.target).attr("aria-controls");
+                var pt = $(e.relatedTarget);
+                var prevTab;
+                if (pt) {
+                    prevTab = pt.attr("aria-controls");
+                    inputString[prevTab] = codeMirrors[prevTab].getValue();
+                }
+                if (!codeMirrors[selectedTab]) {
+                    codeMirrors[selectedTab] = CodeMirror(document.getElementById(selectedTab), {
+                        mode: "javascript",
+                        lineNumbers: true
+                    });
+                }
+                codeMirrors[selectedTab].setValue(inputString[selectedTab]);
+            }
+            );
+        </script>
+    </div>
+</body>
+</html> 
