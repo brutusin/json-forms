@@ -3,7 +3,7 @@ node_js:
   - stable
 
 before_script:
-  - npm install -g bower
-  - bower install
+  - npm install -g gulp
+script: gulp
 
 sudo: false
