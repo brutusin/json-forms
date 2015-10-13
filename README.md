@@ -30,12 +30,12 @@
 ## Usage
 Include the main library dependencies:
 ```html
-<link rel="stylesheet" href='http://brutusin.org/json-forms/src/brutusin-json-forms.css'/>
-<script src="http://brutusin.org/json-forms/src/brutusin-json-forms.js"></script>
+<link rel="stylesheet" href='dist/css/brutusin-json-forms.min.css'/>
+<script src="dist/js/brutusin-json-forms.min.js"></script>
 ```
 Optionally, include the bootstrap extension (requires bootstrap):
 ```html
-<script src="src/brutusin-json-forms-bootstrap.js"></script>
+<script src="dist/js/brutusin-json-forms-bootstrap.min.js"></script>
 ```
 Create the javascript `BrutusinForms` instance, being `schema` a javascript `object` representing the schema structure:
 ```javascript
