@@ -1,0 +1,48 @@
+{
+  "name": "brutusin-json-forms",
+  "version": "1.0.0",
+  "description": "JSON schema to HTML form generator",
+  "repository": "idelvall/brutusin-json-forms",
+  "main": "dist/brutusin-json-forms.min.js",
+  "filename": "dist/brutusin-json-forms.min.js",
+  "homepage": "http://brutusin.org/json-forms/",
+  "author": "Ignacio del Valle Alles <idelvall@brutusin.org> (http://brutusin.org)",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "keywords": [
+    "form",
+    "json",
+    "json-schema",
+    "schema"
+  ],
+  "devDependencies": {
+    "gulp": "^3.5.6",
+    "gulp-angular-templatecache": "^1.2.1",
+    "gulp-concat": "^2.2.0",
+    "gulp-jscs": "^1.1.0",
+    "gulp-minify-html": "^0.1.1",
+    "gulp-protractor": "^1.0.0",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^0.2.1",
+    "gulp-umd": "^0.1.3"
+  },
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "autoupdate": {
+    "source": "git",
+    "target": "git://github.com/brutusin/json-forms.git",
+    "basePath": "/dist/",
+    "files": [
+      "brutusin-jjson-forms.min.js",
+      "brutusin-jjson-forms.js",
+      "brutusin-json-forms-bootstrap.js",
+	  "brutusin-json-forms-bootstrap.min.js",
+      "brutusin-json-forms-jsonsrv.js",
+	  "brutusin-json-forms-jsonsrv.min.js"
+    ]
+  }
+}
