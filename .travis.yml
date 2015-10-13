@@ -3,7 +3,7 @@ node_js:
   - stable
 
 before_script:
-  - npm install
+  -  npm clean cache
 script: gulp
 
 sudo: false
