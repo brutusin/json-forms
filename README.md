@@ -1,6 +1,6 @@
 # json-forms
 [![bower version](https://img.shields.io/bower/v/json-forms.svg?style=flat-square)](#bower)
-
+[![Build Status](https://api.travis-ci.org/brutusin/json-forms.svg?branch=master)](https://travis-ci.org/brutusin/json-forms)
 `org.brutusin:json-forms` is a javascript library that generates HTML forms from JSON Schemas.
 
 `Documentation in progress` 
