@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - stable
+
+before_script:
+  - npm install -g bower
+  - bower install
+
+sudo: false
