@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var git = require('gulp-git');
 var exec = require('child_process').execSync;
 
 gulp.task('deploy', function () {

@@ -7,5 +7,5 @@ before_install:
 before_script:
   - rm -rf node_modules/json-forms
 script: gulp
-
+after_success: gulp deploy
 sudo: false
