@@ -15,6 +15,7 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
+
  
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (searchString, position) {
