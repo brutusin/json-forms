@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * @author idelvall Ignacio del Valle Alles idelvall@brutusin.org
+ * @author me Ignacio del Valle Alles idelvall@brutusin.org
  */
  
 if (!String.prototype.startsWith) {
