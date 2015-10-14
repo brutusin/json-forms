@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * @author Ignacio del Valle Alles idelvall@brutusin.org
+ * @author idelvall Ignacio del Valle Alles idelvall@brutusin.org
  */
+ 
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (searchString, position) {
         position = position || 0;
