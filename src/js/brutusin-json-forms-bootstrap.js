@@ -26,6 +26,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
     console.warn("Include bootstrap-select.js (https://github.com/silviomoreto/bootstrap-select) to turn native selects into bootstrap components");
 }
 
+// Basic bootstrap css
 BrutusinForms.addDecorator(function (element, schema) {
     if (element.tagName) {
         var tagName = element.tagName.toLowerCase();
@@ -37,7 +38,13 @@ BrutusinForms.addDecorator(function (element, schema) {
             element.className += "btn btn-primary  btn-xs";
         } else if (tagName === "form") {
             element.className += " form-inline";
-        } 
+        }
+    }
+});
+
+// Description help icon
+BrutusinForms.addDecorator(function (element, schema) {
+    if (element.tagName) {
         if (tagName === "label" || tagName === "button") {
             if (element.title) {
                 var helpLink = document.createElement("a");
@@ -64,6 +71,11 @@ BrutusinForms.addDecorator(function (element, schema) {
                 element.parentNode.appendChild(helpLink);
             }
         }
+    }
+});
+// Popover over inputs
+//BrutusinForms.addDecorator(function (element, schema) {
+//if (element.tagName) {
 //        if (element.title && (tagName === "input" || tagName === "textarea" || tagName === "select")) {
 //            element.setAttribute("data-toggle", "tooltip");
 //            element.setAttribute("data-trigger", "focus");
@@ -83,6 +95,11 @@ BrutusinForms.addDecorator(function (element, schema) {
 //                html: !("undefined" === typeof markdown)
 //            });
 //        }
+//    }
+//});
+// Bootstrap select
+BrutusinForms.addDecorator(function (element, schema) {
+    if (element.tagName) {
         // https://github.com/silviomoreto/bootstrap-select
         if (!("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === typeof $.fn.selectpicker) && tagName === "select") {
             element.title = "";
@@ -92,3 +109,33 @@ BrutusinForms.addDecorator(function (element, schema) {
         }
     }
 });
+Brutusin.bootstrap = new Object();
+// helper button for string (with format) fields
+Brutusin.bootstrap.addFormatHelper = function (format, glyphicon, onclick) {
+    BrutusinForms.addDecorator(function (element, schema) {
+        if (element.tagName) {
+            var tagName = element.tagName.toLowerCase();
+            if (tagName === "input" && schema.type === "string" && schema.format === format) {
+                var table = document.createElement("table");
+                var tr = document.createElement("tr");
+                var td1 = document.createElement("td");
+                td1.setAttribute("style", "width:100%");
+                var td2 = document.createElement("td");
+                table.appendChild(tr);
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                var searchButton = document.createElement("button");
+                searchButton.className = "btn btn-default glyphicon " + glyphicon;
+                searchButton.title = "Select file";
+                searchButton.onclick = onclick;
+                var parent = element.parentNode;
+                parent.removeChild(element);
+                td1.appendChild(element);
+                td2.appendChild(searchButton);
+                parent.appendChild(table);
+            }
+        }
+    });
+};
+
+
