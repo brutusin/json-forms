@@ -95,7 +95,7 @@ BrutusinForms.addDecorator(function (element, schema) {
 //                container: 'body',
 //                html: !("undefined" === typeof markdown)
 //            });
-//        }
+//        }input
 //    }
 //});
 // Bootstrap select
@@ -113,34 +113,39 @@ BrutusinForms.addDecorator(function (element, schema) {
 });
 BrutusinForms.bootstrap = new Object();
 // helper button for string (with format) fields
-BrutusinForms.bootstrap.addFormatHelper = function (format, glyphicon, cb) {
+BrutusinForms.bootstrap.addFormatHelper = function (format, inputType, glyphicon, cb) {
     BrutusinForms.addDecorator(function (element, schema) {
         if (element.tagName) {
             var tagName = element.tagName.toLowerCase();
             if (tagName === "input" && schema.type === "string" && schema.format === format) {
-                var tr;
-                if (element.parentNode.tagName.toLowerCase() === "td") {
-                    tr = element.parentNode.parentNode;
-                } else {
-                    var table = document.createElement("table");
-                    tr = document.createElement("tr");
-                    var td1 = document.createElement("td");
-                    td1.setAttribute("style", "width:100%");
-                    table.appendChild(tr);
-                    tr.appendChild(td1);
-                    parent.removeChild(element);
-                    td1.appendChild(element);
-                    parent.appendChild(table);
+                if (inputType) {
+                    element.type = inputType;
                 }
-                var td = document.createElement("td");
-                tr.appendChild(td);
-                var searchButton = document.createElement("button");
-                searchButton.className = "btn btn-default glyphicon " + glyphicon;
-                searchButton.title = "Select file";
-                searchButton.onclick = function () {
-                    cb(element);
-                };
-                td.appendChild(searchButton);
+                if (glyphicon) {
+                    var tr;
+                    if (element.parentNode.tagName.toLowerCase() === "td") {
+                        tr = element.parentNode.parentNode;
+                    } else {
+                        var table = document.createElement("table");
+                        tr = document.createElement("tr");
+                        var td1 = document.createElement("td");
+                        td1.setAttribute("style", "width:100%");
+                        table.appendChild(tr);
+                        tr.appendChild(td1);
+                        parent.removeChild(element);
+                        td1.appendChild(element);
+                        parent.appendChild(table);
+                    }
+                    var td = document.createElement("td");
+                    tr.appendChild(td);
+                    var searchButton = document.createElement("button");
+                    searchButton.className = "btn btn-default glyphicon " + glyphicon;
+                    searchButton.title = "Select file";
+                    searchButton.onclick = function () {
+                        cb(element);
+                    };
+                    td.appendChild(searchButton);
+                }
             }
         }
     });
