@@ -45,6 +45,7 @@ BrutusinForms.addDecorator(function (element, schema) {
 // Description help icon
 BrutusinForms.addDecorator(function (element, schema) {
     if (element.tagName) {
+        var tagName = element.tagName.toLowerCase();
         if (tagName === "label" || tagName === "button") {
             if (element.title) {
                 var helpLink = document.createElement("a");
@@ -100,6 +101,7 @@ BrutusinForms.addDecorator(function (element, schema) {
 // Bootstrap select
 BrutusinForms.addDecorator(function (element, schema) {
     if (element.tagName) {
+        var tagName = element.tagName.toLowerCase();
         // https://github.com/silviomoreto/bootstrap-select
         if (!("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === typeof $.fn.selectpicker) && tagName === "select") {
             element.title = "";
@@ -109,30 +111,36 @@ BrutusinForms.addDecorator(function (element, schema) {
         }
     }
 });
-Brutusin.bootstrap = new Object();
+BrutusinForms.bootstrap = new Object();
 // helper button for string (with format) fields
-Brutusin.bootstrap.addFormatHelper = function (format, glyphicon, onclick) {
+BrutusinForms.bootstrap.addFormatHelper = function (format, glyphicon, cb) {
     BrutusinForms.addDecorator(function (element, schema) {
         if (element.tagName) {
             var tagName = element.tagName.toLowerCase();
             if (tagName === "input" && schema.type === "string" && schema.format === format) {
-                var table = document.createElement("table");
-                var tr = document.createElement("tr");
-                var td1 = document.createElement("td");
-                td1.setAttribute("style", "width:100%");
-                var td2 = document.createElement("td");
-                table.appendChild(tr);
-                tr.appendChild(td1);
-                tr.appendChild(td2);
+                var tr;
+                if (element.parentNode.tagName.toLowerCase() === "td") {
+                    tr = element.parentNode.parentNode;
+                } else {
+                    var table = document.createElement("table");
+                    tr = document.createElement("tr");
+                    var td1 = document.createElement("td");
+                    td1.setAttribute("style", "width:100%");
+                    table.appendChild(tr);
+                    tr.appendChild(td1);
+                    parent.removeChild(element);
+                    td1.appendChild(element);
+                    parent.appendChild(table);
+                }
+                var td = document.createElement("td");
+                tr.appendChild(td);
                 var searchButton = document.createElement("button");
                 searchButton.className = "btn btn-default glyphicon " + glyphicon;
                 searchButton.title = "Select file";
-                searchButton.onclick = onclick;
-                var parent = element.parentNode;
-                parent.removeChild(element);
-                td1.appendChild(element);
-                td2.appendChild(searchButton);
-                parent.appendChild(table);
+                searchButton.onclick = function () {
+                    cb(element);
+                };
+                td.appendChild(searchButton);
             }
         }
     });
