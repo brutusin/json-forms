@@ -122,20 +122,16 @@ BrutusinForms.bootstrap.addFormatHelper = function (format, inputType, glyphicon
                     element.type = inputType;
                 }
                 if (glyphicon) {
-                    var tr;
-                    if (element.parentNode.tagName.toLowerCase() === "td") {
-                        tr = element.parentNode.parentNode;
-                    } else {
-                        var table = document.createElement("table");
-                        tr = document.createElement("tr");
-                        var td1 = document.createElement("td");
-                        td1.setAttribute("style", "width:100%");
-                        table.appendChild(tr);
-                        tr.appendChild(td1);
-                        parent.removeChild(element);
-                        td1.appendChild(element);
-                        parent.appendChild(table);
-                    }
+                    var parent = element.parentNode;
+                    var table = document.createElement("table");
+                    var tr = document.createElement("tr");
+                    var td1 = document.createElement("td");
+                    td1.setAttribute("style", "width:100%");
+                    table.appendChild(tr);
+                    tr.appendChild(td1);
+                    parent.removeChild(element);
+                    td1.appendChild(element);
+                    parent.appendChild(table);
                     var td = document.createElement("td");
                     tr.appendChild(td);
                     var searchButton = document.createElement("button");
