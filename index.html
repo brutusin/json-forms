@@ -56,6 +56,11 @@
                     {"pageNum": 1, "pageSize": 50, "selectedFacetValues": [{"facetName": "id", "matchAllNull": false, "matchAllNotNull": true, "facetValues": [{"value": "1223"}], "included": false}], "sorts": [{"fieldName": "name", "ascending": true}]},
                     null,
                     "Example of a form created with initial data preloaded. Same schema as the previous example."],
+                ["Numeric validation",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "A validated number", "minimum": 1, "maximum": 10, "multipleOf": 3, "description": "A number multiple of `3`, between `1` and `10` (inclusive)"}}}
+                    null,
+                    null,
+                    "[Numeric validation](http://json-schema.org/latest/json-schema-validation.html#anchor13) supporting `multipleOf`, `minimum`, `maximum` and `exclusiveMinimum`,`exclusiveMaximum` "],
                 ["Additional properties",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties", "type": "object", "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "additionalProperties": true}}},
                     null,
@@ -201,7 +206,9 @@
                         <div class="alert alert-info" role="alert"><strong id="example-title"></strong><div id="example-desc"></div></div>
                         <div id='container' style="padding-left:12px;padding-right:12px;padding-bottom: 12px;"></div>
                         <div class="panel-footer">
-                            <button class="btn btn-primary" onclick="alert(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="if(bf.validate()){alert('Validation succeeded')}">validate()</button>
+                            <button class="btn btn-primary" onclick="alert(JSON.stringify(bf.getData(), null, 4))">getData()</button>&nbsp;<button class="btn btn-primary" onclick="if (bf.validate()) {
+                                        alert('Validation succeeded')
+                                    }">validate()</button>
                         </div>
                     </div>
                 </div>
