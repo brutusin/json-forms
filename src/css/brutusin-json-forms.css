@@ -21,6 +21,7 @@ form.brutusin-form table,input, select, textarea{
 }
 form.brutusin-form input[type=checkbox]{
     width: auto !important;
+    min-width: min-content !important;
 }
 form.brutusin-form  textarea{
     height: 8em;
