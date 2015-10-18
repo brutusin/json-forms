@@ -26,13 +26,6 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
     console.warn("Include bootstrap-select.js (https://github.com/silviomoreto/bootstrap-select) to turn native selects into bootstrap components");
 }
 
-BrutusinForms.messages = {
-    "required": "This field is <strong>required</strong>",
-    "invalidValue": "Invalid field value",
-    "addpropNameExistent": "This property is already present in the object",
-    "addpropNameRequired": "A name is required"
-};
-
 // Basic bootstrap css
 BrutusinForms.addDecorator(function (element, schema) {
     if (element.tagName) {
@@ -165,9 +158,16 @@ BrutusinForms.onValidationError = function (element, message) {
     var title = element.title;
     element.setAttribute("data-toggle", "popover");
     element.setAttribute("data-trigger", "focus");
-    element.setAttribute("data-content", message);
-    element.title="Validation error";
-    element.parentNode.className += " has-error";
+    if ("undefined" === typeof markdown) {
+        element.setAttribute("data-content", message);
+    } else {
+        element.setAttribute("data-content", markdown.toHTML(message));
+    }
+
+    element.title = "Validation error";
+    if (!element.parentNode.className.includes("has-error")) {
+        element.parentNode.className += " has-error";
+    }
     $(element).popover({
         placement: 'top',
         container: 'body',
@@ -190,7 +190,7 @@ BrutusinForms.onValidationError = function (element, message) {
             $(element).popover('destroy');
         }
         element.oblur = onblur;
-        if(title){
+        if (title) {
             element.title = title;
         }
     }
