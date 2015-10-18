@@ -404,11 +404,13 @@ BrutusinForms.create = function (schema) {
         var pseudoSchema = createPseudoSchema(schema);
         schemaMap[name] = pseudoSchema;
         if (schema.type === "object") {
-            pseudoSchema.properties = new Object();
-            for (var prop in schema.properties) {
-                var childProp = name + "." + prop;
-                pseudoSchema.properties[prop] = childProp;
-                populateSchemaMap(childProp, schema.properties[prop]);
+            if (schema.properties) {
+                pseudoSchema.properties = new Object();
+                for (var prop in schema.properties) {
+                    var childProp = name + "." + prop;
+                    pseudoSchema.properties[prop] = childProp;
+                    populateSchemaMap(childProp, schema.properties[prop]);
+                }
             }
             if (schema.additionalProperties) {
                 var childProp = name + "[*]";
@@ -806,7 +808,6 @@ BrutusinForms.create = function (schema) {
         appendChild(tbody, tr, s);
         appendChild(table, tbody, s);
         render(null, td2, id, current, pp, value);
-        nameInput.onkeyup();
         if (name) {
             nameInput.value = name;
             nameInput.onblur();
@@ -829,7 +830,7 @@ BrutusinForms.create = function (schema) {
         var tbody = document.createElement("tbody");
         appendChild(table, tbody, s);
         var propNum = 0;
-        if (s.properties) {
+        if (s.hasOwnProperty("properties")) {
             propNum = s.properties.length;
             for (var prop in s.properties) {
                 var tr = document.createElement("tr");
