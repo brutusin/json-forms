@@ -633,27 +633,19 @@ BrutusinForms.create = function (schema) {
                 if (s.required && !value) {
                     return BrutusinForms.messages["required"];
                 }
-                if (s.pattern && !s.pattern.test(value)) {
-                    return BrutusinForms.messages["pattern"].format(s.pattern.source);
-                }
-                if (s.minLength) {
-                    if (!value || s.minLength > value.length) {
-                        return BrutusinForms.messages["minLength"].format(s.minLength);
+                if (value !== null) {
+                    if (s.pattern && !s.pattern.test(value)) {
+                        return BrutusinForms.messages["pattern"].format(s.pattern.source);
                     }
-                }
-                if (s.maxLength) {
-                    if (value && s.maxLength < value.length) {
-                        return BrutusinForms.messages["maxLength"].format(s.maxLength);
+                    if (s.minLength) {
+                        if (!value || s.minLength > value.length) {
+                            return BrutusinForms.messages["minLength"].format(s.minLength);
+                        }
                     }
-                }
-                if (s.minLength) {
-                    if (!value || s.minLength > value.length) {
-                        return BrutusinForms.messages["minLength"].format(s.minLength);
-                    }
-                }
-                if (s.maxLength) {
-                    if (value && s.maxLength < value.length) {
-                        return BrutusinForms.messages["maxLength"].format(s.maxLength);
+                    if (s.maxLength) {
+                        if (value && s.maxLength < value.length) {
+                            return BrutusinForms.messages["maxLength"].format(s.maxLength);
+                        }
                     }
                 }
                 if (value !== null && !isNaN(value)) {
