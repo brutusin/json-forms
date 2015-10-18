@@ -39,14 +39,26 @@ if (!String.prototype.includes) {
         return String.prototype.indexOf.apply(this, arguments) !== -1;
     };
 }
+if (!String.prototype.format) {
+    String.prototype.format = function () {
+        var formatted = this;
+        for (var i = 0; i < arguments.length; i++) {
+            var regexp = new RegExp('\\{' + i + '\\}', 'gi');
+            formatted = formatted.replace(regexp, arguments[i]);
+        }
+        return formatted;
+    };
+}
 
 var BrutusinForms = new Object();
 
 BrutusinForms.messages = {
-    "required": "This field is required",
+    "required": "This field is **required**",
     "invalidValue": "Invalid field value",
     "addpropNameExistent": "This property is already present in the object",
-    "addpropNameRequired": "A name is required"
+    "addpropNameRequired": "A name is required",
+    "minItems": "At least `{0}` items are required",
+    "maxItems": "At most `{0}` items are allowed"
 };
 
 /**
@@ -359,6 +371,8 @@ BrutusinForms.create = function (schema) {
         copyProperty(schema, pseudoSchema, "default");
         copyProperty(schema, pseudoSchema, "required");
         copyProperty(schema, pseudoSchema, "enum");
+        copyProperty(schema, pseudoSchema, "minItems");
+        copyProperty(schema, pseudoSchema, "maxItems");
         return pseudoSchema;
     }
 
@@ -608,7 +622,7 @@ BrutusinForms.create = function (schema) {
         }
         input.schema = schemaId;
         input.setAttribute("autocorrect", "off");
-        
+
         input.getValidationError = function () {
             try {
                 var value = getValue(s, input);
@@ -619,13 +633,13 @@ BrutusinForms.create = function (schema) {
                 return BrutusinForms.messages["invalidValue"];
             }
         }
-        
+
         input.onchange = function () {
             var value;
             try {
                 value = getValue(s, input);
             } catch (error) {
-               value = null;
+                value = null;
             }
             if (parentObject) {
                 parentObject[propertyProvider.getValue()] = value;
@@ -881,6 +895,14 @@ BrutusinForms.create = function (schema) {
         appendChild(div, table, s);
         appendChild(container, div, s);
         var addButton = document.createElement("button");
+        addButton.getValidationError = function () {
+            if (s.minItems && s.minItems > table.rows.length) {
+                return BrutusinForms.messages["minItems"].format(s.minItems);
+            }
+            if (s.maxItems && s.maxItems < table.rows.length) {
+                return BrutusinForms.messages["maxItems"].format(s.maxItems);
+            }
+        }
         addButton.onclick = function () {
             addItem(current, table, id + "[#]", null);
         };
