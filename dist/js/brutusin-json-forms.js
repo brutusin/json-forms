@@ -15,7 +15,7 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
- 
+
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (searchString, position) {
         position = position || 0;
@@ -41,6 +41,14 @@ if (!String.prototype.includes) {
 }
 
 var BrutusinForms = new Object();
+
+BrutusinForms.messages = {
+    "required": "This field is required",
+    "invalidValue": "Invalid field value",
+    "addpropNameExistent": "This property is already present in the object",
+    "addpropNameRequired": "A name is required"
+};
+
 /**
  * Callback functions to be notified after an HTML element has been rendered (passed as parameter).
  * @type type
@@ -50,6 +58,18 @@ BrutusinForms.decorators = new Array();
 BrutusinForms.addDecorator = function (f) {
     BrutusinForms.decorators[BrutusinForms.decorators.length] = f;
 }
+
+BrutusinForms.onValidationError = function (element, message) {
+    element.focus();
+    if (!element.className.includes(" error")) {
+        element.className += " error";
+    }
+    alert(message);
+};
+
+BrutusinForms.onValidationSuccess = function (element) {
+    element.className = element.className.replace(" error", "");
+};
 
 /**
  * Callback function to be notified after a form has been rendered (passed as parameter).
@@ -588,26 +608,24 @@ BrutusinForms.create = function (schema) {
         }
         input.schema = schemaId;
         input.setAttribute("autocorrect", "off");
-        input.onchange = function () {
-            var value;
-            var validationFailed = false;
+        
+        input.getValidationError = function () {
             try {
-                value = getValue(s, input);
+                var value = getValue(s, input);
                 if (s.required && !value) {
-                    validationFailed = true;
+                    return BrutusinForms.messages["required"];
                 }
             } catch (error) {
-                validationFailed = true;
+                return BrutusinForms.messages["invalidValue"];
             }
-            if (validationFailed) {
-                input.validationFailed = true;
-                if (!input.className.includes(" error")) {
-                    input.className += " error";
-                }
-                value = null;
-            } else {
-                input.validationFailed = false;
-                input.className = input.className.replace(" error", "");
+        }
+        
+        input.onchange = function () {
+            var value;
+            try {
+                value = getValue(s, input);
+            } catch (error) {
+               value = null;
             }
             if (parentObject) {
                 parentObject[propertyProvider.getValue()] = value;
@@ -682,6 +700,16 @@ BrutusinForms.create = function (schema) {
         td2.className = "prop-value";
         var nameInput = document.createElement("input");
         nameInput.type = "text";
+        nameInput.getValidationError = function () {
+            if (nameInput.previousValue !== nameInput.value) {
+                if (current.hasOwnProperty(nameInput.value)) {
+                    return BrutusinForms.messages["addpropNameExistent"];
+                }
+            }
+            if (!nameInput.value) {
+                return BrutusinForms.messages["addpropNameRequired"];
+            }
+        }
         var pp = createPropertyProvider(
                 function () {
                     if (nameInput.value) {
@@ -697,37 +725,13 @@ BrutusinForms.create = function (schema) {
                     current[pp.getValue()] = current[oldPropertyName];
                     delete current[oldPropertyName];
                 });
-        nameInput.onkeyup = function () {
-            if (nameInput.previousValue !== nameInput.value) {
-                if (current.hasOwnProperty(nameInput.value)) {
-                    nameInput.validationFailed = true;
-                    if (!nameInput.className.includes(" error")) {
-                        nameInput.className += " error";
-                    }
-                } else {
-                    nameInput.validationFailed = false;
-                    nameInput.className = nameInput.className.replace(" error", "");
-                }
-            }
-            if (!nameInput.value) {
-                nameInput.validationFailed = true;
-                if (!nameInput.className.includes(" error")) {
-                    nameInput.className += " error";
-                }
-            }
-        };
+
         nameInput.onblur = function () {
-            if (!nameInput.value) {
-                nameInput.focus();
-                return;
-            }
+            validate(nameInput);
             if (nameInput.previousValue !== nameInput.value) {
-                if (current.hasOwnProperty(nameInput.value)) {
-                    nameInput.focus();
-                    return;
-                }
                 pp.onchange(nameInput.previousValue);
                 nameInput.previousValue = nameInput.value;
+                return;
             }
         };
         var removeButton = document.createElement("button");
@@ -962,20 +966,28 @@ BrutusinForms.create = function (schema) {
             BrutusinForms.postRender(obj);
         }
     };
+
     function validate(element) {
-        if (element.validationFailed) {
-            element.focus();
-            return false;
+        var ret = true;
+        if (element.hasOwnProperty("getValidationError")) {
+            var error = element.getValidationError();
+            if (error) {
+                BrutusinForms.onValidationError(element, error);
+                ret = false;
+            } else {
+                BrutusinForms.onValidationSuccess(element);
+            }
         }
         if (element.childNodes) {
             for (var i = 0; i < element.childNodes.length; i++) {
                 if (!validate(element.childNodes[i])) {
-                    return false;
+                    ret = false;
                 }
             }
         }
-        return true;
+        return ret;
     }
+
     obj.validate = function () {
         return validate(container);
     };
