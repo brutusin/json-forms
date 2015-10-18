@@ -656,21 +656,23 @@ BrutusinForms.create = function (schema) {
                         return BrutusinForms.messages["maxLength"].format(s.maxLength);
                     }
                 }
-                if (s.multipleOf && !isNaN(value) && value % s.multipleOf !== 0) {
-                    return BrutusinForms.messages["multipleOf"].format(s.multipleOf);
-                }
-                if (s.hasOwnProperty("maximum")) {
-                    if (s.exclusiveMaximum && value >= s.maximum) {
-                        return BrutusinForms.messages["exclusiveMaximum"].format(s.maximum);
-                    } else if (!s.exclusiveMaximum && value > s.maximum) {
-                        return BrutusinForms.messages["maximum"].format(s.maximum);
+                if (value !== null && !isNaN(value)) {
+                    if (s.multipleOf && value % s.multipleOf !== 0) {
+                        return BrutusinForms.messages["multipleOf"].format(s.multipleOf);
                     }
-                }
-                if (s.hasOwnProperty("minimum")) {
-                    if (s.exclusiveMinimum && value <= s.minimum) {
-                        return BrutusinForms.messages["exclusiveMinimum"].format(s.minimum);
-                    } else if (!s.exclusiveMinimum && value < s.minimum) {
-                        return BrutusinForms.messages["minimum"].format(s.minimum);
+                    if (s.hasOwnProperty("maximum")) {
+                        if (s.exclusiveMaximum && value >= s.maximum) {
+                            return BrutusinForms.messages["exclusiveMaximum"].format(s.maximum);
+                        } else if (!s.exclusiveMaximum && value > s.maximum) {
+                            return BrutusinForms.messages["maximum"].format(s.maximum);
+                        }
+                    }
+                    if (s.hasOwnProperty("minimum")) {
+                        if (s.exclusiveMinimum && value <= s.minimum) {
+                            return BrutusinForms.messages["exclusiveMinimum"].format(s.minimum);
+                        } else if (!s.exclusiveMinimum && value < s.minimum) {
+                            return BrutusinForms.messages["minimum"].format(s.minimum);
+                        }
                     }
                 }
             } catch (error) {
