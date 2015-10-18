@@ -58,7 +58,18 @@ BrutusinForms.messages = {
     "addpropNameExistent": "This property is already present in the object",
     "addpropNameRequired": "A name is required",
     "minItems": "At least `{0}` items are required",
-    "maxItems": "At most `{0}` items are allowed"
+    "maxItems": "At most `{0}` items are allowed",
+    "pattern": "Value does not match pattern: `{0}`",
+    "minLength": "Value must be **at least** `{0}` characters long",
+    "maxLength": "Value must be **at most** `{0}` characters long",
+    "multipleOf": "Value must be **multiple of** `{0}`",
+    "minimum": "Value must be **greater or equal than** `{0}`",
+    "exclusiveMinimum": "Value must be **greater than** `{0}`",
+    "maximum": "Value must be **lower or equal than** `{0}`",
+    "exclusiveMaximum": "Value must be **lower than** `{0}`",
+    "minProperties": "At least `{0}` properties are required",
+    "maxProperties": "At most `{0}` properties are allowed"
+
 };
 
 /**
@@ -357,22 +368,19 @@ BrutusinForms.create = function (schema) {
         }
     }
 
-    function copyProperty(from, to, propName) {
-        if (from.hasOwnProperty(propName)) {
-            to[propName] = from[propName];
-        }
-    }
-
     function createPseudoSchema(schema) {
         var pseudoSchema = new Object();
-        copyProperty(schema, pseudoSchema, "type");
-        copyProperty(schema, pseudoSchema, "title");
-        copyProperty(schema, pseudoSchema, "description");
-        copyProperty(schema, pseudoSchema, "default");
-        copyProperty(schema, pseudoSchema, "required");
-        copyProperty(schema, pseudoSchema, "enum");
-        copyProperty(schema, pseudoSchema, "minItems");
-        copyProperty(schema, pseudoSchema, "maxItems");
+        for (var p in schema) {
+            if (p === "items" || p === "properties" || p === "additionalProperties") {
+                continue;
+            }
+            if (p === "pattern") {
+                pseudoSchema[p] = new RegExp(schema[p]);
+            } else {
+                pseudoSchema[p] = schema[p];
+            }
+
+        }
         return pseudoSchema;
     }
 
@@ -393,10 +401,10 @@ BrutusinForms.create = function (schema) {
 
 
     function populateSchemaMap(name, schema) {
+        var pseudoSchema = createPseudoSchema(schema);
+        schemaMap[name] = pseudoSchema;
         if (schema.type === "object") {
-            var pseudoSchema = createPseudoSchema(schema);
             pseudoSchema.properties = new Object();
-            schemaMap[name] = pseudoSchema;
             for (var prop in schema.properties) {
                 var childProp = name + "." + prop;
                 pseudoSchema.properties[prop] = childProp;
@@ -412,12 +420,8 @@ BrutusinForms.create = function (schema) {
                 }
             }
         } else if (schema.type === "array") {
-            var pseudoSchema = createPseudoSchema(schema);
             pseudoSchema.items = name + "[#]";
-            schemaMap[name] = pseudoSchema;
             populateSchemaMap(pseudoSchema.items, schema.items);
-        } else {
-            schemaMap[name] = schema;
         }
         if (schema.dependsOn) {
             var arr = new Array();
@@ -629,10 +633,50 @@ BrutusinForms.create = function (schema) {
                 if (s.required && !value) {
                     return BrutusinForms.messages["required"];
                 }
+                if (s.pattern && !s.pattern.test(value)) {
+                    return BrutusinForms.messages["pattern"].format(s.pattern.source);
+                }
+                if (s.minLength) {
+                    if (!value || s.minLength > value.length) {
+                        return BrutusinForms.messages["minLength"].format(s.minLength);
+                    }
+                }
+                if (s.maxLength) {
+                    if (value && s.maxLength < value.length) {
+                        return BrutusinForms.messages["maxLength"].format(s.maxLength);
+                    }
+                }
+                if (s.minLength) {
+                    if (!value || s.minLength > value.length) {
+                        return BrutusinForms.messages["minLength"].format(s.minLength);
+                    }
+                }
+                if (s.maxLength) {
+                    if (value && s.maxLength < value.length) {
+                        return BrutusinForms.messages["maxLength"].format(s.maxLength);
+                    }
+                }
+                if (s.multipleOf && !isNaN(value) && value % s.multipleOf !== 0) {
+                    return BrutusinForms.messages["multipleOf"].format(s.multipleOf);
+                }
+                if (s.hasOwnProperty("maximum")) {
+                    if (s.exclusiveMaximum && value >= s.maximum) {
+                        return BrutusinForms.messages["exclusiveMaximum"].format(s.maximum);
+                    } else if (!s.exclusiveMaximum && value > s.maximum) {
+                        return BrutusinForms.messages["maximum"].format(s.maximum);
+                    }
+                }
+                if (s.hasOwnProperty("minimum")) {
+                    if (s.exclusiveMinimum && value <= s.minimum) {
+                        return BrutusinForms.messages["exclusiveMinimum"].format(s.minimum);
+                    } else if (!s.exclusiveMinimum && value < s.minimum) {
+                        return BrutusinForms.messages["minimum"].format(s.minimum);
+                    }
+                }
             } catch (error) {
                 return BrutusinForms.messages["invalidValue"];
             }
-        }
+        };
 
         input.onchange = function () {
             var value;
@@ -648,6 +692,7 @@ BrutusinForms.create = function (schema) {
             }
             onDependecyChanged(schemaId);
         };
+
         if (s.description) {
             input.title = s.description;
             input.placeholder = s.description;
@@ -658,9 +703,7 @@ BrutusinForms.create = function (schema) {
 //        if (s.required) {
 //            input.required = true;
 //        }
-//        if (s.pattern) {
-//            input.pattern = s.pattern;
-//        }
+//       
 //        if (s.minimum) {
 //            input.min = s.minimum;
 //        }
@@ -698,6 +741,7 @@ BrutusinForms.create = function (schema) {
         input.onchange();
         appendChild(container, input, s);
     };
+
     function addAdditionalProperty(current, table, id, name, value) {
         var schemaId = getSchemaId(id);
         var s = getSchema(schemaId);
@@ -756,6 +800,7 @@ BrutusinForms.create = function (schema) {
             nameInput.value = null;
             pp.onchange(nameInput.previousValue);
         };
+
         appendChild(innerTd1, nameInput, s);
         appendChild(innerTd2, removeButton, s);
         appendChild(innerTr, innerTd1, s);
@@ -789,22 +834,26 @@ BrutusinForms.create = function (schema) {
         table.className = "object";
         var tbody = document.createElement("tbody");
         appendChild(table, tbody, s);
-        for (var prop in s.properties) {
-            var tr = document.createElement("tr");
-            var td1 = document.createElement("td");
-            td1.className = "prop-name";
-            var propId = id + "." + prop;
-            var td2 = document.createElement("td");
-            td2.className = "prop-value";
-            appendChild(tbody, tr, s);
-            appendChild(tr, td1, s);
-            appendChild(tr, td2, s);
-            var pp = createStaticPropertyProvider(prop);
-            var propInitialValue = null;
-            if (value) {
-                propInitialValue = value[prop];
+        var propNum = 0;
+        if (s.properties) {
+            propNum = s.properties.length;
+            for (var prop in s.properties) {
+                var tr = document.createElement("tr");
+                var td1 = document.createElement("td");
+                td1.className = "prop-name";
+                var propId = id + "." + prop;
+                var td2 = document.createElement("td");
+                td2.className = "prop-value";
+                appendChild(tbody, tr, s);
+                appendChild(tr, td1, s);
+                appendChild(tr, td2, s);
+                var pp = createStaticPropertyProvider(prop);
+                var propInitialValue = null;
+                if (value) {
+                    propInitialValue = value[prop];
+                }
+                render(td1, td2, propId, current, pp, propInitialValue);
             }
-            render(td1, td2, propId, current, pp, propInitialValue);
         }
         if (s.additionalProperties) {
             var addPropS = getSchema(s.additionalProperties);
@@ -814,6 +863,16 @@ BrutusinForms.create = function (schema) {
             addButton.onclick = function () {
                 addAdditionalProperty(current, table, id + "[*]");
             };
+            if (s.maxProperties || s.minProperties) {
+                addButton.getValidationError = function () {
+                    if (s.minProperties && propNum + table.rows.length < s.minProperties) {
+                        return BrutusinForms.messages["minProperties"].format(s.minProperties);
+                    }
+                    if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
+                        return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
+                    }
+                };
+            }
             if (addPropS.description) {
                 addButton.title = addPropS.description;
             }
