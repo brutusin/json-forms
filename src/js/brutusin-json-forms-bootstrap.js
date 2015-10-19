@@ -152,46 +152,52 @@ BrutusinForms.onValidationSuccess = function (element) {
     element.parentNode.className = element.parentNode.className.replace(" has-error", "");
 }
 BrutusinForms.onValidationError = function (element, message) {
-    var dataToggle = element.getAttribute("data-toggle");
-    var dataTrigger = element.getAttribute("data-trigger");
-    var dataContent = element.getAttribute("data-content");
-    var title = element.title;
-    element.setAttribute("data-toggle", "popover");
-    element.setAttribute("data-trigger", "focus");
-    if ("undefined" === typeof markdown) {
-        element.setAttribute("data-content", message);
-    } else {
-        element.setAttribute("data-content", markdown.toHTML(message));
-    }
 
-    element.title = "Validation error";
-    if (!element.parentNode.className.includes("has-error")) {
-        element.parentNode.className += " has-error";
-    }
-    $(element).popover({
-        placement: 'top',
-        container: 'body',
-        html: true
-    });
-    element.focus();
-    var onblur = element.onblur;
-    element.onblur = function () {
-        if (onblur) {
-            onblur();
-        }
-        if (dataToggle) {
-            element.setAttribute("data-toggle", dataToggle);
-            element.setAttribute("data-trigger", dataTrigger);
-            element.setAttribute("data-content", dataContent);
+    setTimeout(function () {
+        var dataToggle = element.getAttribute("data-toggle");
+        var dataTrigger = element.getAttribute("data-trigger");
+        var dataContent = element.getAttribute("data-content");
+        var title = element.title;
+        element.setAttribute("data-toggle", "popover");
+        element.setAttribute("data-trigger", "manual");
+        if ("undefined" === typeof markdown) {
+            element.setAttribute("data-content", message);
         } else {
-            element.removeAttribute("data-toggle");
-            element.removeAttribute("data-trigger");
-            element.removeAttribute("data-content");
-            $(element).popover('destroy');
+            element.setAttribute("data-content", markdown.toHTML(message));
         }
-        element.oblur = onblur;
-        if (title) {
+
+        element.title = "Validation error";
+        if (!element.parentNode.className.includes("has-error")) {
+            element.parentNode.className += " has-error";
+        }
+        element.focus();
+        $(element).popover({
+            placement: 'top',
+            container: 'body',
+            html: true
+        });
+        $(element).popover("show");
+        var onblur = element.onblur;
+        element.onblur = function (e) {
+            if (dataToggle) {
+                $(element).popover('hide');
+                element.setAttribute("data-toggle", dataToggle);
+                element.setAttribute("data-trigger", dataTrigger);
+                element.setAttribute("data-content", dataContent);
+            } else {
+                $(element).popover('destroy');
+                element.removeAttribute("data-toggle");
+                element.removeAttribute("data-trigger");
+                element.removeAttribute("data-content");
+            }
+
+            element.onblur = onblur;
             element.title = title;
+            if (onblur) {
+                console.log("blur blur")
+                onblur();
+            }
         }
-    }
+    },
+ 200);
 }
