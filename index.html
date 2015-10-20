@@ -34,7 +34,6 @@ f
             var title;
             var desc;
             var selectedDemo = parseInt(window.location.hash.substring(1));
-
             var demos = [
                 ["Dynamic schemas",
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"species": {"title": "Species supported", "description": "Changes in this property (`$.species`) trigger the resolution of the actual (depending on the values being selected) schema of a dependent property (`$.subspecies`)", "type": "string", "enum": ["human", "dog", "cat"], "required": true}, "subspecies": {"dependsOn": ["species"]}}},
