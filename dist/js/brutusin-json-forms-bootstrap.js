@@ -192,6 +192,9 @@ BrutusinForms.bootstrap.hideLoading = function (element) {
     }
 }
 
+BrutusinForms.onResolutionStarted=BrutusinForms.bootstrap.showLoading;
+BrutusinForms.onResolutionFinished=BrutusinForms.bootstrap.hideLoading;
+
 BrutusinForms.onValidationSuccess = function (element) {
     element.parentNode.className = element.parentNode.className.replace(" has-error", "");
 }

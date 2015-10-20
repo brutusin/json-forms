@@ -82,6 +82,12 @@ BrutusinForms.addDecorator = function (f) {
     BrutusinForms.decorators[BrutusinForms.decorators.length] = f;
 }
 
+BrutusinForms.onResolutionStarted = function (element) {
+}
+
+BrutusinForms.onResolutionFinished = function (element) {
+}
+
 BrutusinForms.onValidationError = function (element, message) {
     element.focus();
     if (!element.className.includes(" error")) {
@@ -549,18 +555,26 @@ BrutusinForms.create = function (schema) {
         if (!arr || !obj.schemaResolver) {
             return;
         }
-        var schemas = obj.schemaResolver(arr, obj.getData(), source);
-        for (var id in schemas) {
-            if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
-                cleanSchemaMap(id);
-                cleanData(id);
-                populateSchemaMap(id, schemas[id]);
-                var renderInfo = renderInfoMap[id];
-                if (renderInfo) {
-                    render(renderInfo.titleContainer, renderInfo.container, id, renderInfo.parentObject, renderInfo.propertyProvider, renderInfo.value);
+        var cb = function (schemas) {
+            if (schemas) {
+                for (var id in schemas) {
+                    if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
+                        cleanSchemaMap(id);
+                        cleanData(id);
+                        populateSchemaMap(id, schemas[id]);
+                        var renderInfo = renderInfoMap[id];
+                        if (renderInfo) {
+                            render(renderInfo.titleContainer, renderInfo.container, id, renderInfo.parentObject, renderInfo.propertyProvider, renderInfo.value);
+                        }
+                    }
                 }
             }
-        }
+            BrutusinForms.onResolutionFinished(source);
+        };
+        BrutusinForms.onResolutionStarted(source);
+        obj.schemaResolver(arr, obj.getData(), cb);
+
+
     }
 
     renderers["integer"] = function (container, id, parentObject, propertyProvider, value) {
