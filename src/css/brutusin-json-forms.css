@@ -15,13 +15,55 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
+.loading-layer{
+    position: absolute;
+    top:0px;
+    left:0px;
+    z-index : 10;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    background-color: white;
+}
+.loading-icon{
+    position: absolute;
+    top:14px;
+    left:50%;
+    z-index : 11;
+}
+.loading-icon-select{
+    position: absolute;
+    top:14px;
+    left:50%;
+    z-index : 11;
+}
+.loading-icon-checkbox{
+    position: absolute;
+    top:7px;
+    left:3px;
+    z-index : 11;
+}
+.glyphicon-refresh-animate {
+    animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
 form.brutusin-form table,input, select, textarea{
     width: 100% !important;
     min-width: 80px;
 }
 form.brutusin-form input[type=checkbox]{
     width: auto !important;
-    min-width: min-content !important;
+    min-width: auto !important;
 }
 form.brutusin-form  textarea{
     height: 8em;

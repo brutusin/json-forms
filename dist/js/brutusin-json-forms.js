@@ -544,12 +544,12 @@ BrutusinForms.create = function (schema) {
         return schemaMap[schemaId];
     }
 
-    function onDependecyChanged(name) {
+    function onDependecyChanged(name, source) {
         var arr = dependencyMap[name];
         if (!arr || !obj.schemaResolver) {
             return;
         }
-        var schemas = obj.schemaResolver(arr, obj.getData());
+        var schemas = obj.schemaResolver(arr, obj.getData(), source);
         for (var id in schemas) {
             if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
                 cleanSchemaMap(id);
@@ -686,7 +686,7 @@ BrutusinForms.create = function (schema) {
             } else {
                 data = value;
             }
-            onDependecyChanged(schemaId);
+            onDependecyChanged(schemaId, input);
         };
 
         if (s.description) {
@@ -724,7 +724,7 @@ BrutusinForms.create = function (schema) {
             } else {
                 data = getValue(s, input);
             }
-            onDependecyChanged(schemaId);
+            onDependecyChanged(schemaId, input);
         };
         if (value === true) {
             input.checked = true;

@@ -147,6 +147,50 @@ BrutusinForms.bootstrap.addFormatDecorator = function (format, inputType, glyphi
         }
     });
 };
+BrutusinForms.bootstrap.showLoading = function (element) {
+    if (element && element.parentNode) {
+        var loadingId = element.id + "_loading";
+        var loadingLayerId = element.id + "_loading-layer";
+        var loading = document.getElementById(loadingId);
+        var loadingLayer = document.getElementById(loadingLayerId);
+        if (!loading) {
+            var tagName = element.tagName.toLowerCase();
+            element.parentNode.style.position = "relative";
+            loading = document.createElement("span");
+            loading.id = loadingId;
+            loading.className = "glyphicon glyphicon-refresh glyphicon-refresh-animate";
+            if (tagName === "select") {
+                loading.className += " loading-icon-select";
+            } else if (element.type === "checkbox") {
+                loading.className += " loading-icon-checkbox";
+            } else {
+                loading.className += " loading-icon";
+            }
+            element.parentNode.appendChild(loading);
+            loadingLayer = document.createElement("div");
+            loadingLayer.className = "loading-layer";
+            loadingLayer.appendChild(document.createTextNode(""));
+            loadingLayer.id = loadingLayerId;
+            element.parentNode.appendChild(loadingLayer);
+        }
+        loading.style.visibility = "visible";
+        loadingLayer.style.visibility = "visible";
+    }
+}
+BrutusinForms.bootstrap.hideLoading = function (element) {
+    if (element) {
+        var loadingId = element.id + "_loading";
+        var loadingLayerId = element.id + "_loading-layer";
+        var loading = document.getElementById(loadingId);
+        var loadingLayer = document.getElementById(loadingLayerId);
+        if (loading) {
+            loading.style.visibility = "hidden";
+        }
+        if (loadingLayer) {
+            loadingLayer.style.visibility = "hidden";
+        }
+    }
+}
 
 BrutusinForms.onValidationSuccess = function (element) {
     element.parentNode.className = element.parentNode.className.replace(" has-error", "");
@@ -199,5 +243,5 @@ BrutusinForms.onValidationError = function (element, message) {
             }
         }
     },
- 200);
+            200);
 }
