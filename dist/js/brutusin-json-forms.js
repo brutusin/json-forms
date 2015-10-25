@@ -648,7 +648,7 @@ if (typeof brutusin === "undefined") {
                 } else {
                     input.type = "text";
                 }
-                if (value !== null) {
+                if (value !== null && typeof value !== "undefined") {
                     input.value = value;
                 }
             }
