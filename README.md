@@ -40,6 +40,7 @@ Optionally, include the bootstrap extension (requires bootstrap):
 ```
 Create the javascript `BrutusinForms` instance, being `schema` a javascript `object` representing the schema structure:
 ```javascript
+var BrutusinForms = brutusin["json-forms"];
 var bf = BrutusinForms.create(schema);
 ```
 And finally, render the form inside a container, with optional JSON initial `data` preloaded:
