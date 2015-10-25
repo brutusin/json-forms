@@ -527,8 +527,14 @@ BrutusinForms.create = function (schema) {
         }
         if (schema.type === "integer") {
             value = parseInt(value);
+            if (!isFinite(value)) {
+                value = null;
+            }
         } else if (schema.type === "number") {
             value = parseFloat(value);
+            if (!isFinite(value)) {
+                value = null;
+            }
         } else if (schema.type === "boolean") {
             value = input.checked;
             if (!value) {
@@ -636,7 +642,7 @@ BrutusinForms.create = function (schema) {
             } else {
                 input.type = "text";
             }
-            if (value) {
+            if (value !== null) {
                 input.value = value;
             }
         }
@@ -646,10 +652,11 @@ BrutusinForms.create = function (schema) {
         input.getValidationError = function () {
             try {
                 var value = getValue(s, input);
-                if (s.required && !value) {
-                    return BrutusinForms.messages["required"];
-                }
-                if (value !== null) {
+                if (value === null) {
+                    if (s.required) {
+                        return BrutusinForms.messages["required"];
+                    }
+                } else {
                     if (s.pattern && !s.pattern.test(value)) {
                         return BrutusinForms.messages["pattern"].format(s.pattern.source);
                     }
@@ -1014,7 +1021,7 @@ BrutusinForms.create = function (schema) {
                 renderTitle(titleContainer, propertyProvider.getValue(), s);
             }
             if (!value) {
-                if (initialValue) {
+                if (initialValue !== null) {
                     value = getInitialValue(id);
                 } else {
                     value = s.default;
