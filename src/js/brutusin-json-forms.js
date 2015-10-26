@@ -1027,7 +1027,7 @@ if (typeof brutusin === "undefined") {
                     renderTitle(titleContainer, propertyProvider.getValue(), s);
                 }
                 if (!value) {
-                    if (initialValue !== null) {
+                    if (typeof initialValue !=="undefined" && initialValue !== null) {
                         value = getInitialValue(id);
                     } else {
                         value = s.default;
