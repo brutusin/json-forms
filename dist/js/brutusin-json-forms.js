@@ -522,6 +522,9 @@ if (typeof brutusin === "undefined") {
         }
 
         function getValue(schema, input) {
+            if (typeof input.getValue === "function") {
+                return input.getValue();
+            }
             var value;
             if (schema.enum) {
                 value = input.options[input.selectedIndex].value;
@@ -1027,7 +1030,7 @@ if (typeof brutusin === "undefined") {
                     renderTitle(titleContainer, propertyProvider.getValue(), s);
                 }
                 if (!value) {
-                    if (typeof initialValue !=="undefined" && initialValue !== null) {
+                    if (typeof initialValue !== "undefined" && initialValue !== null) {
                         value = getInitialValue(id);
                     } else {
                         value = s.default;
@@ -1068,6 +1071,10 @@ if (typeof brutusin === "undefined") {
             if (BrutusinForms.postRender) {
                 BrutusinForms.postRender(obj);
             }
+        };
+
+        obj.getRenderingContainer = function () {
+            return container;
         };
 
         function validate(element) {
