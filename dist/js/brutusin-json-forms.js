@@ -366,12 +366,20 @@ if (typeof brutusin === "undefined") {
                             if (!oldPropertyName) {
                                 oldPropertyName = keyForBlank;
                             }
-                            current[pp.getValue()] = current[oldPropertyName];
-                            delete current[oldPropertyName];
+                            if (oldPropertyName && current.hasOwnProperty(oldPropertyName)) {
+                                current[pp.getValue()] = current[oldPropertyName];
+                                delete current[oldPropertyName];
+                            }
                         });
 
                 nameInput.onblur = function () {
-                    validate(nameInput);
+                    var name = nameInput.value;
+                    var i = 1;
+                    while(current.hasOwnProperty(name)){
+                       name = nameInput.value + "("+i+")";
+                       i++;
+                    }
+                    nameInput.value = name;
                     if (nameInput.previousValue !== nameInput.value) {
                         pp.onchange(nameInput.previousValue);
                         nameInput.previousValue = nameInput.value;
