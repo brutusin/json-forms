@@ -363,6 +363,9 @@ if (typeof brutusin === "undefined") {
                             }
                         },
                         function (oldPropertyName) {
+                            if(pp.getValue()===oldPropertyName){
+                                return;
+                            }
                             if (!oldPropertyName) {
                                 oldPropertyName = keyForBlank;
                             }
@@ -373,14 +376,14 @@ if (typeof brutusin === "undefined") {
                         });
 
                 nameInput.onblur = function () {
-                    var name = nameInput.value;
-                    var i = 1;
-                    while(current.hasOwnProperty(name)){
-                       name = nameInput.value + "("+i+")";
-                       i++;
-                    }
-                    nameInput.value = name;
                     if (nameInput.previousValue !== nameInput.value) {
+                        var name = nameInput.value;
+                        var i = 1;
+                        while (nameInput.previousValue !== name && current.hasOwnProperty(name)) {
+                            name = nameInput.value + "(" + i + ")";
+                            i++;
+                        }
+                        nameInput.value = name;
                         pp.onchange(nameInput.previousValue);
                         nameInput.previousValue = nameInput.value;
                         return;

@@ -244,7 +244,6 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                 element.onblur = onblur;
                 element.title = title;
                 if (onblur) {
-                    console.log("blur blur")
                     onblur();
                 }
             }
