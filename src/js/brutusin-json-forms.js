@@ -320,7 +320,7 @@ if (typeof brutusin === "undefined") {
             var s = getSchema(schemaId);
             var input =  document.createElement("select");
 	    var display = document.createElement("div");
-	    display.innerHTML="selected object goes here";
+	    display.innerHTML="";
             var selectedIndex = 0;
             input.type = "select";
             input.schema = schemaId;
