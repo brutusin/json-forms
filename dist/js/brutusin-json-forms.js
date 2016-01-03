@@ -59,6 +59,7 @@ if (typeof brutusin === "undefined") {
 
     var BrutusinForms = new Object();
     BrutusinForms.messages = {
+        "validationError": "Validation error",
         "required": "This field is **required**",
         "invalidValue": "Invalid field value",
         "addpropNameExistent": "This property is already present in the object",

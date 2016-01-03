@@ -216,7 +216,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                 element.setAttribute("data-content", markdown.toHTML(message));
             }
 
-            element.title = "Validation error";
+            element.title = BrutusinForms.messages["validationError"];
             if (!element.parentNode.className.includes("has-error")) {
                 element.parentNode.className += " has-error";
             }
