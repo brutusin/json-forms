@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name=viewport content='width=560'>
-f
+        f
         <link rel="stylesheet" href='lib/bootstrap/css/bootstrap.min.css'/>
         <link rel="stylesheet" href="lib/codemirror/codemirror.css">
         <link rel="stylesheet" href="lib/bootstrap-select/css/bootstrap-select.min.css">
@@ -68,10 +68,15 @@ f
                     null,
                     "[Numeric validation](http://json-schema.org/latest/json-schema-validation.html#anchor13) supporting `multipleOf`, `minimum`, `maximum` and `exclusiveMinimum`, `exclusiveMaximum` "],
                 ["Additional properties",
-                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"fixed":{"description":"Object supporting schema-fixed additional properties","type":"object","maxProperties":2,"additionalProperties":{"description":"Fixed-schema additional property","type":"object","properties":{"name":{"type":"string"},"age":{"type":"string"}}}},"free":{"description":"Object supporting schema-free additional properties","type":"object","maxProperties":3,"additionalProperties":true}}},
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties", "type": "object", "maxProperties": 2, "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "maxProperties": 3, "additionalProperties": true}}},
                     null,
                     null,
-                    "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported. Also, notice the support of the validation keywords `minProperties` and `maxProperties`"]
+                    "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported. Also, notice the support of the validation keywords `minProperties` and `maxProperties`"],
+                ["oneOf example",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "title": "A number"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "title": "A string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]},
+                    null,
+                    null,
+                    "`oneOf` types support in schemas"]
             ];
             if (isNaN(selectedDemo) || selectedDemo < 0 || selectedDemo >= demos.length) {
                 selectedDemo = 0;
