@@ -86,13 +86,13 @@ if (typeof brutusin === "undefined") {
 
     BrutusinForms.addDecorator = function (f) {
         BrutusinForms.decorators[BrutusinForms.decorators.length] = f;
-    }
+    };
 
     BrutusinForms.onResolutionStarted = function (element) {
-    }
+    };
 
     BrutusinForms.onResolutionFinished = function (element) {
-    }
+    };
 
     BrutusinForms.onValidationError = function (element, message) {
         element.focus();
@@ -167,7 +167,7 @@ if (typeof brutusin === "undefined") {
                     var option = document.createElement("option");
                     var textNode = document.createTextNode("");
                     option.value = "";
-                    appendChild(option, textNode, s)
+                    appendChild(option, textNode, s);
                     appendChild(input, option, s);
                 }
                 var selectedIndex = 0;
@@ -318,31 +318,29 @@ if (typeof brutusin === "undefined") {
         renderers["oneOf"] = function (container, id, parentObject, propertyProvider, value) {
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
-            var input =  document.createElement("select");
-	    var display = document.createElement("div");
-	    display.innerHTML="selected object goes here";
-            var selectedIndex = 0;
+            var input = document.createElement("select");
+            var display = document.createElement("div");
+            display.innerHTML = "";
             input.type = "select";
             input.schema = schemaId;
-	    var noption = document.createElement("option");
-	    noption.value=null;
+            var noption = document.createElement("option");
+            noption.value = null;
             appendChild(input, noption, s);
-            for (var i = 0; i < s.oneOf.length; i++) {		
+            for (var i = 0; i < s.oneOf.length; i++) {
                 var option = document.createElement("option");
-		var propId = id + "."+i;
-		var ss = getSchema(propId);
+                var propId = id + "." + i;
+                var ss = getSchema(propId);
                 var textNode = document.createTextNode(ss.title);
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
-	    }
-	    input.onchange=function(){
-		render(null,display, id + "." + (input.selectedIndex-1), parentObject,propertyProvider,value) ;
-	    }
+            }
+            input.onchange = function () {
+                render(null, display, id + "." + (input.selectedIndex - 1), parentObject, propertyProvider, value);
+            };
             appendChild(container, input, s);
-            appendChild(container, display,s);
-
-	}
+            appendChild(container, display, s);
+        };
         renderers["object"] = function (container, id, parentObject, propertyProvider, value) {
 
             function createStaticPropertyProvider(propname) {
@@ -380,7 +378,7 @@ if (typeof brutusin === "undefined") {
                     if (!nameInput.value) {
                         return BrutusinForms.messages["addpropNameRequired"];
                     }
-                }
+                };
                 var pp = createPropertyProvider(
                         function () {
                             if (nameInput.value) {
@@ -390,7 +388,7 @@ if (typeof brutusin === "undefined") {
                             }
                         },
                         function (oldPropertyName) {
-                            if(pp.getValue()===oldPropertyName){
+                            if (pp.getValue() === oldPropertyName) {
                                 return;
                             }
                             if (!oldPropertyName) {
@@ -513,7 +511,7 @@ if (typeof brutusin === "undefined") {
                 appendChild(container, table, s);
             }
         };
-	// end of object renderer
+        // end of object renderer
         renderers["array"] = function (container, id, parentObject, propertyProvider, value) {
             function addItem(current, table, id, value) {
                 var schemaId = getSchemaId(id);
@@ -584,7 +582,7 @@ if (typeof brutusin === "undefined") {
                 if (s.maxItems && s.maxItems < table.rows.length) {
                     return BrutusinForms.messages["maxItems"].format(s.maxItems);
                 }
-            }
+            };
             addButton.onclick = function () {
                 addItem(current, table, id + "[#]", null);
             };
@@ -601,11 +599,11 @@ if (typeof brutusin === "undefined") {
             }
             appendChild(container, div, s);
         };
-	// end of array render
+        // end of array render
         /**
          * Renders the form inside the the container, with the specified data preloaded
          * @param {type} c container
-         * @param {type} initialValue json data
+         * @param {type} data json data
          * @returns {undefined}
          */
         obj.render = function (c, data) {
@@ -765,14 +763,14 @@ if (typeof brutusin === "undefined") {
                 populateSchemaMap(pseudoSchema.items, schema.items);
             } else if (schema.hasOwnProperty("oneOf")) {
                 pseudoSchema.oneOf = new Array();
-		pseudoSchema.type = "oneOf";
-		for (var i in schema.oneOf) {
-		    console.log(schema.oneOf[i]);
+                pseudoSchema.type = "oneOf";
+                for (var i in schema.oneOf) {
+                   // console.log(schema.oneOf[i]);
                     var childProp = name + "." + i;
                     pseudoSchema.oneOf[i] = childProp;
                     populateSchemaMap(childProp, schema.oneOf[i]);
-		}
-	    }
+                }
+            }
             if (schema.hasOwnProperty("dependsOn")) {
                 if (schema.dependsOn === null) {
                     schema.dependsOn = ["$"];
@@ -807,7 +805,7 @@ if (typeof brutusin === "undefined") {
             if (container) {
                 if (title) {
                     var titleLabel = document.createElement("label");
-                    if (schema.type != "any" && schema.type != "object" && schema.type != "array") {
+                    if (schema.type !== "any" && schema.type !== "object" && schema.type !== "array") {
                         titleLabel.htmlFor = getInputId();
                     }
                     var titleNode = document.createTextNode(title + ":");
@@ -860,7 +858,7 @@ if (typeof brutusin === "undefined") {
         }
 
         function render(titleContainer, container, id, parentObject, propertyProvider, value) {
-	    console.log(id);
+            //console.log(id);
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
             renderInfoMap[schemaId] = new Object();
@@ -871,7 +869,7 @@ if (typeof brutusin === "undefined") {
             renderInfoMap[schemaId].value = value;
             clear(titleContainer);
             clear(container);
-	    console.log(s.type,id,s);
+           // console.log(s.type, id, s);
             var r = renderers[s.type];
             if (r && !s.dependsOn) {
                 if (s.title) {
