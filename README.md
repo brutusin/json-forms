@@ -96,7 +96,7 @@ https://github.com/brutusin/json/issues
 
 - Ignacio del Valle Alles (<https://github.com/idelvall/>)
 
-Contributions are always welcome and greatly appreciated!
+[Contributions](CREDITS) are always welcome and greatly appreciated!
 
 ##License
 Apache License, Version 2.0
