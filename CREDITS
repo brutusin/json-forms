@@ -1,0 +1,6 @@
+Here are people who have contributed to development of json-forms
+(version numbers in brackets indicate release in which the problem was fixed)
+
+Omri Schwarz (ocschwar@github):
+#11: Add handling for the oneOf option for schemas
+(1.2.0)
