@@ -82,6 +82,7 @@
             var bf;
 
             function selectExample(selectedExampleIndex) {
+                document.getElementById("examples").selectedIndex = selectedExampleIndex;
                 input.schema = demos[selectedExampleIndex][1];
                 input.data = demos[selectedExampleIndex][2];
                 eval("input.resolver=" + demos[selectedExampleIndex][3]);
