@@ -72,7 +72,7 @@
                     null,
                     "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported. Also, notice the support of the validation keywords `minProperties` and `maxProperties`"],
                 ["oneOf example",
-                    {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "title": "A number"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "title": "A string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]},
+                    {"$schema":"http://json-schema.org/draft-03/schema#","oneOf":[{"type":"number","required":true,"multipleOf":3,"title":"A multiple of 3"},{"title":"An object","type":"object","properties":{"p1":{"type":"string","required":true,"title":"A required string"},"p2":{"type":"boolean","title":"A boolean"}}}]},
                     null,
                     null,
                     "`oneOf` types support in schemas"]
