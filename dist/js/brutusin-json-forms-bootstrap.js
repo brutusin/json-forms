@@ -28,7 +28,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
 
 (function () {
     var BrutusinForms = brutusin["json-forms"];
-    
+
 // Basic bootstrap css
     BrutusinForms.addDecorator(function (element, schema) {
         if (element.tagName) {
@@ -38,7 +38,13 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
             } else if (tagName === "select") {
                 element.className += " chosen-select form-control";
             } else if (tagName === "button") {
-                element.className += "btn btn-primary  btn-xs";
+                if (element.className === "remove") {
+                    element.className += " glyphicon glyphicon-remove-circle";
+                    while (element.firstChild) {
+                        element.removeChild(element.firstChild);
+                    }
+                }
+                element.className += " btn btn-primary  btn-xs";
             } else if (tagName === "form") {
                 element.className += " form-inline";
             }

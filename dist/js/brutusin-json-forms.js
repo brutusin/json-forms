@@ -416,6 +416,7 @@ if (typeof brutusin === "undefined") {
                     }
                 };
                 var removeButton = document.createElement("button");
+                removeButton.className = "remove";
                 appendChild(removeButton, document.createTextNode("x"), s);
                 removeButton.onclick = function () {
                     delete current[nameInput.value];
@@ -766,7 +767,7 @@ if (typeof brutusin === "undefined") {
                 pseudoSchema.oneOf = new Array();
                 pseudoSchema.type = "oneOf";
                 for (var i in schema.oneOf) {
-                   // console.log(schema.oneOf[i]);
+                    // console.log(schema.oneOf[i]);
                     var childProp = name + "." + i;
                     pseudoSchema.oneOf[i] = childProp;
                     populateSchemaMap(childProp, schema.oneOf[i]);
@@ -870,7 +871,7 @@ if (typeof brutusin === "undefined") {
             renderInfoMap[schemaId].value = value;
             clear(titleContainer);
             clear(container);
-           // console.log(s.type, id, s);
+            // console.log(s.type, id, s);
             var r = renderers[s.type];
             if (r && !s.dependsOn) {
                 if (s.title) {
