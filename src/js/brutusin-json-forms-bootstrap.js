@@ -50,6 +50,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
             }
         }
     });
+    
 
 // Description help icon
     BrutusinForms.addDecorator(function (element, schema) {
