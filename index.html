@@ -236,7 +236,7 @@
 
 
         <script lang="javascript">
-
+            route();
             codeMirrors["schema"] = CodeMirror(document.getElementById("schema"), {
                 value: JSON.stringify(demos[selectedDemo][1], null, 4),
                 mode: "javascript",
@@ -259,7 +259,7 @@
                 codeMirrors[selectedTab].setValue(inputString[selectedTab]);
             }
             );
-            route();
+
         </script>
     </div>
 </body>
