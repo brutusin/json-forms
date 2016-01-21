@@ -528,6 +528,7 @@ if (typeof brutusin === "undefined") {
                 var td3 = document.createElement("td");
                 td3.className = "item-value";
                 var removeButton = document.createElement("button");
+                removeButton.className = "remove";
                 appendChild(removeButton, document.createTextNode("x"), s);
                 var computRowCount = function () {
                     for (var i = 0; i < table.rows.length; i++) {
