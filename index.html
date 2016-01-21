@@ -183,7 +183,7 @@
                     <div id="collapseInput" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                         <div class="panel-body">
                             <label for="examples">Predefined examples:</label>
-                            <select class="form-control" id="examples" onchange="selectExample(this.selectedIndex)">
+                            <select class="form-control" id="examples" onchange="document.location.hash = this.selectedIndex;">
                                 <script>
                                     for (var i = 0; i < demos.length; i++) {
                                         document.write("<option " + (selectedDemo === i ? "selected=true" : "") + ">" + demos[i][0] + "</option>");
