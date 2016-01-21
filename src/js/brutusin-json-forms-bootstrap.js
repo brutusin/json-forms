@@ -39,7 +39,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                 element.className += " chosen-select form-control";
             } else if (tagName === "button") {
                 if (element.className === "remove") {
-                    element.className += " glyphicon glyphicon-remove-circle";
+                    element.className += " glyphicon glyphicon-remove";
                     while (element.firstChild) {
                         element.removeChild(element.firstChild);
                     }
