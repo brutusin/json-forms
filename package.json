@@ -39,8 +39,8 @@
         "target": "git://github.com/brutusin/json-forms.git",
         "basePath": "/dist/",
         "files": [
-            "brutusin-jjson-forms.min.js",
-            "brutusin-jjson-forms.js",
+            "brutusin-json-forms.min.js",
+            "brutusin-json-forms.js",
             "brutusin-json-forms-bootstrap.js",
             "brutusin-json-forms-bootstrap.min.js",
             "brutusin-json-forms-jsonsrv.js",
