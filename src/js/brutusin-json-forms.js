@@ -416,6 +416,7 @@ if (typeof brutusin === "undefined") {
                     }
                 };
                 var removeButton = document.createElement("button");
+                removeButton.setAttribute('type', 'button');
                 removeButton.className = "remove";
                 appendChild(removeButton, document.createTextNode("x"), s);
                 removeButton.onclick = function () {
@@ -482,6 +483,7 @@ if (typeof brutusin === "undefined") {
                 var div = document.createElement("div");
                 appendChild(div, table, s);
                 var addButton = document.createElement("button");
+                addButton.setAttribute('type', 'button');
                 addButton.onclick = function () {
                     addAdditionalProperty(current, table, id + "[*]");
                 };
@@ -528,6 +530,7 @@ if (typeof brutusin === "undefined") {
                 var td3 = document.createElement("td");
                 td3.className = "item-value";
                 var removeButton = document.createElement("button");
+                removeButton.setAttribute('type', 'button');
                 removeButton.className = "remove";
                 appendChild(removeButton, document.createTextNode("x"), s);
                 var computRowCount = function () {
@@ -578,6 +581,7 @@ if (typeof brutusin === "undefined") {
             appendChild(div, table, s);
             appendChild(container, div, s);
             var addButton = document.createElement("button");
+            addButton.setAttribute('type', 'button');
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
                     return BrutusinForms.messages["minItems"].format(s.minItems);
