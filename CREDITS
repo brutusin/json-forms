@@ -1,6 +1,10 @@
 Here are people who have contributed to development of json-forms
 (version numbers in brackets indicate release in which the problem was fixed)
 
+Matheus Graciano (graciano@github)
+#16: Propperly adding types to buttons
+(1.2.4)
+
 Volt220@github
 #15: Update brutusin-json-forms.css
 (1.2.3)
