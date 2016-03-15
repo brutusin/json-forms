@@ -75,7 +75,12 @@
                     {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]},
                     null,
                     null,
-                    "`oneOf` types support in schemas"]
+                    "`oneOf` types support in schemas"],
+                ["Textarea example",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"prop":{"type":"string","title":"A long text","format":"text","description":"A long text property whose input is rendered as `textarea`"}}},
+                    null,
+                    null,
+                    "`textarea` rendering for `string` schemas"]    
             ];
 
             var selectedTab = "schema";
