@@ -196,6 +196,8 @@ if (typeof brutusin === "undefined") {
                     }
                 } else if (s.format === "email") {
                     input.type = "email";
+                } else if (s.format === "text") {
+                    input = document.createElement("textarea");
                 } else {
                     input.type = "text";
                 }
