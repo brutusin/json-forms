@@ -135,9 +135,10 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                     if (glyphicon) {
                         var parent = element.parentNode;
                         var table = document.createElement("table");
+                        table.setAttribute("style", "border:none;margin:0");
                         var tr = document.createElement("tr");
                         var td1 = document.createElement("td");
-                        td1.setAttribute("style", "width:100%;border:none;margin:0");
+                        td1.setAttribute("style", "width:100%");
                         table.appendChild(tr);
                         tr.appendChild(td1);
                         parent.removeChild(element);
