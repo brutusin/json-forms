@@ -137,7 +137,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                         var table = document.createElement("table");
                         var tr = document.createElement("tr");
                         var td1 = document.createElement("td");
-                        td1.setAttribute("style", "width:100%");
+                        td1.setAttribute("style", "width:100%;border:none;margin:0");
                         table.appendChild(tr);
                         tr.appendChild(td1);
                         parent.removeChild(element);
@@ -147,7 +147,6 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                         tr.appendChild(td);
                         var searchButton = document.createElement("button");
                         searchButton.className = "btn btn-default glyphicon " + glyphicon;
-                        searchButton.title = "Select file";
                         searchButton.onclick = function () {
                             cb(element);
                         };

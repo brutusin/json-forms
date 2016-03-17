@@ -268,7 +268,7 @@ if (typeof brutusin === "undefined") {
                 } else {
                     data = value;
                 }
-                onDependecyChanged(schemaId, input);
+                onDependencyChanged(schemaId, input);
             };
 
             if (s.description) {
@@ -307,7 +307,7 @@ if (typeof brutusin === "undefined") {
                 } else {
                     data = getValue(s, input);
                 }
-                onDependecyChanged(schemaId, input);
+                onDependencyChanged(schemaId, input);
             };
             if (value === true) {
                 input.checked = true;
@@ -320,6 +320,7 @@ if (typeof brutusin === "undefined") {
             input.onchange();
             appendChild(container, input, s);
         };
+        
         renderers["oneOf"] = function (container, id, parentObject, propertyProvider, value) {
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
@@ -346,6 +347,7 @@ if (typeof brutusin === "undefined") {
             appendChild(container, input, s);
             appendChild(container, display, s);
         };
+        
         renderers["object"] = function (container, id, parentObject, propertyProvider, value) {
 
             function createStaticPropertyProvider(propname) {
@@ -641,7 +643,7 @@ if (typeof brutusin === "undefined") {
             }
             rendered = true;
             if (dependencyMap.hasOwnProperty("$")) {
-                onDependecyChanged("$");
+                onDependencyChanged("$");
             }
             if (BrutusinForms.postRender) {
                 BrutusinForms.postRender(obj);
@@ -966,7 +968,7 @@ if (typeof brutusin === "undefined") {
             return schemaMap[schemaId];
         }
 
-        function onDependecyChanged(name, source) {
+        function onDependencyChanged(name, source) {
             function cleanSchemaMap(schemaId) {
                 for (var prop in schemaMap) {
                     if (schemaId.startsWith(prop)) {
