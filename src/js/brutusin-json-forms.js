@@ -194,8 +194,8 @@ if (typeof brutusin === "undefined") {
                     if (typeof value !== "number") {
                         value = null;
                     }
-                } else if (s.format === "date") {
-                    input.type = "date";
+                } else if (s.format === "date-time") {
+                    input.type = "datetime";
                 } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
