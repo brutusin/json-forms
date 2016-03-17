@@ -195,7 +195,7 @@ if (typeof brutusin === "undefined") {
                         value = null;
                     }
                 } else if (s.format === "date-time") {
-                    input.type = "datetime";
+                    input.type = "datetime-local";
                 } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
