@@ -82,7 +82,12 @@
                     {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"prop1":{"type":"string","title":"A short string","description":"A short string property whose input is rendered as `input`"},"prop2":{"type":"string","title":"A long text","format":"text","description":"A long text property whose input is rendered as `textarea`"}}},
                     null,
                     null,
-                    "`textarea` rendering for `string` schemas"]    
+                    "`textarea` rendering for `string` schemas"],
+                ["Custom string formats",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"file":{"type":"string","format":"inputstream","description":"Using a custom format decorator with **glyphicon** via `addFormatDecorator(...)` of the bootstrap extension script"},"color":{"type":"string","format":"color","description":"Using a custom format decorator via `addFormatDecorator(...)` of the bootstrap extension script"},"date":{"type":"string","format":"date","description":"Using a custom format decorator with glyphicon via `addFormatDecorator(...)` of the bootstrap extension script"}}},
+                    null,
+                    null,
+                    "Input types can be chosen for custom `string` schema formats via `BrutusinForms.bootstrap.addFormatDecorator(...)`. See current registered decorators at this page source code."]   
             ];
 
             var selectedTab = "schema";
