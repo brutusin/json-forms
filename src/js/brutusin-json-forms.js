@@ -153,6 +153,8 @@ if (typeof brutusin === "undefined") {
         };
 
         renderers["string"] = function (container, id, parentObject, propertyProvider, value) {
+	    /// TODO change the handler for when there is a 'media'
+	    /// specifier so it becomes a file element. 
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
             var input;
@@ -161,6 +163,11 @@ if (typeof brutusin === "undefined") {
                 if (value) {
                     input.value = JSON.stringify(value, null, 4);
                 }
+	    } else if (s.media) {
+		input = document.createElement("input");
+		input.type = "file";
+                appendChild(input, option, s);
+		// TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
                 if (!s.required) {
