@@ -135,6 +135,7 @@ if (typeof brutusin === "undefined") {
         var initialValue;
         var inputCounter = 0;
         var formId = "BrutusinForms#" + BrutusinForms.instances.length;
+	//console.log(schema);
         populateSchemaMap("$", schema);
 
         validateDepencyMapIsAcyclic();
@@ -192,7 +193,10 @@ if (typeof brutusin === "undefined") {
                         }
                     }
                 }
-                input.selectedIndex = selectedIndex;
+		if (s.enum.length == 1)
+		    input.selectedIndex = 1;
+		else
+                    input.selectedIndex = selectedIndex;
             } else {
                 input = document.createElement("input");
                 if (s.type === "integer" || s.type === "number") {
@@ -343,6 +347,7 @@ if (typeof brutusin === "undefined") {
                 var option = document.createElement("option");
 		var propId = id + "."+i;
 		var ss = getSchema(propId);
+		//console.log(s,i,id,ss);
                 var textNode = document.createTextNode(ss.title);
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
@@ -761,12 +766,23 @@ if (typeof brutusin === "undefined") {
         function populateSchemaMap(name, schema) {
             var pseudoSchema = createPseudoSchema(schema);
             schemaMap[name] = pseudoSchema;
-            if (schema.type === "object") {
+
+            if (schema.hasOwnProperty("oneOf")) {
+                pseudoSchema.oneOf = new Array();
+		pseudoSchema.type = "oneOf";		
+		for (var i in schema.oneOf) {
+		    //console.log(schema.oneOf[i]);
+                    var childProp = name + "." + i;
+                    pseudoSchema.oneOf[i] = childProp;
+                    populateSchemaMap(childProp, schema.oneOf[i]);
+		}
+	    } else if (schema.type === "object") {
                 if (schema.properties) {
                     pseudoSchema.properties = new Object();
-                    for (var prop in schema.properties) {
+                    for (var prop in schema.properties) {			
                         var childProp = name + "." + prop;
                         pseudoSchema.properties[prop] = childProp;
+			console.log(prop,childProp,schema);
                         populateSchemaMap(childProp, schema.properties[prop]);
                     }
                 }
@@ -782,16 +798,7 @@ if (typeof brutusin === "undefined") {
             } else if (schema.type === "array") {
                 pseudoSchema.items = name + "[#]";
                 populateSchemaMap(pseudoSchema.items, schema.items);
-            } else if (schema.hasOwnProperty("oneOf")) {
-                pseudoSchema.oneOf = new Array();
-		pseudoSchema.type = "oneOf";
-		for (var i in schema.oneOf) {
-		    //console.log(schema.oneOf[i]);
-                    var childProp = name + "." + i;
-                    pseudoSchema.oneOf[i] = childProp;
-                    populateSchemaMap(childProp, schema.oneOf[i]);
-		}
-	    }
+            } 
             if (schema.hasOwnProperty("dependsOn")) {
                 if (schema.dependsOn === null) {
                     schema.dependsOn = ["$"];
