@@ -1,0 +1,22 @@
+Here are people who have contributed to development of json-forms:
+(version numbers in brackets indicate release in which the problem was fixed)
+
+Stephen J. Fuhry (fuhrysteve@github)
+#20: Add support for date format 
+(1.3.1)
+
+Matheus Graciano (graciano@github)
+#16: Propperly adding types to buttons
+(1.2.4)
+
+Volt220@github
+#15: Update brutusin-json-forms.css
+(1.2.3)
+
+Dirk Haage (e110c0@github)
+#14 Added version to package.json
+(1.2.1)
+
+Omri Schwarz (ocschwar@github):
+#11: Add handling for the oneOf option for schemas
+(1.2.0)

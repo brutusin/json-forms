@@ -28,7 +28,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
 
 (function () {
     var BrutusinForms = brutusin["json-forms"];
-    
+
 // Basic bootstrap css
     BrutusinForms.addDecorator(function (element, schema) {
         if (element.tagName) {
@@ -38,12 +38,19 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
             } else if (tagName === "select") {
                 element.className += " chosen-select form-control";
             } else if (tagName === "button") {
-                element.className += "btn btn-primary  btn-xs";
+                if (element.className === "remove") {
+                    element.className += " glyphicon glyphicon-remove";
+                    while (element.firstChild) {
+                        element.removeChild(element.firstChild);
+                    }
+                }
+                element.className += " btn btn-primary  btn-xs";
             } else if (tagName === "form") {
                 element.className += " form-inline";
             }
         }
     });
+    
 
 // Description help icon
     BrutusinForms.addDecorator(function (element, schema) {
@@ -128,9 +135,10 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                     if (glyphicon) {
                         var parent = element.parentNode;
                         var table = document.createElement("table");
+                        table.setAttribute("style", "border:none;margin:0");
                         var tr = document.createElement("tr");
                         var td1 = document.createElement("td");
-                        td1.setAttribute("style", "width:100%");
+                        td1.setAttribute("style", "width:100%; padding:0;padding-right:4px");
                         table.appendChild(tr);
                         tr.appendChild(td1);
                         parent.removeChild(element);
@@ -138,9 +146,9 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                         parent.appendChild(table);
                         var td = document.createElement("td");
                         tr.appendChild(td);
+                        td.setAttribute("style", "padding:0");
                         var searchButton = document.createElement("button");
                         searchButton.className = "btn btn-default glyphicon " + glyphicon;
-                        searchButton.title = "Select file";
                         searchButton.onclick = function () {
                             cb(element);
                         };
@@ -216,7 +224,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                 element.setAttribute("data-content", markdown.toHTML(message));
             }
 
-            element.title = "Validation error";
+            element.title = BrutusinForms.messages["validationError"];
             if (!element.parentNode.className.includes("has-error")) {
                 element.parentNode.className += " has-error";
             }

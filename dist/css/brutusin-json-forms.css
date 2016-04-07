@@ -57,7 +57,7 @@
     from { transform: scale(1) rotate(0deg);}
     to { transform: scale(1) rotate(360deg);}
 }
-form.brutusin-form table,input, select, textarea{
+form.brutusin-form table, form.brutusin-form input, form.brutusin-form select, form.brutusin-form textarea{
     width: 100% !important;
     min-width: 80px;
 }
