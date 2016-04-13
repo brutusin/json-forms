@@ -352,6 +352,8 @@ if (typeof brutusin === "undefined") {
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
+		if (value == undefined)
+		    continue;
 		if (value.hasOwnProperty("type")) {
 		    if (ss.hasOwnProperty("properties") ){
 			if (ss.properties.hasOwnProperty("type")){
@@ -816,7 +818,7 @@ if (typeof brutusin === "undefined") {
                     }
                 }
 		if (schema.hasOwnProperty("definitions")){
-		    console.log(schema.definitions);
+		    console.log("DEFS",schema.definitions);
 		    pseudoSchema.definitions = new Object();
 		    for (var def in schema.definitions){
 			continue;
