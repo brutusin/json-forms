@@ -353,7 +353,7 @@ if (typeof brutusin === "undefined") {
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
-		if (value == undefined)
+		/*		if (value == undefined)
 		    continue;
 		if (value.hasOwnProperty("type")) {
 		    if (ss.hasOwnProperty("properties") ){
@@ -364,7 +364,7 @@ if (typeof brutusin === "undefined") {
 				render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;			    }
 			}
 		    }
-		}
+		    }*/
 	    }
 	    input.onchange=function(){
 		render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;
