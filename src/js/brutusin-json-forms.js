@@ -353,9 +353,9 @@ if (typeof brutusin === "undefined") {
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
-		/*		if (value == undefined)
+		if (value == undefined)
 		    continue;
-		if (value.hasOwnProperty("type")) {
+		/*		if (value.hasOwnProperty("type")) {
 		    if (ss.hasOwnProperty("properties") ){
 			if (ss.properties.hasOwnProperty("type")){
 			    var tryit = getSchema(ss.properties.type);
@@ -509,6 +509,7 @@ if (typeof brutusin === "undefined") {
                     render(td1, td2, propId, current, pp, propInitialValue);
                 }
             }
+	    // TODO: handle complex additionalProperties type definitions. 
             if (s.additionalProperties) {
                 var addPropS = getSchema(s.additionalProperties);
                 var div = document.createElement("div");
@@ -818,7 +819,8 @@ if (typeof brutusin === "undefined") {
                 if (schema.additionalProperties) {
                     var childProp = name + "[*]";
                     pseudoSchema.additionalProperties = childProp;
-                    if (schema.additionalProperties.hasOwnProperty("type")) {
+                    if (schema.additionalProperties.hasOwnProperty("type")||
+			schema.additionalProperties.hasOwnProperty("oneOf")) {
                         populateSchemaMap(childProp, schema.additionalProperties);
                     } else {
                         populateSchemaMap(childProp, SCHEMA_ANY);
