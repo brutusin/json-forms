@@ -134,6 +134,7 @@ if (typeof brutusin === "undefined") {
         var error;
         var initialValue;
         var inputCounter = 0;
+	var root = schema;
         var formId = "BrutusinForms#" + BrutusinForms.instances.length;
 	//console.log(schema);
         populateSchemaMap("$", schema);
@@ -775,10 +776,16 @@ if (typeof brutusin === "undefined") {
             return pseudoSchema;
         }
 	function getDefinition(path) {
-	    // Translate the path to schema standard.
-	    // $/definitions/ from #/definitions/
-	    // fetch that schema.
-	    
+	    var newpath = "$"+path.substring(1);
+	    var parts = path.split('/');
+	    var def = root;
+	    for ( p in parts) {
+		if (p==0)
+		    continue;
+		def = def[parts[p]];
+
+	    }
+	    return def;	    
 	}
 
         function populateSchemaMap(name, schema) {
@@ -796,7 +803,8 @@ if (typeof brutusin === "undefined") {
 		}
 	    } else if (schema.hasOwnProperty("$ref")){
 		console.log("REFERENTIAL");
-		var newschema = getDefinition(schema["$ref"]);
+		var newSchema = getDefinition(schema["$ref"]);
+		console.log(name,newSchema,schemaMap);
 		populateSchemaMap(name,newSchema);
 	    } else if (schema.type === "object") {
                 if (schema.properties) {
@@ -804,7 +812,6 @@ if (typeof brutusin === "undefined") {
                     for (var prop in schema.properties) {			
                         var childProp = name + "." + prop;
                         pseudoSchema.properties[prop] = childProp;
-			//console.log(prop,childProp,schema);
                         populateSchemaMap(childProp, schema.properties[prop]);
                     }
                 }
@@ -817,16 +824,6 @@ if (typeof brutusin === "undefined") {
                         populateSchemaMap(childProp, SCHEMA_ANY);
                     }
                 }
-		if (schema.hasOwnProperty("definitions")){
-		    console.log("DEFS",schema.definitions);
-		    pseudoSchema.definitions = new Object();
-		    for (var def in schema.definitions){
-			continue;
-                        var childProp = name + "/" + prop;
-                        pseudoSchema.definitions[prop] = childProp;
-                        populateSchemaMap(childProp, schema.definitions[prop]);
-		    }
-		}
             } else if (schema.type === "array") {
                 pseudoSchema.items = name + "[#]";
                 populateSchemaMap(pseudoSchema.items, schema.items);
