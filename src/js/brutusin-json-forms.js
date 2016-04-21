@@ -136,7 +136,7 @@ if (typeof brutusin === "undefined") {
         var inputCounter = 0;
 	var root = schema;
         var formId = "BrutusinForms#" + BrutusinForms.instances.length;
-	//console.log(schema);
+	
         populateSchemaMap("$", schema);
 
         validateDepencyMapIsAcyclic();
@@ -348,14 +348,19 @@ if (typeof brutusin === "undefined") {
                 var option = document.createElement("option");
 		var propId = schemaId + "."+i;
 		var ss = getSchema(propId);
-		//console.log(s,i,id,ss,schemaMap,propId);
+		
                 var textNode = document.createTextNode(ss.title);
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
 		if (value == undefined)
 		    continue;
-		/*		if (value.hasOwnProperty("type")) {
+		/*
+This is a hack used to pre-select elements that have 
+a "type" string attribute. It is not standard, 
+but it is tested and works, so feel free to uncomment. 
+		  
+		if (value.hasOwnProperty("type")) {
 		    if (ss.hasOwnProperty("properties") ){
 			if (ss.properties.hasOwnProperty("type")){
 			    var tryit = getSchema(ss.properties.type);
@@ -364,7 +369,7 @@ if (typeof brutusin === "undefined") {
 				render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;			    }
 			}
 		    }
-		    }*/
+		}*/
 	    }
 	    input.onchange=function(){
 		render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;
@@ -385,8 +390,15 @@ if (typeof brutusin === "undefined") {
                 return ret;
             }
 
-            function addAdditionalProperty(current, table, id, name, value) {
-                var schemaId = getSchemaId(id);
+            function addAdditionalProperty(current, table, id, name, value,button) {
+		// XXX needs a regex argument.
+		// if defined, that needs to be the initial tet in the key field.
+		// if (re !=== undefined ) set attribute placeholder = re.
+		if (button != undefined) {
+		    var schemaId = getSchemaId(button.id);
+		} else {
+                    var schemaId = getSchemaId(id);
+		}
                 var s = getSchema(schemaId);
                 var tbody = table.tBodies[0];
                 var tr = document.createElement("tr");
@@ -456,18 +468,27 @@ if (typeof brutusin === "undefined") {
                     nameInput.value = null;
                     pp.onchange(nameInput.previousValue);
                 };
-
                 appendChild(innerTd1, nameInput, s);
                 appendChild(innerTd2, removeButton, s);
                 appendChild(innerTr, innerTd1, s);
                 appendChild(innerTr, innerTd2, s);
                 appendChild(innerTab, innerTr, s);
                 appendChild(td1, innerTab, s);
+		if (button !== undefined) {
+                    var secondTr = document.createElement("tr");
+                    var secondTd = document.createElement("td");
+                    appendChild(secondTd, document.createTextNode(button.pnp_pattern), s);
+                    appendChild(secondTr,secondTd, s);
+                    appendChild(innerTab,secondTr, s);
+		}
                 appendChild(tr, td1, s);
                 appendChild(tr, td2, s);
                 appendChild(tbody, tr, s);
                 appendChild(table, tbody, s);
-                render(null, td2, id, current, pp, value);
+		if (button !== undefined) 
+                    render(null, td2, button.id, current, pp, value);
+		else
+		    render(null, td2, id, current, pp, value);
                 if (name) {
                     nameInput.value = name;
                     nameInput.onblur();
@@ -509,39 +530,90 @@ if (typeof brutusin === "undefined") {
                     render(td1, td2, propId, current, pp, propInitialValue);
                 }
             }
-	    // TODO: handle complex additionalProperties type definitions. 
-            if (s.additionalProperties) {
-                var addPropS = getSchema(s.additionalProperties);
+	    var used_props = [];
+            if (s.patternProperties || s.additionalProperties) {
                 var div = document.createElement("div");
                 appendChild(div, table, s);
-                var addButton = document.createElement("button");
-		addButton.setAttribute('type', 'button');
-                addButton.onclick = function () {
-                    addAdditionalProperty(current, table, id + "[*]");
-                };
-                if (s.maxProperties || s.minProperties) {
-                    addButton.getValidationError = function () {
-                        if (s.minProperties && propNum + table.rows.length < s.minProperties) {
-                            return BrutusinForms.messages["minProperties"].format(s.minProperties);
-                        }
-                        if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
-                            return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
-                        }
+		if (s.patternProperties) {
+		    for (pattern in s.patternProperties) {
+			var PatProps = s.patternProperties[pattern];
+			var PatPropSchema = getSchema(PatProps);			
+			var patdiv = document.createElement("div");
+			var addButton = document.createElement("button");
+			addButton.setAttribute('type', 'button');
+			addButton.pnp_pattern= pattern.substr(0);
+			addButton.id = id+ "["+pattern+"]";
+			addButton.onclick = function () {
+			    addAdditionalProperty(current, table, id + "["+pattern+"]", undefined,undefined,this);
+			};
+			if (s.maxProperties || s.minProperties) {
+			    addButton.getValidationError = function () {
+				if (s.minProperties && propNum + table.rows.length < s.minProperties) {
+				    return BrutusinForms.messages["minProperties"].format(s.minProperties);
+				}
+				if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
+				    return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
+				}
+			    };
+			}
+			if (PatProps.description) {
+			    addButton.title = PatProps.description;
+			}
+			appendChild(addButton, document.createTextNode("Add "+pattern), s);
+			appendChild(patdiv, addButton, s);
+			if (value) {
+			    for (var p in value) {
+				if (s.properties.hasOwnProperty(p)) {
+				    continue;
+				}
+				var r = RegExp(pattern);
+				if (p.search(r)==-1 ){
+				    continue;
+				}
+				if (used_props.indexOf(p)!=-1){				    
+				    continue;
+				}
+				addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p]);
+				used_props.push(p);
+			    }
+			}
+			appendChild(div, patdiv, s);
+		    }
+		}
+		if (s.additionalProperties) {
+                    var addPropS = getSchema(s.additionalProperties);
+                    var addButton = document.createElement("button");
+		    addButton.setAttribute('type', 'button');
+                    addButton.onclick = function () {
+			addAdditionalProperty(current, table, id + "[*]", undefined);
                     };
-                }
-                if (addPropS.description) {
-                    addButton.title = addPropS.description;
-                }
-                appendChild(addButton, document.createTextNode("Add"), s);
-                appendChild(div, addButton, s);
-                if (value) {
-                    for (var p in value) {
-                        if (s.properties.hasOwnProperty(p)) {
-                            continue;
-                        }
-                        addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p]);
+                    if (s.maxProperties || s.minProperties) {
+			addButton.getValidationError = function () {
+                            if (s.minProperties && propNum + table.rows.length < s.minProperties) {
+				return BrutusinForms.messages["minProperties"].format(s.minProperties);
+                            }
+                            if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
+				return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
+                            }
+			};
                     }
-                }
+                    if (addPropS.description) {
+			addButton.title = addPropS.description;
+                    }
+                    appendChild(addButton, document.createTextNode("Add"), s);
+                    appendChild(div, addButton, s);
+                    if (value) {
+			for (var p in value) {
+                            if (s.properties.hasOwnProperty(p)) {
+				continue;
+                            }
+			    if (used_props.indexOf(p)!=-1){
+				continue;
+			    }
+                            addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p],undefined);
+			}
+                    }
+		}
                 appendChild(container, div, s);
             } else {
                 appendChild(container, table, s);
@@ -797,16 +869,14 @@ if (typeof brutusin === "undefined") {
                 pseudoSchema.oneOf = new Array();
 		pseudoSchema.type = "oneOf";		
 		for (var i in schema.oneOf) {
-		    console.log("ONEOF",name,schema.oneOf[i]);
                     var childProp = name + "." + i;
                     pseudoSchema.oneOf[i] = childProp;
                     populateSchemaMap(childProp, schema.oneOf[i]);
 		}
-	    } else if (schema.hasOwnProperty("$ref")){
-		console.log("REFERENTIAL");
+	    } else if (schema.hasOwnProperty("$ref")){		
 		var newSchema = getDefinition(schema["$ref"]);
-		console.log(name,newSchema,schemaMap);
 		populateSchemaMap(name,newSchema);
+		
 	    } else if (schema.type === "object") {
                 if (schema.properties) {
                     pseudoSchema.properties = new Object();
@@ -815,6 +885,21 @@ if (typeof brutusin === "undefined") {
                         pseudoSchema.properties[prop] = childProp;
                         populateSchemaMap(childProp, schema.properties[prop]);
                     }
+                }
+                if (schema.patternProperties) {
+		    pseudoSchema.patternProperties = new Object();
+		    for (pat in schema.patternProperties){
+			var patChildProp = name + "["+pat+"]";
+			pseudoSchema.patternProperties[pat] = patChildProp;
+			var s  =schema.patternProperties[pat];
+
+			if (s.hasOwnProperty("type")||
+			    s.hasOwnProperty("oneOf")) {
+                            populateSchemaMap(patChildProp, schema.patternProperties[pat]);
+			} else {
+                            populateSchemaMap(patChildProp, SCHEMA_ANY);
+			}
+		    }
                 }
                 if (schema.additionalProperties) {
                     var childProp = name + "[*]";
