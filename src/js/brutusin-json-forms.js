@@ -60,7 +60,7 @@ if (typeof brutusin === "undefined") {
     var BrutusinForms = new Object();
     BrutusinForms.messages = {
         "required": "This field is **required**",
-	"validationError": "Validation error",
+       "validationError": "Validation error",
         "invalidValue": "Invalid field value",
         "addpropNameExistent": "This property is already present in the object",
         "addpropNameRequired": "A name is required",
@@ -134,11 +134,12 @@ if (typeof brutusin === "undefined") {
         var error;
         var initialValue;
         var inputCounter = 0;
-	var root = schema;
+       var root = schema;
         var formId = "BrutusinForms#" + BrutusinForms.instances.length;
-	
+       
         populateSchemaMap("$", schema);
-
+	console.log(schemaMap);
+	    
         validateDepencyMapIsAcyclic();
 
         var renderers = new Object();
@@ -164,13 +165,15 @@ if (typeof brutusin === "undefined") {
             if (s.type === "any") {
                 input = document.createElement("textarea");
                 if (value) {
-                    input.value = JSON.stringify(value, null, 4);
+                    input.value = JSON.stringify(value, null, 4);		    
+		    if (s.readOnly)
+			input.disabled = true;
                 }
 	    } else if (s.media) {
 		input = document.createElement("input");
 		input.type = "file";
                 appendChild(input, option, s);
-		// TODO, encode the SOB properly.
+		// XXX TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
                 if (!s.required) {
@@ -187,11 +190,13 @@ if (typeof brutusin === "undefined") {
                     option.value = s.enum[i];
                     appendChild(option, textNode, s);
                     appendChild(input, option, s);
-                    if (value && s.enum[i] === value) {
+                    if (value && s.enum[i] === value) {			
                         selectedIndex = i;
                         if (!s.required) {
                             selectedIndex++;
                         }
+			if (s.readOnly)
+			    input.disabled = true;
                     }
                 }
 		if (s.enum.length == 1)
@@ -216,7 +221,11 @@ if (typeof brutusin === "undefined") {
                     input.type = "text";
                 }
                 if (value !== null && typeof value !== "undefined") {
+		    // readOnly?
                     input.value = value;
+		    if (s.readOnly)
+			input.disabled = true;
+
                 }
             }
             input.schema = schemaId;
@@ -355,11 +364,8 @@ if (typeof brutusin === "undefined") {
                 appendChild(input, option, s);
 		if (value == undefined)
 		    continue;
-		/*
-This is a hack used to pre-select elements that have 
-a "type" string attribute. It is not standard, 
-but it is tested and works, so feel free to uncomment. 
-		  
+		if (s.readOnly)
+		    input.disabled = true;
 		if (value.hasOwnProperty("type")) {
 		    if (ss.hasOwnProperty("properties") ){
 			if (ss.properties.hasOwnProperty("type")){
@@ -369,7 +375,7 @@ but it is tested and works, so feel free to uncomment.
 				render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;			    }
 			}
 		    }
-		}*/
+		}
 	    }
 	    input.onchange=function(){
 		render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;
@@ -391,9 +397,6 @@ but it is tested and works, so feel free to uncomment.
             }
 
             function addAdditionalProperty(current, table, id, name, value,button) {
-		// XXX needs a regex argument.
-		// if defined, that needs to be the initial tet in the key field.
-		// if (re !=== undefined ) set attribute placeholder = re.
 		if (button != undefined) {
 		    var schemaId = getSchemaId(button.id);
 		} else {
@@ -573,7 +576,7 @@ but it is tested and works, so feel free to uncomment.
 				if (used_props.indexOf(p)!=-1){				    
 				    continue;
 				}
-				addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p]);
+				addAdditionalProperty(current, table, id + "[" + pattern + "]", p, value[p]);
 				used_props.push(p);
 			    }
 			}
@@ -621,7 +624,7 @@ but it is tested and works, so feel free to uncomment.
         };
 	// end of object renderer
         renderers["array"] = function (container, id, parentObject, propertyProvider, value) {
-            function addItem(current, table, id, value) {
+            function addItem(current, table, id, value,readOnly) {
                 var schemaId = getSchemaId(id);
                 var s = getSchema(schemaId);
                 var tbody = document.createElement("tbody");
@@ -636,6 +639,8 @@ but it is tested and works, so feel free to uncomment.
                 var removeButton = document.createElement("button");
 		removeButton.setAttribute('type', 'button');
                 removeButton.className = "remove";
+		if (readOnly === true)
+		    removeButton.disabled=true;
                 appendChild(removeButton, document.createTextNode("x"), s);
                 var computRowCount = function () {
                     for (var i = 0; i < table.rows.length; i++) {
@@ -685,6 +690,8 @@ but it is tested and works, so feel free to uncomment.
             appendChild(div, table, s);
             appendChild(container, div, s);
             var addButton = document.createElement("button");
+	    if (s.readOnly)
+		addButton.disabled=true;
 	    addButton.setAttribute('type', 'button');
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
@@ -705,7 +712,7 @@ but it is tested and works, so feel free to uncomment.
             appendChild(div, addButton, s);
             if (value && value instanceof Array) {
                 for (var i = 0; i < value.length; i++) {
-                    addItem(current, table, id + "[" + i + "]", value[i]);
+                    addItem(current, table, id + "[" + i + "]", value[i],s.readOnly );
                 }
             }
             appendChild(container, div, s);
@@ -875,6 +882,7 @@ but it is tested and works, so feel free to uncomment.
 		}
 	    } else if (schema.hasOwnProperty("$ref")){		
 		var newSchema = getDefinition(schema["$ref"]);
+		//console.log("$REF",name,newSchema);
 		populateSchemaMap(name,newSchema);
 		
 	    } else if (schema.type === "object") {
@@ -893,7 +901,7 @@ but it is tested and works, so feel free to uncomment.
 			pseudoSchema.patternProperties[pat] = patChildProp;
 			var s  =schema.patternProperties[pat];
 
-			if (s.hasOwnProperty("type")||
+			if (s.hasOwnProperty("type")||s.hasOwnProperty("$ref")||
 			    s.hasOwnProperty("oneOf")) {
                             populateSchemaMap(patChildProp, schema.patternProperties[pat]);
 			} else {
@@ -1013,7 +1021,7 @@ but it is tested and works, so feel free to uncomment.
             renderInfoMap[schemaId].value = value;
             clear(titleContainer);
             clear(container);
-	    //console.log(s.type,id,s);
+	    //console.log(id,s,value);
             var r = renderers[s.type];
             if (r && !s.dependsOn) {
                 if (s.title) {
