@@ -59,8 +59,8 @@ if (typeof brutusin === "undefined") {
 
     var BrutusinForms = new Object();
     BrutusinForms.messages = {
+        "validationError": "Validation error",
         "required": "This field is **required**",
-       "validationError": "Validation error",
         "invalidValue": "Invalid field value",
         "addpropNameExistent": "This property is already present in the object",
         "addpropNameRequired": "A name is required",
@@ -134,12 +134,11 @@ if (typeof brutusin === "undefined") {
         var error;
         var initialValue;
         var inputCounter = 0;
-       var root = schema;
+        var root = schema;
         var formId = "BrutusinForms#" + BrutusinForms.instances.length;
-       
+
         populateSchemaMap("$", schema);
-	console.log(schemaMap);
-	    
+
         validateDepencyMapIsAcyclic();
 
         var renderers = new Object();
@@ -157,23 +156,23 @@ if (typeof brutusin === "undefined") {
         };
 
         renderers["string"] = function (container, id, parentObject, propertyProvider, value) {
-	    /// TODO change the handler for when there is a 'media'
-	    /// specifier so it becomes a file element. 
+            /// TODO change the handler for when there is a 'media'
+            /// specifier so it becomes a file element. 
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
             var input;
             if (s.type === "any") {
                 input = document.createElement("textarea");
                 if (value) {
-                    input.value = JSON.stringify(value, null, 4);		    
-		    if (s.readOnly)
-			input.disabled = true;
+                    input.value = JSON.stringify(value, null, 4);
+                    if (s.readOnly)
+                        input.disabled = true;
                 }
-	    } else if (s.media) {
-		input = document.createElement("input");
-		input.type = "file";
+            } else if (s.media) {
+                input = document.createElement("input");
+                input.type = "file";
                 appendChild(input, option, s);
-		// XXX TODO, encode the SOB properly.
+                // XXX TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
                 if (!s.required) {
@@ -190,18 +189,18 @@ if (typeof brutusin === "undefined") {
                     option.value = s.enum[i];
                     appendChild(option, textNode, s);
                     appendChild(input, option, s);
-                    if (value && s.enum[i] === value) {			
+                    if (value && s.enum[i] === value) {
                         selectedIndex = i;
                         if (!s.required) {
                             selectedIndex++;
                         }
-			if (s.readOnly)
-			    input.disabled = true;
+                        if (s.readOnly)
+                            input.disabled = true;
                     }
                 }
-		if (s.enum.length == 1)
-		    input.selectedIndex = 1;
-		else
+                if (s.enum.length === 1)
+                    input.selectedIndex = 1;
+                else
                     input.selectedIndex = selectedIndex;
             } else {
                 input = document.createElement("input");
@@ -211,9 +210,9 @@ if (typeof brutusin === "undefined") {
                     if (typeof value !== "number") {
                         value = null;
                     }
-		} else if (s.format === "date-time") {
+                } else if (s.format === "date-time") {
                     input.type = "datetime-local";
-		} else if (s.format === "email") {
+                } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
                     input = document.createElement("textarea");
@@ -221,10 +220,10 @@ if (typeof brutusin === "undefined") {
                     input.type = "text";
                 }
                 if (value !== null && typeof value !== "undefined") {
-		    // readOnly?
+                    // readOnly?
                     input.value = value;
-		    if (s.readOnly)
-			input.disabled = true;
+                    if (s.readOnly)
+                        input.disabled = true;
 
                 }
             }
@@ -341,49 +340,49 @@ if (typeof brutusin === "undefined") {
             input.onchange();
             appendChild(container, input, s);
         };
-	
+
         renderers["oneOf"] = function (container, id, parentObject, propertyProvider, value) {
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
-            var input =  document.createElement("select");
-	    var display = document.createElement("div");
-	    display.innerHTML="";
+            var input = document.createElement("select");
+            var display = document.createElement("div");
+            display.innerHTML = "";
             input.type = "select";
             input.schema = schemaId;
-	    var noption = document.createElement("option");
-	    noption.value=null;
+            var noption = document.createElement("option");
+            noption.value = null;
             appendChild(input, noption, s);
-            for (var i = 0; i < s.oneOf.length; i++) {		
+            for (var i = 0; i < s.oneOf.length; i++) {
                 var option = document.createElement("option");
-		var propId = schemaId + "."+i;
-		var ss = getSchema(propId);
-		
+                var propId = schemaId + "." + i;
+                var ss = getSchema(propId);
                 var textNode = document.createTextNode(ss.title);
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
-		if (value == undefined)
-		    continue;
-		if (s.readOnly)
-		    input.disabled = true;
-		if (value.hasOwnProperty("type")) {
-		    if (ss.hasOwnProperty("properties") ){
-			if (ss.properties.hasOwnProperty("type")){
-			    var tryit = getSchema(ss.properties.type);
-			    if (value.type == tryit.enum[0]){
-				input.selectedIndex = i+1;
-				render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;			    }
-			}
-		    }
-		}
-	    }
-	    input.onchange=function(){
-		render(null, display, id + "." + (input.selectedIndex-1), parentObject, propertyProvider, value) ;
-	    };
+                if (value === undefined)
+                    continue;
+                if (s.readOnly)
+                    input.disabled = true;
+                if (value.hasOwnProperty("type")) {
+                    if (ss.hasOwnProperty("properties")) {
+                        if (ss.properties.hasOwnProperty("type")) {
+                            var tryit = getSchema(ss.properties.type);
+                            if (value.type === tryit.enum[0]) {
+                                input.selectedIndex = i + 1;
+                                render(null, display, id + "." + (input.selectedIndex - 1), parentObject, propertyProvider, value);
+                            }
+                        }
+                    }
+                }
+            }
+            input.onchange = function () {
+                render(null, display, id + "." + (input.selectedIndex - 1), parentObject, propertyProvider, value);
+            };
             appendChild(container, input, s);
-            appendChild(container, display,s);
+            appendChild(container, display, s);
 
-	};
+        };
         renderers["object"] = function (container, id, parentObject, propertyProvider, value) {
 
             function createStaticPropertyProvider(propname) {
@@ -396,12 +395,13 @@ if (typeof brutusin === "undefined") {
                 return ret;
             }
 
-            function addAdditionalProperty(current, table, id, name, value,button) {
-		if (button != undefined) {
-		    var schemaId = getSchemaId(button.id);
-		} else {
-                    var schemaId = getSchemaId(id);
-		}
+            function addAdditionalProperty(current, table, id, name, value, button) {
+                var schemaId;
+                if (button !== undefined) {
+                    schemaId = getSchemaId(button.id);
+                } else {
+                    schemaId = getSchemaId(id);
+                }
                 var s = getSchema(schemaId);
                 var tbody = table.tBodies[0];
                 var tr = document.createElement("tr");
@@ -421,11 +421,11 @@ if (typeof brutusin === "undefined") {
                         if (current.hasOwnProperty(nameInput.value)) {
                             return BrutusinForms.messages["addpropNameExistent"];
                         }
-                    };
+                    }
                     if (!nameInput.value) {
                         return BrutusinForms.messages["addpropNameRequired"];
-                    };
-                }
+                    }
+                };
                 var pp = createPropertyProvider(
                         function () {
                             if (nameInput.value) {
@@ -435,7 +435,7 @@ if (typeof brutusin === "undefined") {
                             }
                         },
                         function (oldPropertyName) {
-                            if (pp.getValue() === oldPropertyName){
+                            if (pp.getValue() === oldPropertyName) {
                                 return;
                             }
                             if (!oldPropertyName) {
@@ -477,21 +477,21 @@ if (typeof brutusin === "undefined") {
                 appendChild(innerTr, innerTd2, s);
                 appendChild(innerTab, innerTr, s);
                 appendChild(td1, innerTab, s);
-		if (button !== undefined) {
+                if (button !== undefined) {
                     var secondTr = document.createElement("tr");
                     var secondTd = document.createElement("td");
                     appendChild(secondTd, document.createTextNode(button.pnp_pattern), s);
-                    appendChild(secondTr,secondTd, s);
-                    appendChild(innerTab,secondTr, s);
-		}
+                    appendChild(secondTr, secondTd, s);
+                    appendChild(innerTab, secondTr, s);
+                }
                 appendChild(tr, td1, s);
                 appendChild(tr, td2, s);
                 appendChild(tbody, tr, s);
                 appendChild(table, tbody, s);
-		if (button !== undefined) 
+                if (button !== undefined)
                     render(null, td2, button.id, current, pp, value);
-		else
-		    render(null, td2, id, current, pp, value);
+                else
+                    render(null, td2, id, current, pp, value);
                 if (name) {
                     nameInput.value = name;
                     nameInput.onblur();
@@ -533,98 +533,97 @@ if (typeof brutusin === "undefined") {
                     render(td1, td2, propId, current, pp, propInitialValue);
                 }
             }
-	    var used_props = [];
+            var usedProps = [];
             if (s.patternProperties || s.additionalProperties) {
                 var div = document.createElement("div");
                 appendChild(div, table, s);
-		if (s.patternProperties) {
-		    for (pattern in s.patternProperties) {
-			var PatProps = s.patternProperties[pattern];
-			var PatPropSchema = getSchema(PatProps);			
-			var patdiv = document.createElement("div");
-			var addButton = document.createElement("button");
-			addButton.setAttribute('type', 'button');
-			addButton.pnp_pattern= pattern.substr(0);
-			addButton.id = id+ "["+pattern+"]";
-			addButton.onclick = function () {
-			    addAdditionalProperty(current, table, id + "["+pattern+"]", undefined,undefined,this);
-			};
-			if (s.maxProperties || s.minProperties) {
-			    addButton.getValidationError = function () {
-				if (s.minProperties && propNum + table.rows.length < s.minProperties) {
-				    return BrutusinForms.messages["minProperties"].format(s.minProperties);
-				}
-				if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
-				    return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
-				}
-			    };
-			}
-			if (PatProps.description) {
-			    addButton.title = PatProps.description;
-			}
-			appendChild(addButton, document.createTextNode("Add "+pattern), s);
-			appendChild(patdiv, addButton, s);
-			if (value) {
-			    for (var p in value) {
-				if (s.properties.hasOwnProperty(p)) {
-				    continue;
-				}
-				var r = RegExp(pattern);
-				if (p.search(r)==-1 ){
-				    continue;
-				}
-				if (used_props.indexOf(p)!=-1){				    
-				    continue;
-				}
-				addAdditionalProperty(current, table, id + "[" + pattern + "]", p, value[p]);
-				used_props.push(p);
-			    }
-			}
-			appendChild(div, patdiv, s);
-		    }
-		}
-		if (s.additionalProperties) {
+                if (s.patternProperties) {
+                    for (var pattern in s.patternProperties) {
+                        var patProps = s.patternProperties[pattern];
+                        var patdiv = document.createElement("div");
+                        var addButton = document.createElement("button");
+                        addButton.setAttribute('type', 'button');
+                        addButton.pnp_pattern = pattern.substr(0);
+                        addButton.id = id + "[" + pattern + "]";
+                        addButton.onclick = function () {
+                            addAdditionalProperty(current, table, id + "[" + pattern + "]", undefined, undefined, this);
+                        };
+                        if (s.maxProperties || s.minProperties) {
+                            addButton.getValidationError = function () {
+                                if (s.minProperties && propNum + table.rows.length < s.minProperties) {
+                                    return BrutusinForms.messages["minProperties"].format(s.minProperties);
+                                }
+                                if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
+                                    return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
+                                }
+                            };
+                        }
+                        if (patProps.description) {
+                            addButton.title = patProps.description;
+                        }
+                        appendChild(addButton, document.createTextNode("Add " + pattern), s);
+                        appendChild(patdiv, addButton, s);
+                        if (value) {
+                            for (var p in value) {
+                                if (s.properties.hasOwnProperty(p)) {
+                                    continue;
+                                }
+                                var r = RegExp(pattern);
+                                if (p.search(r) === -1) {
+                                    continue;
+                                }
+                                if (usedProps.indexOf(p) !== -1) {
+                                    continue;
+                                }
+                                addAdditionalProperty(current, table, id + "[" + pattern + "]", p, value[p]);
+                                usedProps.push(p);
+                            }
+                        }
+                        appendChild(div, patdiv, s);
+                    }
+                }
+                if (s.additionalProperties) {
                     var addPropS = getSchema(s.additionalProperties);
                     var addButton = document.createElement("button");
-		    addButton.setAttribute('type', 'button');
+                    addButton.setAttribute('type', 'button');
                     addButton.onclick = function () {
-			addAdditionalProperty(current, table, id + "[*]", undefined);
+                        addAdditionalProperty(current, table, id + "[*]", undefined);
                     };
                     if (s.maxProperties || s.minProperties) {
-			addButton.getValidationError = function () {
+                        addButton.getValidationError = function () {
                             if (s.minProperties && propNum + table.rows.length < s.minProperties) {
-				return BrutusinForms.messages["minProperties"].format(s.minProperties);
+                                return BrutusinForms.messages["minProperties"].format(s.minProperties);
                             }
                             if (s.maxProperties && propNum + table.rows.length > s.maxProperties) {
-				return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
+                                return BrutusinForms.messages["maxProperties"].format(s.maxProperties);
                             }
-			};
+                        };
                     }
                     if (addPropS.description) {
-			addButton.title = addPropS.description;
+                        addButton.title = addPropS.description;
                     }
                     appendChild(addButton, document.createTextNode("Add"), s);
                     appendChild(div, addButton, s);
                     if (value) {
-			for (var p in value) {
+                        for (var p in value) {
                             if (s.properties.hasOwnProperty(p)) {
-				continue;
+                                continue;
                             }
-			    if (used_props.indexOf(p)!=-1){
-				continue;
-			    }
-                            addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p],undefined);
-			}
+                            if (usedProps.indexOf(p) !== -1) {
+                                continue;
+                            }
+                            addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p], undefined);
+                        }
                     }
-		}
+                }
                 appendChild(container, div, s);
             } else {
                 appendChild(container, table, s);
             }
         };
-	// end of object renderer
+        // end of object renderer
         renderers["array"] = function (container, id, parentObject, propertyProvider, value) {
-            function addItem(current, table, id, value,readOnly) {
+            function addItem(current, table, id, value, readOnly) {
                 var schemaId = getSchemaId(id);
                 var s = getSchema(schemaId);
                 var tbody = document.createElement("tbody");
@@ -637,10 +636,10 @@ if (typeof brutusin === "undefined") {
                 var td3 = document.createElement("td");
                 td3.className = "item-value";
                 var removeButton = document.createElement("button");
-		removeButton.setAttribute('type', 'button');
+                removeButton.setAttribute('type', 'button');
                 removeButton.className = "remove";
-		if (readOnly === true)
-		    removeButton.disabled=true;
+                if (readOnly === true)
+                    removeButton.disabled = true;
                 appendChild(removeButton, document.createTextNode("x"), s);
                 var computRowCount = function () {
                     for (var i = 0; i < table.rows.length; i++) {
@@ -690,9 +689,9 @@ if (typeof brutusin === "undefined") {
             appendChild(div, table, s);
             appendChild(container, div, s);
             var addButton = document.createElement("button");
-	    if (s.readOnly)
-		addButton.disabled=true;
-	    addButton.setAttribute('type', 'button');
+            if (s.readOnly)
+                addButton.disabled = true;
+            addButton.setAttribute('type', 'button');
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
                     return BrutusinForms.messages["minItems"].format(s.minItems);
@@ -712,17 +711,16 @@ if (typeof brutusin === "undefined") {
             appendChild(div, addButton, s);
             if (value && value instanceof Array) {
                 for (var i = 0; i < value.length; i++) {
-                    addItem(current, table, id + "[" + i + "]", value[i],s.readOnly );
+                    addItem(current, table, id + "[" + i + "]", value[i], s.readOnly);
                 }
             }
             appendChild(container, div, s);
         };
-	// end of array render
+        // end of array render
         /**
          * Renders the form inside the the container, with the specified data preloaded
          * @param {type} c container
          * @param {type} data json data
-         * @param {type} initialValue json data
          * @returns {undefined}
          */
         obj.render = function (c, data) {
@@ -855,18 +853,17 @@ if (typeof brutusin === "undefined") {
             }
             return pseudoSchema;
         }
-	function getDefinition(path) {
-	    var newpath = "$"+path.substring(1);
-	    var parts = path.split('/');
-	    var def = root;
-	    for ( p in parts) {
-		if (p==0)
-		    continue;
-		def = def[parts[p]];
+        function getDefinition(path) {
+            var parts = path.split('/');
+            var def = root;
+            for (var p in parts) {
+                if (p === 0)
+                    continue;
+                def = def[parts[p]];
 
-	    }
-	    return def;	    
-	}
+            }
+            return def;
+        }
 
         function populateSchemaMap(name, schema) {
             var pseudoSchema = createPseudoSchema(schema);
@@ -874,46 +871,46 @@ if (typeof brutusin === "undefined") {
 
             if (schema.hasOwnProperty("oneOf")) {
                 pseudoSchema.oneOf = new Array();
-		pseudoSchema.type = "oneOf";		
-		for (var i in schema.oneOf) {
+                pseudoSchema.type = "oneOf";
+                for (var i in schema.oneOf) {
                     var childProp = name + "." + i;
                     pseudoSchema.oneOf[i] = childProp;
                     populateSchemaMap(childProp, schema.oneOf[i]);
-		}
-	    } else if (schema.hasOwnProperty("$ref")){		
-		var newSchema = getDefinition(schema["$ref"]);
-		//console.log("$REF",name,newSchema);
-		populateSchemaMap(name,newSchema);
-		
-	    } else if (schema.type === "object") {
+                }
+            } else if (schema.hasOwnProperty("$ref")) {
+                var newSchema = getDefinition(schema["$ref"]);
+                //console.log("$REF",name,newSchema);
+                populateSchemaMap(name, newSchema);
+
+            } else if (schema.type === "object") {
                 if (schema.properties) {
                     pseudoSchema.properties = new Object();
-                    for (var prop in schema.properties) {			
+                    for (var prop in schema.properties) {
                         var childProp = name + "." + prop;
                         pseudoSchema.properties[prop] = childProp;
                         populateSchemaMap(childProp, schema.properties[prop]);
                     }
                 }
                 if (schema.patternProperties) {
-		    pseudoSchema.patternProperties = new Object();
-		    for (pat in schema.patternProperties){
-			var patChildProp = name + "["+pat+"]";
-			pseudoSchema.patternProperties[pat] = patChildProp;
-			var s  =schema.patternProperties[pat];
+                    pseudoSchema.patternProperties = new Object();
+                    for (var pat in schema.patternProperties) {
+                        var patChildProp = name + "[" + pat + "]";
+                        pseudoSchema.patternProperties[pat] = patChildProp;
+                        var s = schema.patternProperties[pat];
 
-			if (s.hasOwnProperty("type")||s.hasOwnProperty("$ref")||
-			    s.hasOwnProperty("oneOf")) {
+                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") ||
+                                s.hasOwnProperty("oneOf")) {
                             populateSchemaMap(patChildProp, schema.patternProperties[pat]);
-			} else {
+                        } else {
                             populateSchemaMap(patChildProp, SCHEMA_ANY);
-			}
-		    }
+                        }
+                    }
                 }
                 if (schema.additionalProperties) {
                     var childProp = name + "[*]";
                     pseudoSchema.additionalProperties = childProp;
-                    if (schema.additionalProperties.hasOwnProperty("type")||
-			schema.additionalProperties.hasOwnProperty("oneOf")) {
+                    if (schema.additionalProperties.hasOwnProperty("type") ||
+                            schema.additionalProperties.hasOwnProperty("oneOf")) {
                         populateSchemaMap(childProp, schema.additionalProperties);
                     } else {
                         populateSchemaMap(childProp, SCHEMA_ANY);
@@ -922,7 +919,7 @@ if (typeof brutusin === "undefined") {
             } else if (schema.type === "array") {
                 pseudoSchema.items = name + "[#]";
                 populateSchemaMap(pseudoSchema.items, schema.items);
-            } 
+            }
             if (schema.hasOwnProperty("dependsOn")) {
                 if (schema.dependsOn === null) {
                     schema.dependsOn = ["$"];
@@ -1010,7 +1007,7 @@ if (typeof brutusin === "undefined") {
         }
 
         function render(titleContainer, container, id, parentObject, propertyProvider, value) {
-	    //console.log(id);
+            //console.log(id);
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
             renderInfoMap[schemaId] = new Object();
@@ -1021,7 +1018,7 @@ if (typeof brutusin === "undefined") {
             renderInfoMap[schemaId].value = value;
             clear(titleContainer);
             clear(container);
-	    //console.log(id,s,value);
+            //console.log(id,s,value);
             var r = renderers[s.type];
             if (r && !s.dependsOn) {
                 if (s.title) {
@@ -1322,6 +1319,6 @@ if (typeof brutusin === "undefined") {
                 return ret;
             }
         }
-    }
+    };
     brutusin["json-forms"] = BrutusinForms;
 }());
