@@ -1,6 +1,10 @@
 Here are people who have contributed to development of json-forms:
 (version numbers in brackets indicate release in which the problem was fixed)
 
+Omri Schwarz (ocschwar@github):
+#23: $ref, definitions, fixed oneOf, patternProperties
+(1.4.0)
+
 Stephen J. Fuhry (fuhrysteve@github)
 #20: Add support for date format 
 (1.3.1)
