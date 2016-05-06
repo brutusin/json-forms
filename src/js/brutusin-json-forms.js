@@ -360,7 +360,7 @@ if (typeof brutusin === "undefined") {
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
-                if (value === undefined)
+                if (value === undefined || value === null)
                     continue;
                 if (s.readOnly)
                     input.disabled = true;
