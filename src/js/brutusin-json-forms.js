@@ -857,7 +857,7 @@ if (typeof brutusin === "undefined") {
             var parts = path.split('/');
             var def = root;
             for (var p in parts) {
-                if (p === 0)
+                if (p === "0")
                     continue;
                 def = def[parts[p]];
 
