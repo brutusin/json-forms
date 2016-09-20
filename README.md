@@ -88,7 +88,7 @@ Member|Description
 http://www.jsdelivr.com/projects/brutusin.json-forms
 
 ## Support bugs and requests
-https://github.com/brutusin/json/issues
+https://github.com/brutusin/json-forms/issues
 
 ## Authors
 
