@@ -606,7 +606,7 @@ if (typeof brutusin === "undefined") {
                     appendChild(div, addButton, s);
                     if (value) {
                         for (var p in value) {
-                            if (s.properties.hasOwnProperty(p)) {
+                            if (s.properties && s.properties.hasOwnProperty(p)) {
                                 continue;
                             }
                             if (usedProps.indexOf(p) !== -1) {

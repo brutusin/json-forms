@@ -360,7 +360,7 @@ if (typeof brutusin === "undefined") {
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
-                if (value === undefined)
+                if (value === undefined || value === null)
                     continue;
                 if (s.readOnly)
                     input.disabled = true;
@@ -606,7 +606,7 @@ if (typeof brutusin === "undefined") {
                     appendChild(div, addButton, s);
                     if (value) {
                         for (var p in value) {
-                            if (s.properties.hasOwnProperty(p)) {
+                            if (s.properties && s.properties.hasOwnProperty(p)) {
                                 continue;
                             }
                             if (usedProps.indexOf(p) !== -1) {
