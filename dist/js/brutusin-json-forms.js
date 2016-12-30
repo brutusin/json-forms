@@ -75,8 +75,8 @@ if (typeof brutusin === "undefined") {
         "maximum": "Value must be **lower or equal than** `{0}`",
         "exclusiveMaximum": "Value must be **lower than** `{0}`",
         "minProperties": "At least `{0}` properties are required",
-        "maxProperties": "At most `{0}` properties are allowed"
-
+        "maxProperties": "At most `{0}` properties are allowed",
+        "uniqueItems": "Array items must be unique"
     };
 
     /**
@@ -698,6 +698,15 @@ if (typeof brutusin === "undefined") {
                 }
                 if (s.maxItems && s.maxItems < table.rows.length) {
                     return BrutusinForms.messages["maxItems"].format(s.maxItems);
+                }
+                if (s.uniqueItems) {
+                    for (var i = 0; i < current.length; i++) {
+                        for (var j = i + 1; j < current.length; j++) {
+                            if (JSON.stringify(current[i]) === JSON.stringify(current[j])) {
+                                return BrutusinForms.messages["uniqueItems"];
+                            }
+                        }
+                    }
                 }
             };
             addButton.onclick = function () {
