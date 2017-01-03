@@ -800,30 +800,36 @@ if (typeof brutusin === "undefined") {
         };
 
         obj.getData = function () {
-            function removeEmptiesAndNulls(object) {
+            function removeEmptiesAndNulls(object, schema) {
                 if (object instanceof Array) {
                     if (object.length === 0) {
                         return null;
                     }
                     var clone = new Array();
                     for (var i = 0; i < object.length; i++) {
-                        clone[i] = removeEmptiesAndNulls(object[i]);
+                        clone[i] = removeEmptiesAndNulls(object[i], schema.items);
                     }
                     return clone;
                 } else if (object === "") {
                     return null;
                 } else if (object instanceof Object) {
                     var clone = new Object();
+                    var nonEmpty = false;
                     for (var prop in object) {
                         if (prop.startsWith("$") && prop.endsWith("$")) {
                             continue;
                         }
-                        var value = removeEmptiesAndNulls(object[prop]);
+                        var value = removeEmptiesAndNulls(object[prop], schema.properties[prop]);
                         if (value !== null) {
                             clone[prop] = value;
+                            nonEmpty = true;
                         }
                     }
-                    return clone;
+                    if (nonEmpty || schema.required) {
+                        return clone;
+                    } else {
+                        return null;
+                    }
                 } else {
                     return object;
                 }
@@ -831,8 +837,7 @@ if (typeof brutusin === "undefined") {
             if (!container) {
                 return null;
             } else {
-                return removeEmptiesAndNulls(data);
-                ;
+                return removeEmptiesAndNulls(data, schema);
             }
         };
 
