@@ -318,9 +318,39 @@ if (typeof brutusin === "undefined") {
         renderers["boolean"] = function (container, id, parentObject, propertyProvider, value) {
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
-            var input = document.createElement("input");
-            input.type = "checkbox";
-            input.schema = schemaId;
+            var input;
+            if (s.required) {
+                input = document.createElement("input");
+                input.type = "checkbox";
+                if (value === true) {
+                    input.checked = true;
+                }
+            } else {
+                input = document.createElement("select");
+                var emptyOption = document.createElement("option");
+                var textEmpty = document.createTextNode("");
+                textEmpty.value = "";
+                appendChild(emptyOption, textEmpty, s);
+                appendChild(input, emptyOption, s);
+
+                var optionTrue = document.createElement("option");
+                var textTrue = document.createTextNode("true");
+                textTrue.value = "true";
+                appendChild(optionTrue, textTrue, s);
+                appendChild(input, optionTrue, s);
+
+                var optionFalse = document.createElement("option");
+                var textFalse = document.createTextNode("false");
+                textFalse.value = "false";
+                appendChild(optionFalse, textFalse, s);
+                appendChild(input, optionFalse, s);
+
+                if (value === true) {
+                    input.selectedIndex = 1;
+                } else if (value === false) {
+                    input.selectedIndex = 2;
+                }
+            }
             input.onchange = function () {
                 if (parentObject) {
                     parentObject[propertyProvider.getValue()] = getValue(s, input);
@@ -329,9 +359,7 @@ if (typeof brutusin === "undefined") {
                 }
                 onDependencyChanged(schemaId, input);
             };
-            if (value === true) {
-                input.checked = true;
-            }
+            input.schema = schemaId;
             input.id = getInputId();
             inputCounter++;
             if (s.description) {
@@ -772,30 +800,36 @@ if (typeof brutusin === "undefined") {
         };
 
         obj.getData = function () {
-            function removeEmptiesAndNulls(object) {
+            function removeEmptiesAndNulls(object, schema) {
                 if (object instanceof Array) {
                     if (object.length === 0) {
                         return null;
                     }
                     var clone = new Array();
                     for (var i = 0; i < object.length; i++) {
-                        clone[i] = removeEmptiesAndNulls(object[i]);
+                        clone[i] = removeEmptiesAndNulls(object[i], schema.items);
                     }
                     return clone;
                 } else if (object === "") {
                     return null;
                 } else if (object instanceof Object) {
                     var clone = new Object();
+                    var nonEmpty = false;
                     for (var prop in object) {
                         if (prop.startsWith("$") && prop.endsWith("$")) {
                             continue;
                         }
-                        var value = removeEmptiesAndNulls(object[prop]);
+                        var value = removeEmptiesAndNulls(object[prop], schema.properties[prop]);
                         if (value !== null) {
                             clone[prop] = value;
+                            nonEmpty = true;
                         }
                     }
-                    return clone;
+                    if (nonEmpty || schema.required) {
+                        return clone;
+                    } else {
+                        return null;
+                    }
                 } else {
                     return object;
                 }
@@ -803,8 +837,7 @@ if (typeof brutusin === "undefined") {
             if (!container) {
                 return null;
             } else {
-                return removeEmptiesAndNulls(data);
-                ;
+                return removeEmptiesAndNulls(data, schema);
             }
         };
 
@@ -1093,9 +1126,19 @@ if (typeof brutusin === "undefined") {
                     value = null;
                 }
             } else if (schema.type === "boolean") {
-                value = input.checked;
-                if (!value) {
-                    value = false;
+                if (input.tagName.toLowerCase() === "input") {
+                    value = input.checked;
+                    if (!value) {
+                        value = false;
+                    }
+                } else if (input.tagName.toLowerCase() === "select") {
+                    if (input.value === "true") {
+                        value = true;
+                    } else if (input.value === "false") {
+                        value = false;
+                    } else {
+                        value = null;
+                    }
                 }
             } else if (schema.type === "any") {
                 if (value) {
