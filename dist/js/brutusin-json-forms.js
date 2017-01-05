@@ -211,7 +211,12 @@ if (typeof brutusin === "undefined") {
                         value = null;
                     }
                 } else if (s.format === "date-time") {
-                    input.type = "datetime-local";
+                    try {
+                        input.type = "datetime-local";
+                    } catch (err) {
+                        // #46, problem in IE11. TODO polyfill?
+                        input.type = "text";
+                    }
                 } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
