@@ -553,11 +553,13 @@ if (typeof brutusin === "undefined") {
                     var td1 = document.createElement("td");
                     td1.className = "prop-name";
                     var propId = id + "." + prop;
+                    var propSchema = getSchema(getSchemaId(propId));
                     var td2 = document.createElement("td");
                     td2.className = "prop-value";
-                    appendChild(tbody, tr, s);
-                    appendChild(tr, td1, s);
-                    appendChild(tr, td2, s);
+
+                    appendChild(tbody, tr, propSchema);
+                    appendChild(tr, td1, propSchema);
+                    appendChild(tr, td2, propSchema);
                     var pp = createStaticPropertyProvider(prop);
                     var propInitialValue = null;
                     if (value) {
@@ -900,6 +902,7 @@ if (typeof brutusin === "undefined") {
             }
             return pseudoSchema;
         }
+
         function getDefinition(path) {
             var parts = path.split('/');
             var def = root;
@@ -914,6 +917,7 @@ if (typeof brutusin === "undefined") {
 
         function populateSchemaMap(name, schema) {
             var pseudoSchema = createPseudoSchema(schema);
+            pseudoSchema["$id"] = name;
             schemaMap[name] = pseudoSchema;
 
             if (schema.hasOwnProperty("oneOf")) {
