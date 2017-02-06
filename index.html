@@ -104,7 +104,12 @@
                     {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string"}, "s2": {"type": "string", "readOnly": true}, "a1": {"type": "array", "items": {"type": "string"}}, "a2": {"type": "array", "items": {"type": "string"}, "readOnly": true}}},
                     {"s1": "foo", "s2": "bar", "a1": ["foo", "bar"], "a2": ["baz", "corge"]},
                     null,
-                    "[Read Only](http://json-schema.org/latest/json-schema-validation.html) Supporting greyed-out display of read-only elements"]
+                    "[Read Only](http://json-schema.org/latest/json-schema-validation.html) Supporting greyed-out display of read-only elements"],
+                 ["Required v3, v4+",
+                    {"type":"object","properties":{"prop1":{"type":"integer",},"prop2":{"type":"integer","required":true,},"prop3":{"type":"integer","required":true,}},"required":["prop1","prop2"]},
+                    null,
+                    null,
+                    "Required properties supported in both v3 and v4+ spec formats. Last one format takes preference. More info [here](https://github.com/brutusin/json-forms/issues/56)"]
             ];
 
             var selectedTab = "schema";
