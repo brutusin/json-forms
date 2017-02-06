@@ -915,6 +915,15 @@ if (typeof brutusin === "undefined") {
             return def;
         }
 
+        function containsStr(array, string) {
+            for (var i = 0; i < array.length; i++) {
+                if (array[i] == string) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         function populateSchemaMap(name, schema) {
             var pseudoSchema = createPseudoSchema(schema);
             pseudoSchema["$id"] = name;
@@ -936,10 +945,24 @@ if (typeof brutusin === "undefined") {
             } else if (schema.type === "object") {
                 if (schema.properties) {
                     pseudoSchema.properties = new Object();
+                    var requiredProperties;
+                    if (schema.hasOwnProperty("required")) {
+                        if (Array.isArray(schema.required)) {
+                            requiredProperties = schema.required;
+                        }
+                    }
                     for (var prop in schema.properties) {
                         var childProp = name + "." + prop;
                         pseudoSchema.properties[prop] = childProp;
-                        populateSchemaMap(childProp, schema.properties[prop]);
+                        var subSchema = schema.properties[prop];
+                        if (requiredProperties) {
+                            if (containsStr(requiredProperties, prop)) {
+                                subSchema.required = true;
+                            } else {
+                                subSchema.required = false;
+                            }
+                        }
+                        populateSchemaMap(childProp, subSchema);
                     }
                 }
                 if (schema.patternProperties) {
