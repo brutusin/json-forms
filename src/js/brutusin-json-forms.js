@@ -159,7 +159,9 @@ if (typeof brutusin === "undefined") {
             /// TODO change the handler for when there is a 'media'
             /// specifier so it becomes a file element. 
             var schemaId = getSchemaId(id);
+            var parentId = getParentSchemaId(schemaId);
             var s = getSchema(schemaId);
+            var parentSchema = getSchema(parentId);
             var input;
             if (s.type === "any") {
                 input = document.createElement("textarea");
@@ -240,7 +242,19 @@ if (typeof brutusin === "undefined") {
                     var value = getValue(s, input);
                     if (value === null) {
                         if (s.required) {
-                            return BrutusinForms.messages["required"];
+                            if (parentSchema && parentSchema.type === "object") {
+                                if (parentSchema.required) {
+                                    return BrutusinForms.messages["required"];
+                                } else {
+                                    for (var prop in parentObject) {
+                                        if (parentObject[prop] !== null) {
+                                            return BrutusinForms.messages["required"];
+                                        }
+                                    }
+                                }
+                            } else {
+                                return BrutusinForms.messages["required"];
+                            }
                         }
                     } else {
                         if (s.pattern && !s.pattern.test(value)) {
@@ -1182,6 +1196,10 @@ if (typeof brutusin === "undefined") {
 
         function getSchemaId(id) {
             return id.replace(/\["[^"]*"\]/g, "[*]").replace(/\[\d*\]/g, "[#]");
+        }
+
+        function getParentSchemaId(id) {
+            return id.substring(0, id.lastIndexOf("."));
         }
 
         function getSchema(schemaId) {
