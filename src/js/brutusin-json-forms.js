@@ -614,7 +614,7 @@ if (typeof brutusin === "undefined") {
                         appendChild(patdiv, addButton, s);
                         if (value) {
                             for (var p in value) {
-                              if (s.properties && s.properties.hasOwnProperty(p)) {
+                                if (s.properties && s.properties.hasOwnProperty(p)) {
                                     continue;
                                 }
                                 var r = RegExp(pattern);
