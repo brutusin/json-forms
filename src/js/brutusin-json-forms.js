@@ -614,7 +614,7 @@ if (typeof brutusin === "undefined") {
                         appendChild(patdiv, addButton, s);
                         if (value) {
                             for (var p in value) {
-                                if (s.properties.hasOwnProperty(p)) {
+                              if (s.properties && s.properties.hasOwnProperty(p)) {
                                     continue;
                                 }
                                 var r = RegExp(pattern);
@@ -803,7 +803,6 @@ if (typeof brutusin === "undefined") {
             } else {
                 render(null, form, "$", null, null);
             }
-            rendered = true;
             if (dependencyMap.hasOwnProperty("$")) {
                 onDependencyChanged("$");
             }
