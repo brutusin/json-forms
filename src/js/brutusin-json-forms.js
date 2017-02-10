@@ -1114,11 +1114,10 @@ if (typeof brutusin === "undefined") {
                     renderTitle(titleContainer, propertyProvider.getValue(), s);
                 }
                 if (!value) {
-                    if (typeof initialValue !== "undefined" && initialValue !== null) {
-                        value = getInitialValue(id);
-                    } else {
-                        value = s.default;
-                    }
+                  value = s.default;
+                  if (typeof initialValue !== "undefined" && initialValue !== null) {
+                    value = getInitialValue(id) || value;
+                  }
                 }
                 r(container, id, parentObject, propertyProvider, value);
             }
