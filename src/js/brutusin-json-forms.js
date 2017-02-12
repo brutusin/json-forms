@@ -137,6 +137,7 @@ if (typeof brutusin === "undefined") {
         var root = schema;
         var formId = "BrutusinForms#" + BrutusinForms.instances.length;
 
+        renameRequiredPropeties(schema); // required v4 (array) -> requiredProperties
         populateSchemaMap("$", schema);
 
         validateDepencyMapIsAcyclic();
@@ -937,6 +938,45 @@ if (typeof brutusin === "undefined") {
             return false;
         }
 
+        function renameRequiredPropeties(schema) {
+            if (schema.hasOwnProperty("oneOf")) {
+                for (var i in schema.oneOf) {
+                    renameRequiredPropeties(schema.oneOf[i]);
+                }
+            } else if (schema.hasOwnProperty("$ref")) {
+                var newSchema = getDefinition(schema["$ref"]);
+                renameRequiredPropeties(newSchema);
+            } else if (schema.type === "object") {
+                if (schema.properties) {
+                    if (schema.hasOwnProperty("required")) {
+                        if (Array.isArray(schema.required)) {
+                            schema.requiredProperties = schema.required;
+                            delete schema.required;
+                        }
+                    }
+                    for (var prop in schema.properties) {
+                        renameRequiredPropeties(schema.properties[prop]);
+                    }
+                }
+                if (schema.patternProperties) {
+                    for (var pat in schema.patternProperties) {
+                        var s = schema.patternProperties[pat];
+                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
+                            renameRequiredPropeties(schema.patternProperties[pat]);
+                        }
+                    }
+                }
+                if (schema.additionalProperties) {
+                    if (schema.additionalProperties.hasOwnProperty("type") || schema.additionalProperties.hasOwnProperty("oneOf")) {
+                        renameRequiredPropeties(schema.additionalProperties);
+
+                    }
+                }
+            } else if (schema.type === "array") {
+                renameRequiredPropeties(schema.items);
+            }
+        }
+
         function populateSchemaMap(name, schema) {
             var pseudoSchema = createPseudoSchema(schema);
             pseudoSchema["$id"] = name;
@@ -958,18 +998,12 @@ if (typeof brutusin === "undefined") {
             } else if (schema.type === "object") {
                 if (schema.properties) {
                     pseudoSchema.properties = new Object();
-                    var requiredProperties;
-                    if (schema.hasOwnProperty("required")) {
-                        if (Array.isArray(schema.required)) {
-                            requiredProperties = schema.required;
-                        }
-                    }
                     for (var prop in schema.properties) {
                         var childProp = name + "." + prop;
                         pseudoSchema.properties[prop] = childProp;
                         var subSchema = schema.properties[prop];
-                        if (requiredProperties) {
-                            if (containsStr(requiredProperties, prop)) {
+                        if (schema.requiredProperties) {
+                            if (containsStr(schema.requiredProperties, prop)) {
                                 subSchema.required = true;
                             } else {
                                 subSchema.required = false;
