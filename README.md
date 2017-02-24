@@ -39,7 +39,7 @@ Optionally, include the bootstrap extension (requires bootstrap):
 ```
 Create the javascript `BrutusinForms` instance, `schema` being a javascript `object` representing the schema structure:
 ```javascript
-var schema = new Object({"type": "boolean"})
+var schema = {"type": "boolean"}
 var BrutusinForms = brutusin["json-forms"];
 var bf = BrutusinForms.create(schema);
 ```
