@@ -821,14 +821,17 @@ if (typeof brutusin === "undefined") {
         };
 
         obj.getData = function () {
-            function removeEmptiesAndNulls(object, schema) {
+            function removeEmptiesAndNulls(object, s) {
+                if (s.$ref) {
+                    s = getDefinition(s.$ref);
+                }
                 if (object instanceof Array) {
                     if (object.length === 0) {
                         return null;
                     }
                     var clone = new Array();
                     for (var i = 0; i < object.length; i++) {
-                        clone[i] = removeEmptiesAndNulls(object[i], schema.items);
+                        clone[i] = removeEmptiesAndNulls(object[i], s.items);
                     }
                     return clone;
                 } else if (object === "") {
@@ -840,13 +843,13 @@ if (typeof brutusin === "undefined") {
                         if (prop.startsWith("$") && prop.endsWith("$")) {
                             continue;
                         }
-                        var value = removeEmptiesAndNulls(object[prop], schema.properties[prop]);
+                        var value = removeEmptiesAndNulls(object[prop], s.properties[prop]);
                         if (value !== null) {
                             clone[prop] = value;
                             nonEmpty = true;
                         }
                     }
-                    if (nonEmpty || schema.required) {
+                    if (nonEmpty || s.required) {
                         return clone;
                     } else {
                         return null;
