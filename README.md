@@ -12,7 +12,6 @@
   - [Demo](#demo)
   - [Dynamic schemas](#dynamic-schemas)
   - [API](#api)
-  - [TODO](#todo)
   - [CDN](#cdn)
   - [Support, bugs and requests](#support-bugs-and-requests)
   - [Authors](#authors)
@@ -82,7 +81,7 @@ Member|Description
 `bf.getData()`| Returns the javascript object with the data entered by the user
 `bf.schemaResolver(schemaIdArray, data)`| Schema resolver for [dynamic schemas](#dynamic-schemas)
 
-##CDN
+## CDN
 
 http://www.jsdelivr.com/projects/brutusin.json-forms
 
