@@ -71,7 +71,7 @@
                     null,
                     "[Numeric validation](http://json-schema.org/latest/json-schema-validation.html#anchor13) supporting `multipleOf`, `minimum`, `maximum` and `exclusiveMinimum`, `exclusiveMaximum` "],
                 ["Additional properties",
-                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties", "type": "object", "maxProperties": 2, "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "string"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "maxProperties": 3, "additionalProperties": true}}},
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties", "type": "object", "maxProperties": 2, "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "integer"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "maxProperties": 3, "additionalProperties": true}}},
                     null,
                     null,
                     "Both object and boolean typed [additionalProperties](http://json-schema.org/latest/json-schema-validation.html#anchor64) are supported. Also, notice the support of the validation keywords `minProperties` and `maxProperties`"],
