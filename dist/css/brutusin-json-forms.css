@@ -15,6 +15,9 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
+.add-pattern-div{
+    margin-top: 6px;
+}
 .loading-layer{
     position: absolute;
     top:0px;

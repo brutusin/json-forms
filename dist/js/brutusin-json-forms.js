@@ -443,13 +443,8 @@ if (typeof brutusin === "undefined") {
                 return ret;
             }
 
-            function addAdditionalProperty(current, table, id, name, value, button) {
-                var schemaId;
-                if (button !== undefined) {
-                    schemaId = getSchemaId(button.id);
-                } else {
-                    schemaId = getSchemaId(id);
-                }
+            function addAdditionalProperty(current, table, id, name, value, pattern) {
+                var schemaId = getSchemaId(id);
                 var s = getSchema(schemaId);
                 var tbody = table.tBodies[0];
                 var tr = document.createElement("tr");
@@ -464,6 +459,10 @@ if (typeof brutusin === "undefined") {
                 td2.className = "prop-value";
                 var nameInput = document.createElement("input");
                 nameInput.type = "text";
+                var regExp;
+                if (pattern) {
+                    regExp = RegExp(pattern);
+                }
                 nameInput.getValidationError = function () {
                     if (nameInput.previousValue !== nameInput.value) {
                         if (current.hasOwnProperty(nameInput.value)) {
@@ -477,19 +476,24 @@ if (typeof brutusin === "undefined") {
                 var pp = createPropertyProvider(
                         function () {
                             if (nameInput.value) {
-                                return nameInput.value;
-                            } else {
-                                return keyForBlank;
+                                if (regExp) {
+                                    if (nameInput.value.search(regExp) !== -1) {
+                                        return nameInput.value;
+                                    }
+                                } else {
+                                    return nameInput.value;
+                                }
                             }
+                            return keyForBlank;
                         },
                         function (oldPropertyName) {
                             if (pp.getValue() === oldPropertyName) {
                                 return;
                             }
-                            if (!oldPropertyName) {
+                            if (!oldPropertyName || !current.hasOwnProperty(oldPropertyName)) {
                                 oldPropertyName = keyForBlank;
                             }
-                            if (oldPropertyName && current.hasOwnProperty(oldPropertyName)) {
+                            if (current.hasOwnProperty(oldPropertyName) || regExp && pp.getValue().search(regExp) === -1) {
                                 current[pp.getValue()] = current[oldPropertyName];
                                 delete current[oldPropertyName];
                             }
@@ -525,21 +529,17 @@ if (typeof brutusin === "undefined") {
                 appendChild(innerTr, innerTd2, s);
                 appendChild(innerTab, innerTr, s);
                 appendChild(td1, innerTab, s);
-                if (button !== undefined) {
-                    var secondTr = document.createElement("tr");
-                    var secondTd = document.createElement("td");
-                    appendChild(secondTd, document.createTextNode(button.pnp_pattern), s);
-                    appendChild(secondTr, secondTd, s);
-                    appendChild(innerTab, secondTr, s);
+
+                if (pattern !== undefined) {
+                    nameInput.placeholder = pattern;
                 }
+
                 appendChild(tr, td1, s);
                 appendChild(tr, td2, s);
                 appendChild(tbody, tr, s);
                 appendChild(table, tbody, s);
-                if (button !== undefined)
-                    render(null, td2, button.id, current, pp, value);
-                else
-                    render(null, td2, id, current, pp, value);
+                render(null, td2, id, current, pp, value);
+
                 if (name) {
                     nameInput.value = name;
                     nameInput.onblur();
@@ -591,12 +591,13 @@ if (typeof brutusin === "undefined") {
                     for (var pattern in s.patternProperties) {
                         var patProps = s.patternProperties[pattern];
                         var patdiv = document.createElement("div");
+                        patdiv.className = "add-pattern-div";
                         var addButton = document.createElement("button");
                         addButton.setAttribute('type', 'button');
-                        addButton.pnp_pattern = pattern.substr(0);
+                        addButton.pattern = pattern;
                         addButton.id = id + "[" + pattern + "]";
                         addButton.onclick = function () {
-                            addAdditionalProperty(current, table, id + "[" + pattern + "]", undefined, undefined, this);
+                            addAdditionalProperty(current, table, this.id, undefined, undefined, this.pattern);
                         };
                         if (s.maxProperties || s.minProperties) {
                             addButton.getValidationError = function () {
@@ -625,7 +626,7 @@ if (typeof brutusin === "undefined") {
                                 if (usedProps.indexOf(p) !== -1) {
                                     continue;
                                 }
-                                addAdditionalProperty(current, table, id + "[" + pattern + "]", p, value[p]);
+                                addAdditionalProperty(current, table, id + "[" + pattern + "]", p, value[p], pattern);
                                 usedProps.push(p);
                             }
                         }
@@ -662,7 +663,7 @@ if (typeof brutusin === "undefined") {
                             if (usedProps.indexOf(p) !== -1) {
                                 continue;
                             }
-                            addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p], undefined);
+                            addAdditionalProperty(current, table, id + "[\"" + prop + "\"]", p, value[p]);
                         }
                     }
                 }
@@ -822,6 +823,9 @@ if (typeof brutusin === "undefined") {
 
         obj.getData = function () {
             function removeEmptiesAndNulls(object, s) {
+                if (ss === null){
+                    ss = SCHEMA_ANY;
+                }
                 if (s.$ref) {
                     s = getDefinition(s.$ref);
                 }
@@ -843,7 +847,25 @@ if (typeof brutusin === "undefined") {
                         if (prop.startsWith("$") && prop.endsWith("$")) {
                             continue;
                         }
-                        var value = removeEmptiesAndNulls(object[prop], s.properties[prop]);
+                        var ss = null;
+                        if (s.hasOwnProperty("properties") && s.properties.hasOwnProperty(prop)) {
+                            ss = s.properties[prop];
+                        }
+                        if (ss === null && s.hasOwnProperty("additionalProperties")) {
+                            if (typeof s.additionalProperties === 'object') {
+                                ss = s.additionalProperties;
+                            }
+                        } 
+                        if (ss === null && s.hasOwnProperty("patternProperties")) {
+                            for (var p in s.patternProperties) {
+                                var r = RegExp(p);
+                                if (prop.search(r) !== -1) {
+                                    ss = s.patternProperties[p];
+                                    break;
+                                }
+                            }
+                        }
+                        var value = removeEmptiesAndNulls(object[prop], ss);
                         if (value !== null) {
                             clone[prop] = value;
                             nonEmpty = true;
