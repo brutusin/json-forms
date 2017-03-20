@@ -823,7 +823,7 @@ if (typeof brutusin === "undefined") {
 
         obj.getData = function () {
             function removeEmptiesAndNulls(object, s) {
-                if (ss === null){
+                if (ss === null) {
                     ss = SCHEMA_ANY;
                 }
                 if (s.$ref) {
@@ -855,7 +855,7 @@ if (typeof brutusin === "undefined") {
                             if (typeof s.additionalProperties === 'object') {
                                 ss = s.additionalProperties;
                             }
-                        } 
+                        }
                         if (ss === null && s.hasOwnProperty("patternProperties")) {
                             for (var p in s.patternProperties) {
                                 var r = RegExp(p);
@@ -1016,9 +1016,21 @@ if (typeof brutusin === "undefined") {
                     populateSchemaMap(childProp, schema.oneOf[i]);
                 }
             } else if (schema.hasOwnProperty("$ref")) {
-                var newSchema = getDefinition(schema["$ref"]);
-                //console.log("$REF",name,newSchema);
-                populateSchemaMap(name, newSchema);
+                var refSchema = getDefinition(schema["$ref"]);
+                if (schema.hasOwnProperty("title") || schema.hasOwnProperty("description")) {
+                    var clonedRefSchema = {};
+                    for (var prop in refSchema) {
+                        clonedRefSchema[prop] = refSchema[prop];
+                    }
+                    if (schema.hasOwnProperty("title")) {
+                        clonedRefSchema.title = schema.title;
+                    }
+                    if (schema.hasOwnProperty("description")) {
+                        clonedRefSchema.description = schema.description;
+                    }
+                    refSchema = clonedRefSchema;
+                }
+                populateSchemaMap(name, refSchema);
 
             } else if (schema.type === "object") {
                 if (schema.properties) {
