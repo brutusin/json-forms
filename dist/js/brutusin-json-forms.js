@@ -76,7 +76,8 @@ if (typeof brutusin === "undefined") {
         "exclusiveMaximum": "Value must be **lower than** `{0}`",
         "minProperties": "At least `{0}` properties are required",
         "maxProperties": "At most `{0}` properties are allowed",
-        "uniqueItems": "Array items must be unique"
+        "uniqueItems": "Array items must be unique",
+        "addItem": "Add item"
     };
 
     /**
@@ -766,7 +767,7 @@ if (typeof brutusin === "undefined") {
             if (itemS.description) {
                 addButton.title = itemS.description;
             }
-            appendChild(addButton, document.createTextNode("Add item"), s);
+            appendChild(addButton, document.createTextNode(BrutusinForms.messages["addItem"]), s);
             appendChild(div, table, s);
             appendChild(div, addButton, s);
             if (value && value instanceof Array) {

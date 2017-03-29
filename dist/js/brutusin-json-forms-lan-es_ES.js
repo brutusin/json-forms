@@ -21,6 +21,8 @@ if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["json-for
         "maximum": "El valor debe ser **menor o igual que** `{0}`",
         "exclusiveMaximum": "El valor debe ser **menor que** `{0}`",
         "minProperties": "Se requieren como mínimo `{0}` propiedades",
-        "maxProperties": "Se admiten a lo sumo `{0}` propiedades"
+        "maxProperties": "Se admiten a lo sumo `{0}` propiedades",
+        "uniqueItems": "Los elementos del array deben ser diferentes",
+        "addItem": "Añadir elemento"
     };
 }());
