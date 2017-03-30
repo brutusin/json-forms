@@ -1,6 +1,10 @@
 Here are people who have contributed to development of json-forms:
 (version numbers in brackets indicate release in which the problem was fixed)
 
+fabifabi@github
+Several contributions regarding i18n. French translation
+(1.6.2)
+
 Omri Schwarz (ocschwar@github):
 #23: $ref, definitions, fixed oneOf, patternProperties
 (1.4.0)
