@@ -434,6 +434,7 @@ if (typeof brutusin === "undefined") {
             appendChild(container, display, s);
 
         };
+
         renderers["object"] = function (container, id, parentObject, propertyProvider, value) {
 
             function createStaticPropertyProvider(propname) {
@@ -967,7 +968,9 @@ if (typeof brutusin === "undefined") {
         }
 
         function renameRequiredPropeties(schema) {
-            if (schema.hasOwnProperty("oneOf")) {
+            if (!schema) {
+                return;
+            } else if (schema.hasOwnProperty("oneOf")) {
                 for (var i in schema.oneOf) {
                     renameRequiredPropeties(schema.oneOf[i]);
                 }
@@ -1010,7 +1013,9 @@ if (typeof brutusin === "undefined") {
             pseudoSchema["$id"] = name;
             schemaMap[name] = pseudoSchema;
 
-            if (schema.hasOwnProperty("oneOf")) {
+            if (!schema) {
+                return;
+            } else if (schema.hasOwnProperty("oneOf")) {
                 pseudoSchema.oneOf = new Array();
                 pseudoSchema.type = "oneOf";
                 for (var i in schema.oneOf) {
@@ -1020,21 +1025,22 @@ if (typeof brutusin === "undefined") {
                 }
             } else if (schema.hasOwnProperty("$ref")) {
                 var refSchema = getDefinition(schema["$ref"]);
-                if (schema.hasOwnProperty("title") || schema.hasOwnProperty("description")) {
-                    var clonedRefSchema = {};
-                    for (var prop in refSchema) {
-                        clonedRefSchema[prop] = refSchema[prop];
+                if (refSchema) {
+                    if (schema.hasOwnProperty("title") || schema.hasOwnProperty("description")) {
+                        var clonedRefSchema = {};
+                        for (var prop in refSchema) {
+                            clonedRefSchema[prop] = refSchema[prop];
+                        }
+                        if (schema.hasOwnProperty("title")) {
+                            clonedRefSchema.title = schema.title;
+                        }
+                        if (schema.hasOwnProperty("description")) {
+                            clonedRefSchema.description = schema.description;
+                        }
+                        refSchema = clonedRefSchema;
                     }
-                    if (schema.hasOwnProperty("title")) {
-                        clonedRefSchema.title = schema.title;
-                    }
-                    if (schema.hasOwnProperty("description")) {
-                        clonedRefSchema.description = schema.description;
-                    }
-                    refSchema = clonedRefSchema;
+                    populateSchemaMap(name, refSchema);
                 }
-                populateSchemaMap(name, refSchema);
-
             } else if (schema.type === "object") {
                 if (schema.properties) {
                     pseudoSchema.properties = new Object();
@@ -1195,6 +1201,25 @@ if (typeof brutusin === "undefined") {
                     }
                 }
                 r(container, id, parentObject, propertyProvider, value);
+            } else if (s.$ref) {
+                if (obj.schemaResolver) {
+                    var cb = function (schemas) {
+                        if (schemas && schemas.hasOwnProperty(id)) {
+                            if (JSON.stringify(schemaMap[id]) !== JSON.stringify(schemas[id])) {
+                                cleanSchemaMap(id);
+                                cleanData(id);
+                                populateSchemaMap(id, schemas[id]);
+                                var renderInfo = renderInfoMap[id];
+                                if (renderInfo) {
+                                    render(renderInfo.titleContainer, renderInfo.container, id, renderInfo.parentObject, renderInfo.propertyProvider, renderInfo.value);
+                                }
+                            }
+                        }
+                        BrutusinForms.onResolutionFinished(parentObject);
+                    };
+                    BrutusinForms.onResolutionStarted(parentObject);
+                    obj.schemaResolver([id], obj.getData(), cb);
+                }
             }
         }
 
@@ -1279,20 +1304,22 @@ if (typeof brutusin === "undefined") {
             return schemaMap[schemaId];
         }
 
-        function onDependencyChanged(name, source) {
-            function cleanSchemaMap(schemaId) {
-                for (var prop in schemaMap) {
-                    if (schemaId.startsWith(prop)) {
-                        delete schemaMap[prop];
-                    }
+        function cleanSchemaMap(schemaId) {
+            for (var prop in schemaMap) {
+                if (schemaId.startsWith(prop)) {
+                    delete schemaMap[prop];
                 }
             }
-            function cleanData(schemaId) {
-                var expression = new Expression(schemaId);
-                expression.visit(data, function (data, parent, property) {
-                    delete parent[property];
-                });
-            }
+        }
+        function cleanData(schemaId) {
+            var expression = new Expression(schemaId);
+            expression.visit(data, function (data, parent, property) {
+                delete parent[property];
+            });
+        }
+
+        function onDependencyChanged(name, source) {
+
             var arr = dependencyMap[name];
             if (!arr || !obj.schemaResolver) {
                 return;
