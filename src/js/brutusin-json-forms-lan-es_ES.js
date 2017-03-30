@@ -23,6 +23,8 @@ if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["json-for
         "minProperties": "Se requieren como mínimo `{0}` propiedades",
         "maxProperties": "Se admiten a lo sumo `{0}` propiedades",
         "uniqueItems": "Los elementos del array deben ser diferentes",
-        "addItem": "Añadir elemento"
+        "addItem": "Añadir elemento",
+        "true": "Verdadero",
+        "false": "Falso"
     };
 }());

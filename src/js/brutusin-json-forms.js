@@ -77,7 +77,9 @@ if (typeof brutusin === "undefined") {
         "minProperties": "At least `{0}` properties are required",
         "maxProperties": "At most `{0}` properties are allowed",
         "uniqueItems": "Array items must be unique",
-        "addItem": "Add item"
+        "addItem": "Add item",
+        "true": "True",
+        "false": "False"
     };
 
     /**
@@ -355,13 +357,13 @@ if (typeof brutusin === "undefined") {
                 appendChild(input, emptyOption, s);
 
                 var optionTrue = document.createElement("option");
-                var textTrue = document.createTextNode("true");
+                var textTrue = document.createTextNode(BrutusinForms.messages["true"]);
                 textTrue.value = "true";
                 appendChild(optionTrue, textTrue, s);
                 appendChild(input, optionTrue, s);
 
                 var optionFalse = document.createElement("option");
-                var textFalse = document.createTextNode("false");
+                var textFalse = document.createTextNode(BrutusinForms.messages["false"]);
                 textFalse.value = "false";
                 appendChild(optionFalse, textFalse, s);
                 appendChild(input, optionFalse, s);
