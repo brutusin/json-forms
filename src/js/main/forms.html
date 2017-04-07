@@ -5,85 +5,101 @@
     // Static configuration
     {
         var BrutusinForms = new Object();
-        BrutusinForms.createForm = function (schema) {
-            return new BrutusinForm(schema);
-        }
+        BrutusinForms.createForm = function (schema, initialData, config) {
+            return new BrutusinForm(schema, initialData, config);
+        };
 
-        BrutusinForms.createTypeComponent = function () {
-            return Object.create(typePrototype);
-        },
-                BrutusinForms.factories = {
-                    schemaResolver: null,
-                    expression: null,
-                    typeComponents: {
-                        string: null,
-                        object: null,
-                        array: null,
-                        boolean: null,
-                        number: null,
-                        integer: null,
-                        any: null
-                    }
-                }
+        BrutusinForms.factories = {
+            schemaResolver: null,
+            typeComponents: {
+                string: null,
+                object: null,
+//                array: null,
+//                boolean: null,
+//                number: null,
+//                integer: null,
+//                any: null
+            }
+        };
     }
 
-    /**
-     * Form prototype
-     * @returns {TypeComponent}
-     */
-    function BrutusinForm(schema) {
+    function BrutusinForm(schema, initialData, config) {
         this.schema = schema;
-        this.schemaResolver = new BrutusinForms.factories.schemaResolver;
-        this.schemaResolver.init(this);
+        this.initialData = initialData;
+
+        var schemaResolver = createSchemaResolver(config);
+        schemaResolver.init(this);
+        var typeFactories = createFactories(config);
+        var dOMForm = createDOMForm();
+        var formFunctions = {schemaResolver: schemaResolver, createTypeComponent: createTypeComponent, appendChild: appendChild};
+        var rootComponent;
+
+        createTypeComponent("$", initialData, function (component) {
+            rootComponent = component;
+            appendChild(dOMForm, component.getDOM());
+        });
 
         this.getData = function () {
+            return rootComponent.getData();
+        };
 
+        this.getDOM = function () {
+            return dOMForm;
+        };
+
+        function appendChild(parent, child, schema) {
+            parent.appendChild(child);
+            // TODO
+//            for (var i = 0; i < BrutusinForms.decorators.length; i++) {
+//                BrutusinForms.decorators[i](child, schema);
+//            }
         }
 
-        /**
-         * Async component creation
-         * @param {type} schemaId
-         * @param {type} initialData
-         * @param {type} callback
-         * @returns {undefined}
-         */
-        this.createTypeComponent = function (schemaId, initialData, callback) {
-            schemaResolver.resolve(schemaId, function (schema) {
-                if (!schema) {
-                    throw "Unresolved schema id: " + schemaId;
+        function createDOMForm() {
+            var ret = document.createElement("form");
+            ret.className = "brutusin-form";
+            ret.onsubmit = function (event) {
+                return false;
+            };
+            return ret;
+        }
+
+        function createSchemaResolver(config) {
+            if (!BrutusinForms.factories.schemaResolver) {
+                throw "SchemaResolver factory not registered";
+            }
+            var ret = new BrutusinForms.factories.schemaResolver;
+            if (config && config.customSchemaResolver) {
+                ret.resolveSchemas = config.customSchemaResolver;
+            }
+            return ret;
+        }
+
+        function createFactories(config) {
+            var ret = {};
+            for (var prop in BrutusinForms.factories.typeComponents) {
+                if (!BrutusinForms.factories.typeComponents[prop]) {
+                    throw "TypeComponent factory not registered for type '" + prop + "'";
                 }
-                if (BrutusinForms.factories.typeComponents.hasOwnProperty(schema.type) && BrutusinForms.factories.typeComponents[schema.type]) {
-                    var component = new BrutusinForms.factories.typeComponents[schema.type];
-                    component.init(schema, initialData);
+                ret[prop] = BrutusinForms.factories.typeComponents[prop];
+            }
+            return ret;
+        }
+
+        function createTypeComponent(schemaId, initialData, callback) {
+            schemaResolver.addListener(schemaId, function (schema) {
+                if (!schema || !schema.type) {
+                    return;
+                }
+                if (typeFactories.hasOwnProperty(schema.type)) {
+                    var component = new typeFactories[schema.type];
+                    component.init(schemaId, initialData, formFunctions);
                     callback(component);
                 } else {
                     throw "Component factory not found for schemas of type '" + schema.type + "'";
                 }
-
             });
         }
-
-        this.render = function (htmlContainer, initialData) {
-
-            var form = document.createElement("form");
-            form.className = "brutusin-form";
-            form.onsubmit = function (event) {
-                return false;
-            };
-            if (htmlContainer) {
-                appendChild(htmlContainer, form);
-            } else {
-                appendChild(document.body, form);
-            }
-            render(null, form, "$", null, null);
-
-            if (dependencyMap.hasOwnProperty("$")) {
-                onDependencyChanged("$");
-            }
-            if (BrutusinForms.postRender) {
-                BrutusinForms.postRender(obj);
-            }
-        };
     }
 
     /**
@@ -91,23 +107,93 @@
      * @returns {TypeComponent}
      */
     function TypeComponent() {
-        this.init = function (form, schema, initialData) {
-            this.form = form;
-            schema = schema;
+
+        this.dom = createContainer();
+
+        function createContainer() {
+            var ret = document.createElement("div");
+            return ret;
+        }
+
+        function removeAllChildren(domElement) {
+            while (domElement.firstChild) {
+                domElement.removeChild(domElement.firstChild);
+            }
+        }
+
+        this.init = function (schemaId, initialData, formFunctions) {
+            this.schemaId = schemaId;
             this.initialData = initialData;
-        }
-        this.render = function (htmlContainer) {
-        }
-        this.getValue = function () {
-        }
+            this.formFunctions = formFunctions;
+
+            var component = this;
+
+            function reset() {
+                removeAllChildren(component.dom);
+                this.children = [];
+            }
+
+            formFunctions.schemaResolver.addListener(schemaId, function (schema) {
+                reset();
+                if (schema && schema.type) {
+                    component.render(schema);
+                }
+            });
+        };
+        this.render = function (schema) {
+        };
+        this.getDOM = function () {
+            return this.dom;
+        };
+        this.getDOM = function () {
+            return this.dom;
+        };
+        this.getData = function () {
+        };
         this.validate = function () {
-        }
-        this.onChange = function (component) {
-        }
-        this.fireOnChange = function () {
-            onChange(this);
-        }
+        };
     }
+
+    function StringComponent() {
+        this.render = function (schema) {
+            var input = document.createElement("input");
+            input.type = "file";
+            this.dom = input;
+        };
+    }
+    StringComponent.prototype = new TypeComponent;
+    BrutusinForms.factories.typeComponents["string"] = StringComponent;
+
+    function ObjectComponent() {
+        this.render = function (schema) {
+            var appendChild = this.formFunctions.appendChild;
+            var table = document.createElement("table");
+            table.className = "object";
+            var tbody = document.createElement("tbody");
+            appendChild(table, tbody);
+            if (schema.hasOwnProperty("properties")) {
+                for (var prop in schema.properties) {
+                    var tr = document.createElement("tr");
+                    var td1 = document.createElement("td");
+                    td1.className = "prop-name";
+                    var propId = this.schemaId + "." + prop;
+                    var td2 = document.createElement("td");
+                    td2.className = "prop-value";
+                    appendChild(tbody, tr);
+                    appendChild(tr, td1);
+                    appendChild(td1, document.createTextNode(prop));
+                    appendChild(tr, td2);
+                    this.formFunctions.createTypeComponent(propId, null, function (child) {
+                        this.children.push(child);
+                        appendChild(td2, child.getDOM());
+                    });
+                }
+            }
+            appendChild(this.dom, table);
+        };
+    }
+    ObjectComponent.prototype = new TypeComponent;
+    BrutusinForms.factories.typeComponents["object"] = ObjectComponent;
 
     /**
      * Async schema resolution. Schema listeners are notified once initially and later when a subschema item changes
@@ -365,16 +451,18 @@
             }
             this.resolveSchemas(dependentIds, this.form.getData(), function (schemas) {
                 if (schemas) {
-                    for (var dependentId in schemas) {
-                        if (!schemaMap.hasOwnProperty(dependentId) || JSON.stringify(schemaMap[dependentId].schema) !== JSON.stringify(schemas[dependentId])) {
-                            var newEntries = processSchema(dependentId, schemas[dependentId], true);
-                            cleanNonExistingEntries(dependentId, newEntries);
-                            for (var prop in newEntries) {
-                                schemaMap[prop] = newEntries[prop];
-                                var listenerCallbacks = listeners[prop];
-                                if (listenerCallbacks) {
-                                    for (var i = 0; i < listenerCallbacks.length; i++) {
-                                        listenerCallbacks[i](newEntries[prop].schema);
+                    for (var id in schemas) {
+                        if (dependentIds.includes(id)) {
+                            if (!schemaMap.hasOwnProperty(id) || JSON.stringify(schemaMap[id].schema) !== JSON.stringify(schemas[id])) {
+                                var newEntries = processSchema(id, schemas[id], true);
+                                cleanNonExistingEntries(id, newEntries);
+                                for (var prop in newEntries) {
+                                    schemaMap[prop] = newEntries[prop];
+                                    var listenerCallbacks = listeners[prop];
+                                    if (listenerCallbacks) {
+                                        for (var i = 0; i < listenerCallbacks.length; i++) {
+                                            listenerCallbacks[i](newEntries[prop].schema);
+                                        }
                                     }
                                 }
                             }
@@ -441,13 +529,17 @@
                 ]
             }
         }
-    });
-    form.schemaResolver.resolveSchemas = function (ids, data, callback) {
-        callback({"$.subspecies": {type: "string", enum: ["bulldog", "labrador"]}});
-    };
-    form.schemaResolver.addListener("$.subspecies", function (schema) {
-        alert(JSON.stringify(schema, 4));
-        form.schemaResolver.notifyChanged("$.species");
-    });
+    }, null, {customSchemaResolver: function (ids, data, callback) {
+            callback({"$.subspecies": {type: "string", enum: ["bulldog", "labrador"]}});
+        }});
+//    form.schemaResolver.addListener("$.subspecies", function (schema) {
+//        form.schemaResolver.notifyChanged("$.species");
+//    });
 
+</script>
+<body>
+    <div id="mydiv"></div>
+</body>
+<script>
+    document.getElementById("mydiv").appendChild(form.getDOM());
 </script>
