@@ -87,18 +87,20 @@
         }
 
         function createTypeComponent(schemaId, initialData, callback) {
-            schemaResolver.addListener(schemaId, function (schema) {
-                if (!schema || !schema.type) {
+            var listener = function (schema) {
+                if (!schema || !schema.type || schema.type === "null") {
                     return;
                 }
                 if (typeFactories.hasOwnProperty(schema.type)) {
                     var component = new typeFactories[schema.type];
                     component.init(schemaId, initialData, formFunctions);
+                    schemaResolver.removeListener(schemaId, listener);
                     callback(component);
                 } else {
                     throw "Component factory not found for schemas of type '" + schema.type + "'";
                 }
-            });
+            };
+            schemaResolver.addListener(schemaId, listener);
         }
     }
 
@@ -108,42 +110,38 @@
      */
     function TypeComponent() {
 
-        this.dom = createContainer();
-
-        function createContainer() {
-            var ret = document.createElement("div");
-            return ret;
-        }
-
-        function removeAllChildren(domElement) {
-            while (domElement.firstChild) {
-                domElement.removeChild(domElement.firstChild);
+        this.componentFunctions = {
+            removeAllChildren: function removeAllChildren(domElement) {
+                while (domElement.firstChild) {
+                    domElement.removeChild(domElement.firstChild);
+                }
             }
-        }
+        };
 
         this.init = function (schemaId, initialData, formFunctions) {
             this.schemaId = schemaId;
             this.initialData = initialData;
             this.formFunctions = formFunctions;
+            this.dom = document.createElement("div");
 
             var component = this;
 
             function reset() {
-                removeAllChildren(component.dom);
-                this.children = [];
+                component.componentFunctions.removeAllChildren(component.dom);
+                component.children = {};
             }
 
-            formFunctions.schemaResolver.addListener(schemaId, function (schema) {
+            this.schemaListener = function (schema) {
                 reset();
-                if (schema && schema.type) {
+                if (schema) {
                     component.render(schema);
                 }
-            });
+            };
+
+            this.formFunctions.schemaResolver.addListener(this.schemaId, this.schemaListener);
         };
+
         this.render = function (schema) {
-        };
-        this.getDOM = function () {
-            return this.dom;
         };
         this.getDOM = function () {
             return this.dom;
@@ -152,44 +150,163 @@
         };
         this.validate = function () {
         };
+        this.onchange = function () {
+        };
+        this.dispose = function () {
+            this.formFunctions.schemaResolver.removeListener(this.schemaId, this.schemaListener);
+        }
     }
 
     function StringComponent() {
         this.render = function (schema) {
-            var input = document.createElement("input");
-            input.type = "file";
-            this.dom = input;
+            var component = this;
+            var appendChild = this.formFunctions.appendChild;
+            var initialData = this.initialData;
+            this.input = createInput();
+            input.onchange = function (evt) {
+                component.formFunctions.schemaResolver.notifyChanged(component.schemaId);
+                component.onchange(evt);
+            }
+            this.componentFunctions.removeAllChildren(this.dom);
+            appendChild(this.dom, this.input);
+            function createInput() {
+                if (schema.type === "any") {
+                    input = document.createElement("textarea");
+                    if (initialData) {
+                        input.value = JSON.stringify(initialData, null, 4);
+                        if (schema.readOnly)
+                            input.disabled = true;
+                    }
+                } else if (schema.media) {
+                    input = document.createElement("input");
+                    input.type = "file";
+                    appendChild(input, option);
+                    // XXX TODO, encode the SOB properly.
+                } else if (schema.enum) {
+                    input = document.createElement("select");
+                    if (!schema.required) {
+                        var option = document.createElement("option");
+                        var textNode = document.createTextNode("");
+                        option.value = "";
+                        appendChild(option, textNode);
+                        appendChild(input, option);
+                    }
+                    var selectedIndex = 0;
+                    for (var i = 0; i < schema.enum.length; i++) {
+                        var option = document.createElement("option");
+                        var textNode = document.createTextNode(schema.enum[i]);
+                        option.value = schema.enum[i];
+                        appendChild(option, textNode);
+                        appendChild(input, option);
+                        if (initialData && schema.enum[i] === initialData) {
+                            selectedIndex = i;
+                            if (!schema.required) {
+                                selectedIndex++;
+                            }
+                            if (schema.readOnly)
+                                input.disabled = true;
+                        }
+                    }
+                    if (schema.enum.length === 1)
+                        input.selectedIndex = 1;
+                    else
+                        input.selectedIndex = selectedIndex;
+                } else {
+                    input = document.createElement("input");
+                    if (schema.type === "integer" || schema.type === "number") {
+                        input.type = "number";
+                        input.step = "any";
+                        if (typeof initialData !== "number") {
+                            initialData = null;
+                        }
+                    } else if (schema.format === "date-time") {
+                        try {
+                            input.type = "datetime-local";
+                        } catch (err) {
+                            // #46, problem in IE11. TODO polyfill?
+                            input.type = "text";
+                        }
+                    } else if (schema.format === "email") {
+                        input.type = "email";
+                    } else if (schema.format === "text") {
+                        input = document.createElement("textarea");
+                    } else {
+                        input.type = "text";
+                    }
+                    if (initialData !== null && typeof initialData !== "undefined") {
+                        // readOnly?
+                        input.value = initialData;
+                        if (schema.readOnly)
+                            input.disabled = true;
+
+                    }
+                }
+                if (schema.description) {
+                    input.title = schema.description;
+                    input.placeholder = schema.description;
+                }
+                input.setAttribute("autocorrect", "off");
+                return input;
+            }
         };
+
+        this.getData = function () {
+            return this.input.value;
+        }
     }
+
     StringComponent.prototype = new TypeComponent;
     BrutusinForms.factories.typeComponents["string"] = StringComponent;
 
     function ObjectComponent() {
         this.render = function (schema) {
             var appendChild = this.formFunctions.appendChild;
-            var table = document.createElement("table");
-            table.className = "object";
-            var tbody = document.createElement("tbody");
-            appendChild(table, tbody);
-            if (schema.hasOwnProperty("properties")) {
-                for (var prop in schema.properties) {
-                    var tr = document.createElement("tr");
-                    var td1 = document.createElement("td");
-                    td1.className = "prop-name";
-                    var propId = this.schemaId + "." + prop;
-                    var td2 = document.createElement("td");
-                    td2.className = "prop-value";
-                    appendChild(tbody, tr);
-                    appendChild(tr, td1);
-                    appendChild(td1, document.createTextNode(prop));
-                    appendChild(tr, td2);
-                    this.formFunctions.createTypeComponent(propId, null, function (child) {
-                        this.children.push(child);
-                        appendChild(td2, child.getDOM());
-                    });
+            this.componentFunctions.removeAllChildren(this.dom);
+            if (schema) {
+                var table = document.createElement("table");
+                table.className = "object";
+                var tbody = document.createElement("tbody");
+                appendChild(table, tbody);
+                var component = this;
+                if (schema.hasOwnProperty("properties")) {
+                    for (var p in schema.properties) {
+                        var prop = p;
+                        var propId = this.schemaId + "." + prop;
+                        var tr = document.createElement("tr");
+                        this.formFunctions.schemaResolver.addListener(propId, function (schema) {
+                            component.componentFunctions.removeAllChildren(tr);
+                            var child = component.children[prop];
+                            if (child) {
+                                child.dispose();
+                                delete component.children[prop];
+                            }
+                            if (schema && schema.type && schema.type !== "null") {
+                                var td1 = document.createElement("td");
+                                td1.className = "prop-name";
+                                var td2 = document.createElement("td");
+                                td2.className = "prop-value";
+                                appendChild(tbody, tr);
+                                appendChild(tr, td1);
+                                appendChild(td1, document.createTextNode(prop));
+                                appendChild(tr, td2);
+                                component.formFunctions.createTypeComponent(propId, null, function (child) {
+                                    component.children[prop] = child;
+                                    appendChild(td2, child.getDOM());
+                                });
+                            }
+                        });
+                    }
                 }
+                appendChild(this.dom, table);
             }
-            appendChild(this.dom, table);
+        };
+
+        this.getData = function () {
+            var data = {};
+            for (var prop in this.children) {
+                data[prop] = this.children[prop].getData();
+            }
+            return data;
         };
     }
     ObjectComponent.prototype = new TypeComponent;
@@ -209,7 +326,7 @@
 
         function cleanNonExistingEntries(id, newEntries) {
             for (var prop in schemaMap) {
-                if (id.startsWith(prop) && !newEntries.hasOwnProperty(prop)) {
+                if (prop.startsWith(id) && !newEntries.hasOwnProperty(prop)) {
                     var listenerCallbacks = listeners[prop];
                     if (listenerCallbacks) {
                         for (var i = 0; i < listenerCallbacks.length; i++) {
@@ -449,10 +566,14 @@
             if (!dependentIds) {
                 return;
             }
-            this.resolveSchemas(dependentIds, this.form.getData(), function (schemas) {
+            this.resolve(dependentIds);
+        };
+
+        this.resolve = function (ids) {
+            this.resolveSchemas(ids, this.form.getData(), function (schemas) {
                 if (schemas) {
                     for (var id in schemas) {
-                        if (dependentIds.includes(id)) {
+                        if (ids.includes(id)) {
                             if (!schemaMap.hasOwnProperty(id) || JSON.stringify(schemaMap[id].schema) !== JSON.stringify(schemas[id])) {
                                 var newEntries = processSchema(id, schemas[id], true);
                                 cleanNonExistingEntries(id, newEntries);
@@ -472,7 +593,7 @@
                     throw "Couldn't resolve schema item '" + id + "'";
                 }
             });
-        };
+        }
 
         this.addListener = function (id, callback) {
             id = normalizeId(id);
@@ -481,7 +602,7 @@
             } else {
                 listeners[id] = [callback];
             }
-            if (schemaMap.hasOwnProperty(id)) {
+            if (schemaMap.hasOwnProperty(id) && !schemaMap[id].dependsOn) {
                 callback(schemaMap[id].schema);
                 return;
             }
@@ -490,10 +611,10 @@
         this.removeListener = function (id, callback) {
             id = normalizeId(id);
             if (listeners.hasOwnProperty(id)) {
-                var listeners = listeners[id];
-                for (var i = 0; i < listeners.length; i++) {
-                    if (listeners[i] === callback) {
-                        listeners.splice(i, 1);
+                var callbacks = listeners[id];
+                for (var i = 0; i < callbacks.length; i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);
                         break;
                     }
                 }
@@ -530,8 +651,24 @@
             }
         }
     }, null, {customSchemaResolver: function (ids, data, callback) {
-            callback({"$.subspecies": {type: "string", enum: ["bulldog", "labrador"]}});
+            var schemas = new Object();
+            var schema = new Object();
+            if (data.species === "human") {
+                schema.type = "null"; // no such property for humans
+            } else {
+                schema.type = "string";
+                if (data.species === "dog") {
+                    schema.title = "Dog breed";
+                    schema.enum = ["bulldog", "labrador"]
+                } else {
+                    schema.title = "Cat breed";
+                    schema.enum = ["siamese", "persian"]
+                }
+            }
+            schemas["$.subspecies"] = schema;
+            callback(schemas);
         }});
+
 //    form.schemaResolver.addListener("$.subspecies", function (schema) {
 //        form.schemaResolver.notifyChanged("$.species");
 //    });
