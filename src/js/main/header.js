@@ -16,8 +16,25 @@
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 
+/* global brutusin */
+
 if (typeof brutusin === "undefined") {
     window.brutusin = new Object();
 } else if (typeof brutusin !== "object") {
-    throw ("brutusin global variable already exists");
-}    
+    throw "brutusin global variable already exists";
+}
+var BrutusinForms = new Object();
+
+BrutusinForms.factories = {
+    schemaResolver: null,
+    typeComponents: {
+        string: null,
+        object: null,
+      //  array: null,
+        boolean: null,
+        number: null,
+        integer: null,
+        any: null
+    }
+};
+brutusin["json-forms"] = BrutusinForms;

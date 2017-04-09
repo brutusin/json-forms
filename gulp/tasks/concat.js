@@ -1,33 +1,12 @@
 var gulp = require("gulp");
-var gulpMerge = require('gulp-merge');
 var concat = require('gulp-concat');
 var wrap = require("gulp-wrap");
  
-gulp.task('concat', function() {
+gulp.task('concat', ['clean:dist'], function() {
     
-  var wrap = gulp.src(['./src/js/main/main.js'])
+  return gulp.src(['./src/js/main/pollyfills.js', './src/js/main/header.js', './src/js/main/*.js', './src/js/main/components/prototype.js', './src/js/main/components/*.js'])
+    .pipe(concat('brutusin-json-forms.js'))
     .pipe(wrap('(function(){\n"use strict";\n<%= contents %>\n})();'))
-    .pipe(gulp.dest("./dist"));
-    
-  return gulp.src(['./src/js/main/header.js', './src/js/main/pollyfills.js', ])
-    .pipe(concat('all.js'))
-    .pipe(wrap('(function(){\n"use strict";\n<%= contents %>\n})();'))
-    .pipe(gulp.dest('./dist/'));
+    .pipe(gulp.dest('./dist/js'));
 });
-gulp.src(['./src/js/main/main.js', './src/js/main/input/*.js'])
-    .pipe(wrap('(function(){\n"use strict";\n<%= contents %>\n})();'))
-    .pipe(gulp.dest("./dist"));
-    
-    
-    var gulpMerge = require('gulp-merge');
 
-gulp.task('build', function() {
-    return gulpMerge(
-        gulp.src(['./src/js/main/main.js','./src/js/main/input/*.js'])
-            .pipe(concat('concat1.js')),
-
-        gulp.src('src/**/*.js')
-    )
-    .pipe(uglify())
-    .pipe(gulp.dest('build/'));
-});
