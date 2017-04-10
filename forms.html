@@ -1,0 +1,107 @@
+<meta charset="UTF-8"></meta>
+<script src="dist/js/brutusin-json-forms.js"></script>
+<script src="dist/js/addon/i18n/brutusin-json-forms-lan-es_ES.min.js"></script>
+<script>
+    var BrutusinForms = brutusin["json-forms"];
+    var form = BrutusinForms.createForm(
+          {
+  "$schema": "http://json-schema.org/draft-03/schema#",
+  "type": "object",
+  "properties": {
+    "s1": {
+      "type": "string",
+      "title": "A  string",
+      "description": "A string"
+    }
+  },
+  "patternProperties": {
+    "^ref_.*": {
+      "type": "number"
+    },
+          "^ddf_.*": {
+      "type": "number"
+    }
+  }
+}
+//            {
+//                "$schema": "http://json-schema.org/draft-03/schema#",
+//                "type": "object",
+//                "properties": {
+//                    "present": {
+//                        "name": "Present supported",
+//                        "type": "boolean"
+//                    },
+//                    "species": {
+//                        "title": "Species supported",
+//                        "description": "Changes in this property  (`$.species`) trigger the resolution of the actual (depending on the values being selected) schema of a dependent property (`$.subspecies`)",
+//                        "type": "string",
+//                        "enum": [
+//                            "human",
+//                            "dog",
+//                            "cat"
+//                        ],
+//                        "required": true
+//                    },
+//                    "subspecies": {
+//                        "dependsOn": [
+//                            "species"
+//                        ]
+//                    }
+//                }
+//            }
+//            {
+//                "$schema": "http://json-schema.org/draft-03/schema#",
+//                "type": "object",
+//                "properties": {
+//                    "pageNum": {
+//                        "type": "integer",
+//                        "title": "Page number",
+//                        "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details",
+//                        "default": 1,
+//                        "required": true
+//                    },
+//                    "pageSize": {
+//                        "type": "integer",
+//                        "title": "Page size",
+//                        "description": "Number of records per page",
+//                        "required": true,
+//                        "default": 50,
+//                        "enum": [
+//                            10,
+//                            25,
+//                            50,
+//                            100
+//                        ]
+//                    }
+//                }
+//            }
+    , null, {customSchemaResolver: function (ids, data, callback) {
+            var schemas = new Object();
+            var schema = new Object();
+            if (data.species === "human") {
+                schema.type = "null"; // no such property for humans
+            } else {
+                schema.type = "string";
+                if (data.species === "dog") {
+                    schema.title = "Dog breed";
+                    schema.enum = ["bulldog", "labrador"]
+                } else {
+                    schema.title = "Cat breed";
+                    schema.enum = ["siamese", "persian"]
+                }
+            }
+            schemas["$.subspecies"] = schema;
+            callback(schemas);
+        }});
+
+//    form.schemaResolver.addListener("$.subspecies", function (schema) {
+//        form.schemaResolver.notifyChanged("$.species");
+//    });
+
+</script>
+<body>
+    <div id="mydiv"></div>
+</body>
+<script>
+    document.getElementById("mydiv").appendChild(form.getDOM());
+</script>

@@ -1,10 +1,12 @@
+/* global brutusin */
+
 if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["json-forms"]) {
-    throw new Error("brutusin-json-forms-bootstrap.js requires brutusin-json-forms.js");
+    throw new Error("brutusin-json-forms.js is required");
 }
 (function () {
     var BrutusinForms = brutusin["json-forms"];
 
-    BrutusinForms.messages = {
+    BrutusinForms.i18n.setTranslations({
         "validationError": "Erreur de validation",
         "required": "Ce champ est obligatoire",
         "invalidValue": "Valeur du champ invalide",
@@ -26,5 +28,5 @@ if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["json-for
         "addItem": "Ajouter un élément",
         "true": "Vrai",
         "false": "Faux"
-    };
+    });
 }());

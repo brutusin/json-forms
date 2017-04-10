@@ -11,7 +11,8 @@ function SchemaResolver() {
     var schemaMap;
 
     function normalizeId(id) {
-        return id.replace(/\["[^"]*"\]/g, "[*]").replace(/\[\d*\]/g, "[#]");
+        // return id.replace(/\["[^"]*"\]/g, "[*]").replace(/\[\d*\]/g, "[#]"); // problems for pattern properties
+        return id;
     }
 
     function cleanNonExistingEntries(id, newEntries) {
@@ -32,21 +33,24 @@ function SchemaResolver() {
         var entryMap = {};
         var dependencyMap = {};
         renameRequiredPropeties(schema); // required v4 (array) -> requiredProperties
+        renameAdditionalPropeties(schema); // additionalProperties -> patternProperties
         populateSchemaMap(id, schema);
         validateDepencyGraphIsAcyclic();
         merge();
         return entryMap;
 
-        function renameRequiredPropeties(schema) {
+        function visitSchema(schema, visitor) {
             if (!schema) {
                 return;
-            } else if (schema.hasOwnProperty("oneOf")) {
+            }
+            visitor(schema);
+            if (schema.hasOwnProperty("oneOf")) {
                 for (var i in schema.oneOf) {
-                    renameRequiredPropeties(schema.oneOf[i]);
+                    visitSchema(schema.oneOf[i], visitor);
                 }
             } else if (schema.hasOwnProperty("$ref")) {
                 var newSchema = getDefinition(schema["$ref"]);
-                renameRequiredPropeties(newSchema);
+                visitSchema(newSchema, visitor);
             } else if (schema.type === "object") {
                 if (schema.properties) {
                     if (schema.hasOwnProperty("required")) {
@@ -56,26 +60,62 @@ function SchemaResolver() {
                         }
                     }
                     for (var prop in schema.properties) {
-                        renameRequiredPropeties(schema.properties[prop]);
+                        visitSchema(schema.properties[prop], visitor);
                     }
                 }
                 if (schema.patternProperties) {
                     for (var pat in schema.patternProperties) {
                         var s = schema.patternProperties[pat];
                         if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
-                            renameRequiredPropeties(schema.patternProperties[pat]);
+                            visitSchema(schema.patternProperties[pat], visitor);
                         }
                     }
                 }
                 if (schema.additionalProperties) {
                     if (schema.additionalProperties.hasOwnProperty("type") || schema.additionalProperties.hasOwnProperty("oneOf")) {
-                        renameRequiredPropeties(schema.additionalProperties);
+                        visitSchema(schema.additionalProperties, visitor);
 
                     }
                 }
             } else if (schema.type === "array") {
-                renameRequiredPropeties(schema.items);
+                visitSchema(schema.items, visitor);
             }
+        }
+        function renameRequiredPropeties(schema) {
+            visitSchema(schema, function (subSchema) {
+                if (subSchema.type === "object") {
+                    if (subSchema.properties) {
+                        if (subSchema.hasOwnProperty("required")) {
+                            if (Array.isArray(subSchema.required)) {
+                                subSchema.requiredProperties = subSchema.required;
+                                delete subSchema.required;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        function renameAdditionalPropeties(schema) {
+            visitSchema(schema, function (subSchema) {
+                if (subSchema.type === "object") {
+                    if (subSchema.additionalProperties) {
+                        if (!subSchema.hasOwnProperty("patternProperties")) {
+                            subSchema.patternProperties = {};
+                        }
+                        var found = false;
+                        for (var pattern in subSchema.patternProperties) {
+                            if (pattern === ".*") {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            subSchema.patternProperties[".*"] = subSchema.additionalProperties;
+                            delete subSchema.additionalProperties;
+                        }
+                    }
+                }
+            });
         }
         function populateSchemaMap(id, schema) {
             var pseudoSchema = createPseudoSchema(schema);
@@ -128,26 +168,15 @@ function SchemaResolver() {
                 if (schema.patternProperties) {
                     pseudoSchema.patternProperties = {};
                     for (var pat in schema.patternProperties) {
-                        var patChildProp = id + "[" + pat + "]";
+                        var patChildProp = id + "[/" + pat + "/]";
                         pseudoSchema.patternProperties[pat] = patChildProp;
                         var s = schema.patternProperties[pat];
 
-                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") ||
-                                s.hasOwnProperty("oneOf")) {
+                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
                             populateSchemaMap(patChildProp, schema.patternProperties[pat]);
                         } else {
                             populateSchemaMap(patChildProp, SCHEMA_ANY);
                         }
-                    }
-                }
-                if (schema.additionalProperties) {
-                    var childProp = id + "[*]";
-                    pseudoSchema.additionalProperties = childProp;
-                    if (schema.additionalProperties.hasOwnProperty("type") ||
-                            schema.additionalProperties.hasOwnProperty("oneOf")) {
-                        populateSchemaMap(childProp, schema.additionalProperties);
-                    } else {
-                        populateSchemaMap(childProp, SCHEMA_ANY);
                     }
                 }
             } else if (schema.type === "array") {

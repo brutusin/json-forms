@@ -212,6 +212,30 @@ function BrutusinForm(schema, initialData, config) {
 }
 /* global BrutusinForms */
 
+BrutusinForms.i18n = new I18n;
+
+
+function I18n() {
+
+    this.translations = {};
+    
+    this.setTranslations = function (translations) {
+        if (!translations) {
+            throw "A translation map is required";
+        }
+        this.translations = translations;
+    };
+
+    this.getTranslation = function (entryId) {
+        if (this.translations[entryId]) {
+            return this.translations[entryId];
+        } else {
+            return "{$" + entryId + "}";
+        }
+    };
+}
+/* global BrutusinForms */
+
 /**
  * Async schema resolution. Schema listeners are notified once initially and later when a subschema item changes
  * @returns {SchemaResolver}
@@ -223,7 +247,8 @@ function SchemaResolver() {
     var schemaMap;
 
     function normalizeId(id) {
-        return id.replace(/\["[^"]*"\]/g, "[*]").replace(/\[\d*\]/g, "[#]");
+        // return id.replace(/\["[^"]*"\]/g, "[*]").replace(/\[\d*\]/g, "[#]"); // problems for pattern properties
+        return id;
     }
 
     function cleanNonExistingEntries(id, newEntries) {
@@ -244,21 +269,24 @@ function SchemaResolver() {
         var entryMap = {};
         var dependencyMap = {};
         renameRequiredPropeties(schema); // required v4 (array) -> requiredProperties
+        renameAdditionalPropeties(schema); // additionalProperties -> patternProperties
         populateSchemaMap(id, schema);
         validateDepencyGraphIsAcyclic();
         merge();
         return entryMap;
 
-        function renameRequiredPropeties(schema) {
+        function visitSchema(schema, visitor) {
             if (!schema) {
                 return;
-            } else if (schema.hasOwnProperty("oneOf")) {
+            }
+            visitor(schema);
+            if (schema.hasOwnProperty("oneOf")) {
                 for (var i in schema.oneOf) {
-                    renameRequiredPropeties(schema.oneOf[i]);
+                    visitSchema(schema.oneOf[i], visitor);
                 }
             } else if (schema.hasOwnProperty("$ref")) {
                 var newSchema = getDefinition(schema["$ref"]);
-                renameRequiredPropeties(newSchema);
+                visitSchema(newSchema, visitor);
             } else if (schema.type === "object") {
                 if (schema.properties) {
                     if (schema.hasOwnProperty("required")) {
@@ -268,26 +296,62 @@ function SchemaResolver() {
                         }
                     }
                     for (var prop in schema.properties) {
-                        renameRequiredPropeties(schema.properties[prop]);
+                        visitSchema(schema.properties[prop], visitor);
                     }
                 }
                 if (schema.patternProperties) {
                     for (var pat in schema.patternProperties) {
                         var s = schema.patternProperties[pat];
                         if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
-                            renameRequiredPropeties(schema.patternProperties[pat]);
+                            visitSchema(schema.patternProperties[pat], visitor);
                         }
                     }
                 }
                 if (schema.additionalProperties) {
                     if (schema.additionalProperties.hasOwnProperty("type") || schema.additionalProperties.hasOwnProperty("oneOf")) {
-                        renameRequiredPropeties(schema.additionalProperties);
+                        visitSchema(schema.additionalProperties, visitor);
 
                     }
                 }
             } else if (schema.type === "array") {
-                renameRequiredPropeties(schema.items);
+                visitSchema(schema.items, visitor);
             }
+        }
+        function renameRequiredPropeties(schema) {
+            visitSchema(schema, function (subSchema) {
+                if (subSchema.type === "object") {
+                    if (subSchema.properties) {
+                        if (subSchema.hasOwnProperty("required")) {
+                            if (Array.isArray(subSchema.required)) {
+                                subSchema.requiredProperties = subSchema.required;
+                                delete subSchema.required;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        function renameAdditionalPropeties(schema) {
+            visitSchema(schema, function (subSchema) {
+                if (subSchema.type === "object") {
+                    if (subSchema.additionalProperties) {
+                        if (!subSchema.hasOwnProperty("patternProperties")) {
+                            subSchema.patternProperties = {};
+                        }
+                        var found = false;
+                        for (var pattern in subSchema.patternProperties) {
+                            if (pattern === ".*") {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            subSchema.patternProperties[".*"] = subSchema.additionalProperties;
+                            delete subSchema.additionalProperties;
+                        }
+                    }
+                }
+            });
         }
         function populateSchemaMap(id, schema) {
             var pseudoSchema = createPseudoSchema(schema);
@@ -340,26 +404,15 @@ function SchemaResolver() {
                 if (schema.patternProperties) {
                     pseudoSchema.patternProperties = {};
                     for (var pat in schema.patternProperties) {
-                        var patChildProp = id + "[" + pat + "]";
+                        var patChildProp = id + "[/" + pat + "/]";
                         pseudoSchema.patternProperties[pat] = patChildProp;
                         var s = schema.patternProperties[pat];
 
-                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") ||
-                                s.hasOwnProperty("oneOf")) {
+                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
                             populateSchemaMap(patChildProp, schema.patternProperties[pat]);
                         } else {
                             populateSchemaMap(patChildProp, SCHEMA_ANY);
                         }
-                    }
-                }
-                if (schema.additionalProperties) {
-                    var childProp = id + "[*]";
-                    pseudoSchema.additionalProperties = childProp;
-                    if (schema.additionalProperties.hasOwnProperty("type") ||
-                            schema.additionalProperties.hasOwnProperty("oneOf")) {
-                        populateSchemaMap(childProp, schema.additionalProperties);
-                    } else {
-                        populateSchemaMap(childProp, SCHEMA_ANY);
                     }
                 }
             } else if (schema.type === "array") {
@@ -598,34 +651,173 @@ function ObjectComponent() {
             var component = this;
             if (schema.hasOwnProperty("properties")) {
                 for (var p in schema.properties) {
-                    var prop = p;
-                    var propId = this.schemaId + "." + prop;
-                    var tr = document.createElement("tr");
-                    this.formFunctions.schemaResolver.addListener(propId, function (schema) {
-                        component.componentFunctions.removeAllChildren(tr);
-                        var child = component.children[prop];
-                        if (child) {
-                            child.dispose();
-                            delete component.children[prop];
-                        }
-                        if (schema && schema.type && schema.type !== "null") {
-                            var td1 = document.createElement("td");
-                            td1.className = "prop-name";
-                            var td2 = document.createElement("td");
-                            td2.className = "prop-value";
-                            appendChild(tbody, tr);
-                            appendChild(tr, td1);
-                            appendChild(td1, document.createTextNode(prop));
-                            appendChild(tr, td2);
-                            component.formFunctions.createTypeComponent(propId, null, function (child) {
-                                component.children[prop] = child;
-                                appendChild(td2, child.getDOM());
-                            });
-                        }
-                    });
+                    var tr = createPropertyInput(component.schemaId + "." + p, p, this.initialData ? this.initialData[p] : null);
+                    appendChild(tbody, tr);
                 }
             }
-            appendChild(this.dom, table);
+            if (schema.patternProperties) {
+                var usedProps = [];
+                var div = document.createElement("div");
+                appendChild(div, table);
+                for (var pattern in schema.patternProperties) {
+                    var patdiv = document.createElement("div");
+                    patdiv.className = "add-pattern-div";
+                    var addButton = document.createElement("button");
+                    addButton.setAttribute('type', 'button');
+                    addButton.pattern = pattern;
+                    addButton.onclick = function () {
+                        var p = this.pattern;
+                        var tr = createPatternPropertyInput(schema.patternProperties[p], p);
+                        appendChild(tbody, tr);
+                    };
+                    if (Object.keys(schema.patternProperties).length === 1) {
+                        appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
+                    } else {
+                        appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
+                    }
+                    appendChild(patdiv, addButton, schema);
+                    if (this.initialData) {
+                        for (var p in initialData) {
+                            if (schema.properties && schema.properties.hasOwnProperty(p)) {
+                                continue;
+                            }
+                            var r = RegExp(pattern);
+                            if (p.search(r) === -1) {
+                                continue;
+                            }
+                            if (usedProps.indexOf(p) !== -1) {
+                                continue;
+                            }
+                            var tr = createPatternPropertyInput(schema.patternProperties[pattern], pattern, this.initialData[p]);
+                            appendChild(tbody, tr);
+                            usedProps.push(p);
+                        }
+                    }
+                    appendChild(div, patdiv);
+                }
+                appendChild(this.dom, div);
+            } else {
+                appendChild(this.dom, table);
+            }
+        }
+
+        function createPatternPropertyInput(propertySchemaId, pattern, initialData) {
+            var tr = document.createElement("tr");
+            var regExp = RegExp(pattern);
+            component.formFunctions.schemaResolver.addListener(propertySchemaId, function (schema) {
+                component.componentFunctions.removeAllChildren(tr);
+                var propertyName = null;
+                if (propertyName) {
+                    var child = component.children[propertyName];
+                    if (child) {
+                        child.dispose();
+                        delete component.children[propertyName];
+                    }
+                }
+                if (schema && schema.type && schema.type !== "null") {
+                    var childComponent;
+                    var td1 = document.createElement("td");
+                    td1.className = "add-prop-name";
+                    var innerTab = document.createElement("table");
+                    var innerTr = document.createElement("tr");
+                    var innerTd1 = document.createElement("td");
+                    var innerTd2 = document.createElement("td");
+                    var td2 = document.createElement("td");
+                    td2.className = "prop-value";
+                    var nameInput = document.createElement("input");
+                    nameInput.type = "text";
+                    nameInput.placeholder = "/" + pattern + "/";
+
+//                    nameInput.getValidationError = function () {
+//                        if (nameInput.previousValue !== nameInput.value) {
+//                            if (current.hasOwnProperty(nameInput.value)) {
+//                                return BrutusinForms.messages["addpropNameExistent"];
+//                            }
+//                        }
+//                        if (!nameInput.value) {
+//                            return BrutusinForms.messages["addpropNameRequired"];
+//                        }
+//                    };
+
+                    nameInput.onchange = function () {
+                        if (propertyName) {
+                            delete component.children[propertyName];
+                        }
+                        if (nameInput.value && nameInput.value.search(regExp) !== -1) {
+                            var name = nameInput.value;
+                            var i = 1;
+                            while (propertyName !== name && component.children.hasOwnProperty(name)) {
+                                name = nameInput.value + "(" + i + ")";
+                                i++;
+                            }
+                            propertyName = name;
+                            nameInput.value = propertyName;
+                            component.children[propertyName] = childComponent;
+                        }
+                    };
+                    var removeButton = document.createElement("button");
+                    removeButton.setAttribute('type', 'button');
+                    removeButton.className = "remove";
+                    appendChild(removeButton, document.createTextNode("x"));
+                    removeButton.onclick = function () {
+                        if (propertyName) {
+                            delete component.children[propertyName];
+                        }
+                        if (childComponent) {
+                            childComponent.dispose();
+                            childComponent = null;
+                            tr.parentNode.removeChild(tr);
+                        }
+                    };
+                    appendChild(innerTd1, nameInput);
+                    appendChild(innerTd2, removeButton);
+                    appendChild(innerTr, innerTd1);
+                    appendChild(innerTr, innerTd2);
+                    appendChild(innerTab, innerTr);
+                    appendChild(td1, innerTab);
+
+                    appendChild(tr, td1);
+                    appendChild(tr, td2);
+                    appendChild(tbody, tr);
+                    appendChild(table, tbody);
+
+                    component.formFunctions.createTypeComponent(propertySchemaId, initialData, function (child) {
+                        childComponent = child;
+                        if (propertyName) {
+                            component.children[propertyName] = child;
+                        }
+                        appendChild(td2, child.getDOM());
+                    });
+                }
+            });
+            return tr;
+        }
+
+        function createPropertyInput(propertySchemaId, propertyName, initialData) {
+            var tr = document.createElement("tr");
+            component.formFunctions.schemaResolver.addListener(propertySchemaId, function (schema) {
+                component.componentFunctions.removeAllChildren(tr);
+                var child = component.children[propertyName];
+                if (child) {
+                    child.dispose();
+                    delete component.children[propertyName];
+                }
+                if (schema && schema.type && schema.type !== "null") {
+                    var td1 = document.createElement("td");
+                    td1.className = "prop-name";
+                    var td2 = document.createElement("td");
+                    td2.className = "prop-value";
+                    appendChild(tbody, tr);
+                    appendChild(tr, td1);
+                    appendChild(td1, document.createTextNode(propertyName));
+                    appendChild(tr, td2);
+                    component.formFunctions.createTypeComponent(propertySchemaId, initialData, function (child) {
+                        component.children[propertyName] = child;
+                        appendChild(td2, child.getDOM());
+                    });
+                }
+            });
+            return tr;
         }
     };
 
@@ -695,6 +887,39 @@ function SimpleComponent() {
                     input.selectedIndex = 1;
                 else
                     input.selectedIndex = selectedIndex;
+            } else if (schema.type === "boolean") {
+                if (schema.required) {
+                    input = document.createElement("input");
+                    input.type = "checkbox";
+                    if (initialData === true) {
+                        input.checked = true;
+                    }
+                } else {
+                    input = document.createElement("select");
+                    var emptyOption = document.createElement("option");
+                    var textEmpty = document.createTextNode("");
+                    textEmpty.value = "";
+                    appendChild(emptyOption, textEmpty);
+                    appendChild(input, emptyOption);
+
+                    var optionTrue = document.createElement("option");
+                    var textTrue = document.createTextNode(BrutusinForms.i18n.getTranslation("true"));
+                    optionTrue.value = "true";
+                    appendChild(optionTrue, textTrue);
+                    appendChild(input, optionTrue);
+
+                    var optionFalse = document.createElement("option");
+                    var textFalse = document.createTextNode(BrutusinForms.i18n.getTranslation("false"));
+                    optionFalse.value = "false";
+                    appendChild(optionFalse, textFalse);
+                    appendChild(input, optionFalse);
+
+                    if (initialData === true) {
+                        input.selectedIndex = 1;
+                    } else if (initialData === false) {
+                        input.selectedIndex = 2;
+                    }
+                }
             } else {
                 input = document.createElement("input");
                 if (schema.type === "integer" || schema.type === "number") {
@@ -794,4 +1019,36 @@ BrutusinForms.factories.typeComponents["boolean"] = SimpleComponent;
 BrutusinForms.factories.typeComponents["integer"] = SimpleComponent;
 BrutusinForms.factories.typeComponents["number"] = SimpleComponent;
 BrutusinForms.factories.typeComponents["any"] = SimpleComponent;
+/* global brutusin */
+
+if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["json-forms"]) {
+    throw new Error("brutusin-json-forms.js is required");
+}
+(function () {
+    var BrutusinForms = brutusin["json-forms"];
+    
+    BrutusinForms.i18n.setTranslations({
+        "validationError": "Validation error",
+        "required": "This field is **required**",
+        "invalidValue": "Invalid field value",
+        "addpropNameExistent": "This property is already present in the object",
+        "addpropNameRequired": "A name is required",
+        "minItems": "At least `{0}` items are required",
+        "maxItems": "At most `{0}` items are allowed",
+        "pattern": "Value does not match pattern: `{0}`",
+        "minLength": "Value must be **at least** `{0}` characters long",
+        "maxLength": "Value must be **at most** `{0}` characters long",
+        "multipleOf": "Value must be **multiple of** `{0}`",
+        "minimum": "Value must be **greater or equal than** `{0}`",
+        "exclusiveMinimum": "Value must be **greater than** `{0}`",
+        "maximum": "Value must be **lower or equal than** `{0}`",
+        "exclusiveMaximum": "Value must be **lower than** `{0}`",
+        "minProperties": "At least `{0}` properties are required",
+        "maxProperties": "At most `{0}` properties are allowed",
+        "uniqueItems": "Array items must be unique",
+        "addItem": "Add item",
+        "true": "True",
+        "false": "False"
+    });
+}());
 })();

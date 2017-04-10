@@ -54,6 +54,39 @@ function SimpleComponent() {
                     input.selectedIndex = 1;
                 else
                     input.selectedIndex = selectedIndex;
+            } else if (schema.type === "boolean") {
+                if (schema.required) {
+                    input = document.createElement("input");
+                    input.type = "checkbox";
+                    if (initialData === true) {
+                        input.checked = true;
+                    }
+                } else {
+                    input = document.createElement("select");
+                    var emptyOption = document.createElement("option");
+                    var textEmpty = document.createTextNode("");
+                    textEmpty.value = "";
+                    appendChild(emptyOption, textEmpty);
+                    appendChild(input, emptyOption);
+
+                    var optionTrue = document.createElement("option");
+                    var textTrue = document.createTextNode(BrutusinForms.i18n.getTranslation("true"));
+                    optionTrue.value = "true";
+                    appendChild(optionTrue, textTrue);
+                    appendChild(input, optionTrue);
+
+                    var optionFalse = document.createElement("option");
+                    var textFalse = document.createTextNode(BrutusinForms.i18n.getTranslation("false"));
+                    optionFalse.value = "false";
+                    appendChild(optionFalse, textFalse);
+                    appendChild(input, optionFalse);
+
+                    if (initialData === true) {
+                        input.selectedIndex = 1;
+                    } else if (initialData === false) {
+                        input.selectedIndex = 2;
+                    }
+                }
             } else {
                 input = document.createElement("input");
                 if (schema.type === "integer" || schema.type === "number") {
