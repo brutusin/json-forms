@@ -2,8 +2,7 @@
 
 function ObjectComponent() {
     this.render = function (schema) {
-        var appendChild = this.formFunctions.appendChild;
-        this.componentFunctions.removeAllChildren(this.dom);
+        var appendChild = this._.appendChild;
         if (schema) {
             var table = document.createElement("table");
             table.className = "object";
@@ -56,23 +55,25 @@ function ObjectComponent() {
                     }
                     appendChild(div, patdiv);
                 }
-                appendChild(this.dom, div);
+                appendChild(this.getDOM(), div);
             } else {
-                appendChild(this.dom, table);
+                appendChild(this.getDOM(), table);
             }
         }
 
         function createPatternPropertyInput(propertySchemaId, pattern, initialData) {
             var tr = document.createElement("tr");
             var regExp = RegExp(pattern);
-            component.formFunctions.schemaResolver.addListener(propertySchemaId, function (schema) {
-                component.componentFunctions.removeAllChildren(tr);
+            var schemaListener = function (schema) {
+                while (tr.firstChild) {
+                    tr.removeChild(tr.firstChild);
+                }
                 var propertyName = null;
                 if (propertyName) {
-                    var child = component.children[propertyName];
+                    var child = component._.children[propertyName];
                     if (child) {
                         child.dispose();
-                        delete component.children[propertyName];
+                        delete component._.children[propertyName];
                     }
                 }
                 if (schema && schema.type && schema.type !== "null") {
@@ -102,18 +103,18 @@ function ObjectComponent() {
 
                     nameInput.onchange = function () {
                         if (propertyName) {
-                            delete component.children[propertyName];
+                            delete component._.children[propertyName];
                         }
                         if (nameInput.value && nameInput.value.search(regExp) !== -1) {
                             var name = nameInput.value;
                             var i = 1;
-                            while (propertyName !== name && component.children.hasOwnProperty(name)) {
+                            while (propertyName !== name && component._.children.hasOwnProperty(name)) {
                                 name = nameInput.value + "(" + i + ")";
                                 i++;
                             }
                             propertyName = name;
                             nameInput.value = propertyName;
-                            component.children[propertyName] = childComponent;
+                            component._.children[propertyName] = childComponent;
                         }
                     };
                     var removeButton = document.createElement("button");
@@ -122,13 +123,14 @@ function ObjectComponent() {
                     appendChild(removeButton, document.createTextNode("x"));
                     removeButton.onclick = function () {
                         if (propertyName) {
-                            delete component.children[propertyName];
+                            delete component._.children[propertyName];
                         }
                         if (childComponent) {
                             childComponent.dispose();
                             childComponent = null;
                             tr.parentNode.removeChild(tr);
                         }
+                        component._.unRegisterSchemaListener(propertySchemaId, schemaListener);
                     };
                     appendChild(innerTd1, nameInput);
                     appendChild(innerTd2, removeButton);
@@ -142,26 +144,29 @@ function ObjectComponent() {
                     appendChild(tbody, tr);
                     appendChild(table, tbody);
 
-                    component.formFunctions.createTypeComponent(propertySchemaId, initialData, function (child) {
+                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
                         childComponent = child;
                         if (propertyName) {
-                            component.children[propertyName] = child;
+                            component._.children[propertyName] = child;
                         }
                         appendChild(td2, child.getDOM());
                     });
                 }
-            });
+            }
+            component._.registerSchemaListener(propertySchemaId, schemaListener);
             return tr;
         }
 
         function createPropertyInput(propertySchemaId, propertyName, initialData) {
             var tr = document.createElement("tr");
-            component.formFunctions.schemaResolver.addListener(propertySchemaId, function (schema) {
-                component.componentFunctions.removeAllChildren(tr);
-                var child = component.children[propertyName];
+            component._.registerSchemaListener(propertySchemaId, function (schema) {
+                while (tr.firstChild) {
+                    tr.removeChild(tr.firstChild);
+                }
+                var child = component._.children[propertyName];
                 if (child) {
                     child.dispose();
-                    delete component.children[propertyName];
+                    delete component._.children[propertyName];
                 }
                 if (schema && schema.type && schema.type !== "null") {
                     var td1 = document.createElement("td");
@@ -172,8 +177,8 @@ function ObjectComponent() {
                     appendChild(tr, td1);
                     appendChild(td1, document.createTextNode(propertyName));
                     appendChild(tr, td2);
-                    component.formFunctions.createTypeComponent(propertySchemaId, initialData, function (child) {
-                        component.children[propertyName] = child;
+                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
+                        component._.children[propertyName] = child;
                         appendChild(td2, child.getDOM());
                     });
                 }
@@ -184,11 +189,12 @@ function ObjectComponent() {
 
     this.getData = function () {
         var data = {};
-        for (var prop in this.children) {
-            data[prop] = this.children[prop].getData();
+        for (var prop in this._.children) {
+            data[prop] = this._.children[prop].getData();
         }
         return data;
     };
+
 }
 ObjectComponent.prototype = new BrutusinForms.TypeComponent;
 BrutusinForms.factories.typeComponents["object"] = ObjectComponent;

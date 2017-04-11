@@ -30,7 +30,7 @@ BrutusinForms.factories = {
     typeComponents: {
         string: null,
         object: null,
-      //  array: null,
+        array: null,
         boolean: null,
         number: null,
         integer: null,

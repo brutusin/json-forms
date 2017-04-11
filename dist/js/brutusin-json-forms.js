@@ -116,7 +116,7 @@ BrutusinForms.factories = {
     typeComponents: {
         string: null,
         object: null,
-      //  array: null,
+        array: null,
         boolean: null,
         number: null,
         integer: null,
@@ -589,42 +589,71 @@ BrutusinForms.factories.schemaResolver = SchemaResolver;
  */
 function TypeComponent() {
 
-    this.componentFunctions = {
-        removeAllChildren: function removeAllChildren(domElement) {
-            while (domElement.firstChild) {
-                domElement.removeChild(domElement.firstChild);
-            }
+    /**
+     * Called with all args the first time. Called with no args on schema change
+     * @param {type} schemaId
+     * @param {type} initialData
+     * @param {type} formHelper
+     * @returns {undefined}
+     */
+    this.init = function (schemaId, initialData, formHelper) {
+        if (!this._) { // to group and represent protected fields
+            this._ = {};
+            this._.dom = document.createElement("div");
         }
-    };
-
-    this.init = function (schemaId, initialData, formFunctions) {
-        this.schemaId = schemaId;
-        this.initialData = initialData;
-        this.formFunctions = formFunctions;
-        this.dom = document.createElement("div");
-
         var component = this;
-
-        function reset() {
-            component.componentFunctions.removeAllChildren(component.dom);
-            component.children = {};
+        this._.children = {};
+        this._.schemaListeners = [];
+        if (schemaId) {
+            this.schemaId = schemaId;
         }
+        if (initialData) {
+            this.initialData = initialData;
+        }
+        if (formHelper) {
+            this._.appendChild = formHelper.appendChild;
+            this._.createTypeComponent = formHelper.createTypeComponent;
+            this._.registerSchemaListener = function (schemaId, callback) {
+                component._.schemaListeners.push({schemaId: schemaId, callback: callback});
+                formHelper.schemaResolver.addListener(schemaId, callback);
+            };
+            this._.unRegisterSchemaListener = function (schemaId, callback) {
+                var listener;
+                for (var i = 0; i < component._.schemaListeners.length; i++) {
+                    listener = component._.schemaListeners[i];
+                    if (listener.schemaId === schemaId && listener.callback === callback) {
+                        component._.schemaListeners.splice(i, 1);
+                        break;
+                    }
+                }
+                formHelper.schemaResolver.removeListener(schemaId, callback);
+            };
+            this._.notifyChanged = function (schemaId) {
+                formHelper.schemaResolver.notifyChanged(schemaId);
+            };
+        }
+        ;
 
-        this.schemaListener = function (schema) {
-            component.schema = schema;
-            reset();
-            if (schema) {
-                component.render(schema);
+        while (this._.dom.firstChild) {
+            this._.dom.removeChild(this._dom.firstChild);
+        }
+        this._.registerSchemaListener(this.schemaId, function (schema) {
+            if (component._.schema) {
+                component.dispose();
+                component.init();
+            } else {
+                component._.schema = schema;
+                if (schema) {
+                    component.render(schema);
+                }
             }
-        };
-
-        this.formFunctions.schemaResolver.addListener(this.schemaId, this.schemaListener);
+        });
     };
 
     this.render = function (schema) {
     };
     this.getDOM = function () {
-        return this.dom;
+        return this._.dom;
     };
     this.getData = function () {
     };
@@ -633,16 +662,134 @@ function TypeComponent() {
     this.onchange = function () {
     };
     this.dispose = function () {
-        this.formFunctions.schemaResolver.removeListener(this.schemaId, this.schemaListener);
+        for (var i = this._.schemaListeners.length - 1; i >= 0; i--) {
+            var listener = this._.schemaListeners[i];
+            this._.unRegisterSchemaListener(listener.schemaId, listener.callback);
+        }
+        for (var p in this._.children) {
+            this._.children[p].dispose();
+        }
     };
 }
 BrutusinForms.TypeComponent = TypeComponent;
 /* global BrutusinForms */
 
+function ArrayComponent() {
+    this.render = function (schema) {
+        this._.children = [];
+        var appendChild = this._.appendChild;
+        if (schema) {
+            var component = this;
+            this._.registerSchemaListener(this.schemaId, function (itemSchema) {
+                var div = document.createElement("div");
+                var table = document.createElement("table");
+                table.className = "array";
+                var addButton = document.createElement("button");
+                if (schema.readOnly) {
+                    addButton.disabled = true;
+                }
+                addButton.setAttribute('type', 'button');
+//            addButton.getValidationError = function () {
+//                if (schema.minItems && schema.minItems > table.rows.length) {
+//                    return BrutusinForms.messages["minItems"].format(schema.minItems);
+//                }
+//                if (schema.maxItems && schema.maxItems < table.rows.length) {
+//                    return BrutusinForms.messages["maxItems"].format(schema.maxItems);
+//                }
+//                if (schema.uniqueItems) {
+//                    for (var i = 0; i < current.length; i++) {
+//                        for (var j = i + 1; j < current.length; j++) {
+//                            if (JSON.stringify(current[i]) === JSON.stringify(current[j])) {
+//                                return BrutusinForms.messages["uniqueItems"];
+//                            }
+//                        }
+//                    }
+//                }
+//            };
+                addButton.onclick = function () {
+                    addItem(table);
+                };
+                if (itemSchema.description) {
+                    addButton.title = itemSchema.description;
+                }
+                appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
+                appendChild(div, table);
+                appendChild(div, addButton);
+                if (component.initialData && component.initialData instanceof Array) {
+                    for (var i = 0; i < component.initialData.length; i++) {
+                        addItem(table, component.initialData[i]);
+                    }
+                }
+                appendChild(component.getDOM(), div);
+
+            });
+        }
+
+        function addItem(table, initialData) {
+            var tbody = document.createElement("tbody");
+            var tr = document.createElement("tr");
+            tr.className = "item";
+            var td1 = document.createElement("td");
+            td1.className = "item-index";
+            var td2 = document.createElement("td");
+            td2.className = "item-action";
+            var td3 = document.createElement("td");
+            td3.className = "item-value";
+            var removeButton = document.createElement("button");
+            removeButton.setAttribute('type', 'button');
+            removeButton.className = "remove";
+            if (schema.readOnly === true) {
+                removeButton.disabled = true;
+            }
+            appendChild(removeButton, document.createTextNode("x"));
+            var computRowCount = function () {
+                for (var i = 0; i < table.rows.length; i++) {
+                    var tr = table.rows[i];
+                    tr.cells[0].innerHTML = i + 1;
+                    tr.index = i;
+                }
+            };
+            var childComponent;
+            component._.createTypeComponent(schema.items, initialData, function (child) {
+                childComponent = child;
+                component._.children.push(child);
+                appendChild(td3, child.getDOM());
+            });
+            removeButton.onclick = function () {
+                if (childComponent) {
+                    childComponent.dispose();
+                    childComponent = null;
+                    tr.parentNode.removeChild(tr);
+                    component._.children.splice(tr.index, 1);
+                }
+                computRowCount();
+            };
+            appendChild(td2, removeButton);
+            var number = document.createTextNode(table.rows.length + 1);
+            appendChild(td1, number);
+            appendChild(tr, td1);
+            appendChild(tr, td2);
+            appendChild(tr, td3);
+            appendChild(tbody, tr);
+            appendChild(table, tbody);
+        }
+    };
+
+    this.getData = function () {
+        var data = [];
+        for (var prop in this._.children) {
+            data[prop] = this._.children[prop].getData();
+        }
+        return data;
+    };
+}
+ArrayComponent.prototype = new BrutusinForms.TypeComponent;
+BrutusinForms.factories.typeComponents["array"] = ArrayComponent;
+/* global BrutusinForms */
+
 function ObjectComponent() {
     this.render = function (schema) {
-        var appendChild = this.formFunctions.appendChild;
-        this.componentFunctions.removeAllChildren(this.dom);
+        var appendChild = this._.appendChild;
         if (schema) {
             var table = document.createElement("table");
             table.className = "object";
@@ -695,23 +842,25 @@ function ObjectComponent() {
                     }
                     appendChild(div, patdiv);
                 }
-                appendChild(this.dom, div);
+                appendChild(this.getDOM(), div);
             } else {
-                appendChild(this.dom, table);
+                appendChild(this.getDOM(), table);
             }
         }
 
         function createPatternPropertyInput(propertySchemaId, pattern, initialData) {
             var tr = document.createElement("tr");
             var regExp = RegExp(pattern);
-            component.formFunctions.schemaResolver.addListener(propertySchemaId, function (schema) {
-                component.componentFunctions.removeAllChildren(tr);
+            var schemaListener = function (schema) {
+                while (tr.firstChild) {
+                    tr.removeChild(tr.firstChild);
+                }
                 var propertyName = null;
                 if (propertyName) {
-                    var child = component.children[propertyName];
+                    var child = component._.children[propertyName];
                     if (child) {
                         child.dispose();
-                        delete component.children[propertyName];
+                        delete component._.children[propertyName];
                     }
                 }
                 if (schema && schema.type && schema.type !== "null") {
@@ -741,18 +890,18 @@ function ObjectComponent() {
 
                     nameInput.onchange = function () {
                         if (propertyName) {
-                            delete component.children[propertyName];
+                            delete component._.children[propertyName];
                         }
                         if (nameInput.value && nameInput.value.search(regExp) !== -1) {
                             var name = nameInput.value;
                             var i = 1;
-                            while (propertyName !== name && component.children.hasOwnProperty(name)) {
+                            while (propertyName !== name && component._.children.hasOwnProperty(name)) {
                                 name = nameInput.value + "(" + i + ")";
                                 i++;
                             }
                             propertyName = name;
                             nameInput.value = propertyName;
-                            component.children[propertyName] = childComponent;
+                            component._.children[propertyName] = childComponent;
                         }
                     };
                     var removeButton = document.createElement("button");
@@ -761,13 +910,14 @@ function ObjectComponent() {
                     appendChild(removeButton, document.createTextNode("x"));
                     removeButton.onclick = function () {
                         if (propertyName) {
-                            delete component.children[propertyName];
+                            delete component._.children[propertyName];
                         }
                         if (childComponent) {
                             childComponent.dispose();
                             childComponent = null;
                             tr.parentNode.removeChild(tr);
                         }
+                        component._.unRegisterSchemaListener(propertySchemaId, schemaListener);
                     };
                     appendChild(innerTd1, nameInput);
                     appendChild(innerTd2, removeButton);
@@ -781,26 +931,29 @@ function ObjectComponent() {
                     appendChild(tbody, tr);
                     appendChild(table, tbody);
 
-                    component.formFunctions.createTypeComponent(propertySchemaId, initialData, function (child) {
+                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
                         childComponent = child;
                         if (propertyName) {
-                            component.children[propertyName] = child;
+                            component._.children[propertyName] = child;
                         }
                         appendChild(td2, child.getDOM());
                     });
                 }
-            });
+            }
+            component._.registerSchemaListener(propertySchemaId, schemaListener);
             return tr;
         }
 
         function createPropertyInput(propertySchemaId, propertyName, initialData) {
             var tr = document.createElement("tr");
-            component.formFunctions.schemaResolver.addListener(propertySchemaId, function (schema) {
-                component.componentFunctions.removeAllChildren(tr);
-                var child = component.children[propertyName];
+            component._.registerSchemaListener(propertySchemaId, function (schema) {
+                while (tr.firstChild) {
+                    tr.removeChild(tr.firstChild);
+                }
+                var child = component._.children[propertyName];
                 if (child) {
                     child.dispose();
-                    delete component.children[propertyName];
+                    delete component._.children[propertyName];
                 }
                 if (schema && schema.type && schema.type !== "null") {
                     var td1 = document.createElement("td");
@@ -811,8 +964,8 @@ function ObjectComponent() {
                     appendChild(tr, td1);
                     appendChild(td1, document.createTextNode(propertyName));
                     appendChild(tr, td2);
-                    component.formFunctions.createTypeComponent(propertySchemaId, initialData, function (child) {
-                        component.children[propertyName] = child;
+                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
+                        component._.children[propertyName] = child;
                         appendChild(td2, child.getDOM());
                     });
                 }
@@ -823,11 +976,12 @@ function ObjectComponent() {
 
     this.getData = function () {
         var data = {};
-        for (var prop in this.children) {
-            data[prop] = this.children[prop].getData();
+        for (var prop in this._.children) {
+            data[prop] = this._.children[prop].getData();
         }
         return data;
     };
+
 }
 ObjectComponent.prototype = new BrutusinForms.TypeComponent;
 BrutusinForms.factories.typeComponents["object"] = ObjectComponent;
@@ -835,15 +989,14 @@ BrutusinForms.factories.typeComponents["object"] = ObjectComponent;
 function SimpleComponent() {
     this.render = function (schema) {
         var component = this;
-        var appendChild = this.formFunctions.appendChild;
+        var appendChild = this._.appendChild;
         var initialData = this.initialData;
-        this.input = createInput();
-        this.input.onchange = function (evt) {
-            component.formFunctions.schemaResolver.notifyChanged(component.schemaId);
+        this._.input = createInput();
+        this._.input.onchange = function (evt) {
+            component._.notifyChanged(component.schemaId);
             component.onchange(evt);
         };
-        this.componentFunctions.removeAllChildren(this.dom);
-        appendChild(this.dom, this.input);
+        appendChild(this._.dom, this._.input);
         function createInput() {
             var input;
             if (schema.type === "any") {
@@ -960,7 +1113,7 @@ function SimpleComponent() {
     };
 
     this.getData = function () {
-        return getValue(this.schema, this.input);
+        return getValue(this._.schema, this._.input);
 
         function getValue(schema, input) {
             if (!schema) {

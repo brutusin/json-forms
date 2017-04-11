@@ -2,15 +2,14 @@
 function SimpleComponent() {
     this.render = function (schema) {
         var component = this;
-        var appendChild = this.formFunctions.appendChild;
+        var appendChild = this._.appendChild;
         var initialData = this.initialData;
-        this.input = createInput();
-        this.input.onchange = function (evt) {
-            component.formFunctions.schemaResolver.notifyChanged(component.schemaId);
+        this._.input = createInput();
+        this._.input.onchange = function (evt) {
+            component._.notifyChanged(component.schemaId);
             component.onchange(evt);
         };
-        this.componentFunctions.removeAllChildren(this.dom);
-        appendChild(this.dom, this.input);
+        appendChild(this._.dom, this._.input);
         function createInput() {
             var input;
             if (schema.type === "any") {
@@ -127,7 +126,7 @@ function SimpleComponent() {
     };
 
     this.getData = function () {
-        return getValue(this.schema, this.input);
+        return getValue(this._.schema, this._.input);
 
         function getValue(schema, input) {
             if (!schema) {

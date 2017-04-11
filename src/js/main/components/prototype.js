@@ -6,42 +6,71 @@
  */
 function TypeComponent() {
 
-    this.componentFunctions = {
-        removeAllChildren: function removeAllChildren(domElement) {
-            while (domElement.firstChild) {
-                domElement.removeChild(domElement.firstChild);
-            }
+    /**
+     * Called with all args the first time. Called with no args on schema change
+     * @param {type} schemaId
+     * @param {type} initialData
+     * @param {type} formHelper
+     * @returns {undefined}
+     */
+    this.init = function (schemaId, initialData, formHelper) {
+        if (!this._) { // to group and represent protected fields
+            this._ = {};
+            this._.dom = document.createElement("div");
         }
-    };
-
-    this.init = function (schemaId, initialData, formFunctions) {
-        this.schemaId = schemaId;
-        this.initialData = initialData;
-        this.formFunctions = formFunctions;
-        this.dom = document.createElement("div");
-
         var component = this;
-
-        function reset() {
-            component.componentFunctions.removeAllChildren(component.dom);
-            component.children = {};
+        this._.children = {};
+        this._.schemaListeners = [];
+        if (schemaId) {
+            this.schemaId = schemaId;
         }
+        if (initialData) {
+            this.initialData = initialData;
+        }
+        if (formHelper) {
+            this._.appendChild = formHelper.appendChild;
+            this._.createTypeComponent = formHelper.createTypeComponent;
+            this._.registerSchemaListener = function (schemaId, callback) {
+                component._.schemaListeners.push({schemaId: schemaId, callback: callback});
+                formHelper.schemaResolver.addListener(schemaId, callback);
+            };
+            this._.unRegisterSchemaListener = function (schemaId, callback) {
+                var listener;
+                for (var i = 0; i < component._.schemaListeners.length; i++) {
+                    listener = component._.schemaListeners[i];
+                    if (listener.schemaId === schemaId && listener.callback === callback) {
+                        component._.schemaListeners.splice(i, 1);
+                        break;
+                    }
+                }
+                formHelper.schemaResolver.removeListener(schemaId, callback);
+            };
+            this._.notifyChanged = function (schemaId) {
+                formHelper.schemaResolver.notifyChanged(schemaId);
+            };
+        }
+        ;
 
-        this.schemaListener = function (schema) {
-            component.schema = schema;
-            reset();
-            if (schema) {
-                component.render(schema);
+        while (this._.dom.firstChild) {
+            this._.dom.removeChild(this._dom.firstChild);
+        }
+        this._.registerSchemaListener(this.schemaId, function (schema) {
+            if (component._.schema) {
+                component.dispose();
+                component.init();
+            } else {
+                component._.schema = schema;
+                if (schema) {
+                    component.render(schema);
+                }
             }
-        };
-
-        this.formFunctions.schemaResolver.addListener(this.schemaId, this.schemaListener);
+        });
     };
 
     this.render = function (schema) {
     };
     this.getDOM = function () {
-        return this.dom;
+        return this._.dom;
     };
     this.getData = function () {
     };
@@ -50,7 +79,13 @@ function TypeComponent() {
     this.onchange = function () {
     };
     this.dispose = function () {
-        this.formFunctions.schemaResolver.removeListener(this.schemaId, this.schemaListener);
+        for (var i = this._.schemaListeners.length - 1; i >= 0; i--) {
+            var listener = this._.schemaListeners[i];
+            this._.unRegisterSchemaListener(listener.schemaId, listener.callback);
+        }
+        for (var p in this._.children) {
+            this._.children[p].dispose();
+        }
     };
 }
 BrutusinForms.TypeComponent = TypeComponent;

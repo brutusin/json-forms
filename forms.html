@@ -4,25 +4,112 @@
 <script>
     var BrutusinForms = brutusin["json-forms"];
     var form = BrutusinForms.createForm(
-          {
-  "$schema": "http://json-schema.org/draft-03/schema#",
-  "type": "object",
-  "properties": {
-    "s1": {
-      "type": "string",
-      "title": "A  string",
-      "description": "A string"
-    }
-  },
-  "patternProperties": {
-    "^ref_.*": {
-      "type": "number"
-    },
-          "^ddf_.*": {
-      "type": "number"
-    }
-  }
-}
+            {
+                "$schema": "http://json-schema.org/draft-03/schema#",
+                "type": "object",
+                "properties": {
+                    "pageNum": {
+                        "type": "integer",
+                        "title": "Page number",
+                        "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details",
+                        "default": 1,
+                        "required": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "title": "Page size",
+                        "description": "Number of records per page",
+                        "required": true,
+                        "default": 50,
+                        "enum": [
+                            10,
+                            25,
+                            50,
+                            100
+                        ]
+                    },
+                    "selectedFacetValues": {
+                        "type": "array",
+                        "title": "Query terms",
+                        "minItems": 2,
+                        "uniqueItems": true,
+                        "items": {
+                            "description": "Query item",
+                            "type": "object",
+                            "properties": {
+                                "facetName": {
+                                    "type": "string",
+                                    "title": "Field name",
+                                    "description": "Indexed field name",
+                                    "required": true
+                                },
+                                "matchAllNull": {
+                                    "type": "boolean",
+                                    "title": "Match nulls"
+                                },
+                                "matchAllNotNull": {
+                                    "type": "boolean",
+                                    "title": "Match not nulls"
+                                },
+                                "facetValues": {
+                                    "type": "array",
+                                    "title": "Field values",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "value": {
+                                                "type": "string",
+                                                "title": "Value"
+                                            }
+                                        }
+                                    }
+                                },
+                                "included": {
+                                    "type": "boolean",
+                                    "title": "Included"
+                                }
+                            }
+                        }
+                    },
+                    "sorts": {
+                        "type": "array",
+                        "title": "Sorting",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fieldName": {
+                                    "type": "string",
+                                    "title": "Field name"
+                                },
+                                "ascending": {
+                                    "type": "boolean",
+                                    "title": "Ascending"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+//          {
+//  "$schema": "http://json-schema.org/draft-03/schema#",
+//  "type": "object",
+//  "properties": {
+//    "s1": {
+//      "type": "string",
+//      "title": "A  string",
+//      "description": "A string"
+//    }
+//  },
+//  "patternProperties": {
+//    "^ref_.*": {
+//      "type": "number"
+//    },
+//          "^ddf_.*": {
+//      "type": "number"
+//    }
+//  }
+//}
 //            {
 //                "$schema": "http://json-schema.org/draft-03/schema#",
 //                "type": "object",
