@@ -104,9 +104,12 @@ function ArrayComponent() {
     this.getData = function () {
         var data = [];
         for (var prop in this._.children) {
-            data[prop] = this._.children[prop].getData();
+            var value = this._.children[prop].getData();
+            if (value !== null) {
+                data.push(value);
+            }
         }
-        return data;
+        return data.length > 0 ? data : null;
     };
 }
 ArrayComponent.prototype = new BrutusinForms.TypeComponent;

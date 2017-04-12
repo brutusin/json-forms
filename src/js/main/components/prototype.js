@@ -24,7 +24,7 @@ function TypeComponent() {
         if (schemaId) {
             this.schemaId = schemaId;
         }
-        if (initialData) {
+        if (typeof initialData !== "undefined") {
             this.initialData = initialData;
         }
         if (formHelper) {

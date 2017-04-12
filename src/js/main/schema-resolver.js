@@ -119,6 +119,14 @@ function SchemaResolver() {
         }
         function populateSchemaMap(id, schema) {
             var pseudoSchema = createPseudoSchema(schema);
+            function containsStr(array, string) {
+                for (var i = 0; i < array.length; i++) {
+                    if (array[i] == string) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             entryMap[id] = {id: id, schema: pseudoSchema, static: !dynamic};
             if (!schema) {
                 return;
@@ -281,11 +289,13 @@ function SchemaResolver() {
     };
 
     this.notifyChanged = function (id) {
-        var dependentIds = schemaMap[id].dependedBy;
-        if (!dependentIds) {
-            return;
+        if (schemaMap.hasOwnProperty(id)) {
+            var dependentIds = schemaMap[id].dependedBy;
+            if (!dependentIds) {
+                return;
+            }
+            this.resolve(dependentIds);
         }
-        this.resolve(dependentIds);
     };
 
     this.resolve = function (ids) {

@@ -150,7 +150,12 @@ function ObjectComponent() {
                             component._.children[propertyName] = child;
                         }
                         appendChild(td2, child.getDOM());
+                        child.onchange = function(evt){
+                            component._.notifyChanged(component.schemaId);
+                            component.onchange(evt);
+                        };
                     });
+                    
                 }
             }
             component._.registerSchemaListener(propertySchemaId, schemaListener);
@@ -189,10 +194,15 @@ function ObjectComponent() {
 
     this.getData = function () {
         var data = {};
+        var hasProperties = false;
         for (var prop in this._.children) {
-            data[prop] = this._.children[prop].getData();
+            var value = this._.children[prop].getData();
+            if (value !== null) {
+                hasProperties = true;
+                data[prop] = value;
+            }
         }
-        return data;
+        return (hasProperties || this._.schema.required === true) ? data : null;
     };
 
 }

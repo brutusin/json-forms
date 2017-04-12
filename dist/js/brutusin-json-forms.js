@@ -355,6 +355,14 @@ function SchemaResolver() {
         }
         function populateSchemaMap(id, schema) {
             var pseudoSchema = createPseudoSchema(schema);
+            function containsStr(array, string) {
+                for (var i = 0; i < array.length; i++) {
+                    if (array[i] == string) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             entryMap[id] = {id: id, schema: pseudoSchema, static: !dynamic};
             if (!schema) {
                 return;
@@ -517,11 +525,13 @@ function SchemaResolver() {
     };
 
     this.notifyChanged = function (id) {
-        var dependentIds = schemaMap[id].dependedBy;
-        if (!dependentIds) {
-            return;
+        if (schemaMap.hasOwnProperty(id)) {
+            var dependentIds = schemaMap[id].dependedBy;
+            if (!dependentIds) {
+                return;
+            }
+            this.resolve(dependentIds);
         }
-        this.resolve(dependentIds);
     };
 
     this.resolve = function (ids) {
@@ -607,7 +617,7 @@ function TypeComponent() {
         if (schemaId) {
             this.schemaId = schemaId;
         }
-        if (initialData) {
+        if (typeof initialData !== "undefined") {
             this.initialData = initialData;
         }
         if (formHelper) {
@@ -778,9 +788,12 @@ function ArrayComponent() {
     this.getData = function () {
         var data = [];
         for (var prop in this._.children) {
-            data[prop] = this._.children[prop].getData();
+            var value = this._.children[prop].getData();
+            if (value !== null) {
+                data.push(value);
+            }
         }
-        return data;
+        return data.length > 0 ? data : null;
     };
 }
 ArrayComponent.prototype = new BrutusinForms.TypeComponent;
@@ -937,7 +950,12 @@ function ObjectComponent() {
                             component._.children[propertyName] = child;
                         }
                         appendChild(td2, child.getDOM());
+                        child.onchange = function(evt){
+                            component._.notifyChanged(component.schemaId);
+                            component.onchange(evt);
+                        };
                     });
+                    
                 }
             }
             component._.registerSchemaListener(propertySchemaId, schemaListener);
@@ -976,10 +994,15 @@ function ObjectComponent() {
 
     this.getData = function () {
         var data = {};
+        var hasProperties = false;
         for (var prop in this._.children) {
-            data[prop] = this._.children[prop].getData();
+            var value = this._.children[prop].getData();
+            if (value !== null) {
+                hasProperties = true;
+                data[prop] = value;
+            }
         }
-        return data;
+        return (hasProperties || this._.schema.required === true) ? data : null;
     };
 
 }

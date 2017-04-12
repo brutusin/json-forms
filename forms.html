@@ -1,95 +1,65 @@
 <meta charset="UTF-8"></meta>
+<link rel="stylesheet" href="dist/css/brutusin-json-forms.css"/>
 <script src="dist/js/brutusin-json-forms.js"></script>
 <script src="dist/js/addon/i18n/brutusin-json-forms-lan-es_ES.min.js"></script>
 <script>
     var BrutusinForms = brutusin["json-forms"];
     var form = BrutusinForms.createForm(
             {
-                "$schema": "http://json-schema.org/draft-03/schema#",
-                "type": "object",
-                "properties": {
-                    "pageNum": {
-                        "type": "integer",
-                        "title": "Page number",
-                        "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details",
-                        "default": 1,
-                        "required": true
-                    },
-                    "pageSize": {
-                        "type": "integer",
-                        "title": "Page size",
-                        "description": "Number of records per page",
-                        "required": true,
-                        "default": 50,
-                        "enum": [
-                            10,
-                            25,
-                            50,
-                            100
-                        ]
-                    },
-                    "selectedFacetValues": {
-                        "type": "array",
-                        "title": "Query terms",
-                        "minItems": 2,
-                        "uniqueItems": true,
-                        "items": {
-                            "description": "Query item",
-                            "type": "object",
-                            "properties": {
-                                "facetName": {
-                                    "type": "string",
-                                    "title": "Field name",
-                                    "description": "Indexed field name",
-                                    "required": true
-                                },
-                                "matchAllNull": {
-                                    "type": "boolean",
-                                    "title": "Match nulls"
-                                },
-                                "matchAllNotNull": {
-                                    "type": "boolean",
-                                    "title": "Match not nulls"
-                                },
-                                "facetValues": {
-                                    "type": "array",
-                                    "title": "Field values",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "value": {
-                                                "type": "string",
-                                                "title": "Value"
-                                            }
-                                        }
-                                    }
-                                },
-                                "included": {
-                                    "type": "boolean",
-                                    "title": "Included"
-                                }
-                            }
-                        }
-                    },
-                    "sorts": {
-                        "type": "array",
-                        "title": "Sorting",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "fieldName": {
-                                    "type": "string",
-                                    "title": "Field name"
-                                },
-                                "ascending": {
-                                    "type": "boolean",
-                                    "title": "Ascending"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+  "type": "object",
+  "properties": {
+    "prop1": {
+      "type": "integer"
+    },
+    "prop2": {
+      "type": "integer",
+      "required": true
+    },
+    "prop3": {
+      "type": "integer",
+      "required": true
+    },
+    "composite1": {
+      "type": "object",
+      "properties": {
+        "nested1": {
+          "type": "number",
+          "required": true
+        },
+        "nested2": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "required": [
+        "nested1",
+        "nested2"
+      ]
+    },
+    "composite2": {
+      "type": "object",
+      "properties": {
+        "nested1": {
+          "type": "number",
+          "required": true
+        },
+        "nested2": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "required": [
+        "nested1",
+        "nested2"
+      ]
+    }
+  },
+  "required": [
+    "prop1",
+    "prop2",
+    "composite1"
+  ]
+}
 
 //          {
 //  "$schema": "http://json-schema.org/draft-03/schema#",
@@ -162,24 +132,26 @@
 //                    }
 //                }
 //            }
-    , null, {customSchemaResolver: function (ids, data, callback) {
-            var schemas = new Object();
-            var schema = new Object();
-            if (data.species === "human") {
-                schema.type = "null"; // no such property for humans
-            } else {
-                schema.type = "string";
-                if (data.species === "dog") {
-                    schema.title = "Dog breed";
-                    schema.enum = ["bulldog", "labrador"]
-                } else {
-                    schema.title = "Cat breed";
-                    schema.enum = ["siamese", "persian"]
-                }
-            }
-            schemas["$.subspecies"] = schema;
-            callback(schemas);
-        }});
+    ,
+            null
+            , {customSchemaResolver: function (ids, data, callback) {
+                    var schemas = new Object();
+                    var schema = new Object();
+                    if (data.species === "human") {
+                        schema.type = "null"; // no such property for humans
+                    } else {
+                        schema.type = "string";
+                        if (data.species === "dog") {
+                            schema.title = "Dog breed";
+                            schema.enum = ["bulldog", "labrador"]
+                        } else {
+                            schema.title = "Cat breed";
+                            schema.enum = ["siamese", "persian"]
+                        }
+                    }
+                    schemas["$.subspecies"] = schema;
+                    callback(schemas);
+                }});
 
 //    form.schemaResolver.addListener("$.subspecies", function (schema) {
 //        form.schemaResolver.notifyChanged("$.species");
