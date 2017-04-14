@@ -21,6 +21,7 @@ function TypeComponent() {
         var component = this;
         this._.children = {};
         this._.schemaListeners = [];
+        this._.schema = null;
         if (schemaId) {
             this.schemaId = schemaId;
         }
@@ -52,7 +53,7 @@ function TypeComponent() {
         ;
 
         while (this._.dom.firstChild) {
-            this._.dom.removeChild(this._dom.firstChild);
+            this._.dom.removeChild(this._.dom.firstChild);
         }
         this._.registerSchemaListener(this.schemaId, function (schema) {
             if (component._.schema) {

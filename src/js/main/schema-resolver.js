@@ -294,11 +294,11 @@ function SchemaResolver() {
             if (!dependentIds) {
                 return;
             }
-            this.resolve(dependentIds);
+            this.resolve(dependentIds, listeners);
         }
     };
 
-    this.resolve = function (ids) {
+    this.resolve = function (ids, listeners) {
         this.resolveSchemas(ids, this.form.getData(), function (schemas) {
             if (schemas) {
                 for (var id in schemas) {
@@ -331,8 +331,14 @@ function SchemaResolver() {
         } else {
             listeners[id] = [callback];
         }
-        if (schemaMap.hasOwnProperty(id) && !schemaMap[id].dependsOn) {
-            callback(schemaMap[id].schema);
+        if (schemaMap.hasOwnProperty(id)) {
+            if (!schemaMap[id].dependsOn) {
+                callback(schemaMap[id].schema);
+            } else {
+                var listenerMap = {};
+                listenerMap[id] = [callback]
+                this.resolve(id, listenerMap);
+            }
             return;
         }
     };

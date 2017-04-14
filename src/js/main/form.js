@@ -8,25 +8,27 @@ function BrutusinForm(schema, initialData, config) {
     this.schema = schema;
     this.initialData = initialData;
 
+    var rootComponent;
+    this.getData = function () {
+        if (rootComponent) {
+            return rootComponent.getData();
+        } else {
+            return this.initialData;
+        }
+    };
     var schemaResolver = createSchemaResolver(config);
     schemaResolver.init(this);
     var typeFactories = createFactories(config);
     var dOMForm = createDOMForm();
+    this.getDOM = function () {
+        return dOMForm;
+    };
     var formFunctions = {schemaResolver: schemaResolver, createTypeComponent: createTypeComponent, appendChild: appendChild};
-    var rootComponent;
 
     createTypeComponent("$", initialData, function (component) {
         rootComponent = component;
         appendChild(dOMForm, component.getDOM());
     });
-
-    this.getData = function () {
-        return rootComponent.getData();
-    };
-
-    this.getDOM = function () {
-        return dOMForm;
-    };
 
     function appendChild(parent, child, schema) {
         parent.appendChild(child);
@@ -83,4 +85,6 @@ function BrutusinForm(schema, initialData, config) {
         };
         schemaResolver.addListener(schemaId, listener);
     }
+
+
 }

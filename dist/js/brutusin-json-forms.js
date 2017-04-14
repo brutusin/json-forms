@@ -134,25 +134,27 @@ function BrutusinForm(schema, initialData, config) {
     this.schema = schema;
     this.initialData = initialData;
 
+    var rootComponent;
+    this.getData = function () {
+        if (rootComponent) {
+            return rootComponent.getData();
+        } else {
+            return this.initialData;
+        }
+    };
     var schemaResolver = createSchemaResolver(config);
     schemaResolver.init(this);
     var typeFactories = createFactories(config);
     var dOMForm = createDOMForm();
+    this.getDOM = function () {
+        return dOMForm;
+    };
     var formFunctions = {schemaResolver: schemaResolver, createTypeComponent: createTypeComponent, appendChild: appendChild};
-    var rootComponent;
 
     createTypeComponent("$", initialData, function (component) {
         rootComponent = component;
         appendChild(dOMForm, component.getDOM());
     });
-
-    this.getData = function () {
-        return rootComponent.getData();
-    };
-
-    this.getDOM = function () {
-        return dOMForm;
-    };
 
     function appendChild(parent, child, schema) {
         parent.appendChild(child);
@@ -209,6 +211,8 @@ function BrutusinForm(schema, initialData, config) {
         };
         schemaResolver.addListener(schemaId, listener);
     }
+
+
 }
 /* global BrutusinForms */
 
@@ -530,11 +534,11 @@ function SchemaResolver() {
             if (!dependentIds) {
                 return;
             }
-            this.resolve(dependentIds);
+            this.resolve(dependentIds, listeners);
         }
     };
 
-    this.resolve = function (ids) {
+    this.resolve = function (ids, listeners) {
         this.resolveSchemas(ids, this.form.getData(), function (schemas) {
             if (schemas) {
                 for (var id in schemas) {
@@ -567,8 +571,14 @@ function SchemaResolver() {
         } else {
             listeners[id] = [callback];
         }
-        if (schemaMap.hasOwnProperty(id) && !schemaMap[id].dependsOn) {
-            callback(schemaMap[id].schema);
+        if (schemaMap.hasOwnProperty(id)) {
+            if (!schemaMap[id].dependsOn) {
+                callback(schemaMap[id].schema);
+            } else {
+                var listenerMap = {};
+                listenerMap[id] = [callback]
+                this.resolve(id, listenerMap);
+            }
             return;
         }
     };
@@ -614,6 +624,7 @@ function TypeComponent() {
         var component = this;
         this._.children = {};
         this._.schemaListeners = [];
+        this._.schema = null;
         if (schemaId) {
             this.schemaId = schemaId;
         }
@@ -645,7 +656,7 @@ function TypeComponent() {
         ;
 
         while (this._.dom.firstChild) {
-            this._.dom.removeChild(this._dom.firstChild);
+            this._.dom.removeChild(this._.dom.firstChild);
         }
         this._.registerSchemaListener(this.schemaId, function (schema) {
             if (component._.schema) {
@@ -1181,7 +1192,7 @@ function SimpleComponent() {
                 }
             } else if (schema.type === "any") {
                 if (value) {
-                    eval("value=" + value);
+                    value = JSON.parse(value);
                 }
             }
             return value;

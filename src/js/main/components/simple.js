@@ -171,7 +171,7 @@ function SimpleComponent() {
                 }
             } else if (schema.type === "any") {
                 if (value) {
-                    eval("value=" + value);
+                    value = JSON.parse(value);
                 }
             }
             return value;
