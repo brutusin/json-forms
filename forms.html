@@ -6,6 +6,7 @@
     <table>
         <tr><td id="td11"></td><td id="td12"></td><td id="td13"></td></tr>
         <tr><td id="td21"></td><td id="td22"></td><td id="td23"></td></tr>
+        <tr><td id="td31"></td><td id="td32"></td><td id="td33"></td></tr>
     </table>
 </body>
 <script>
@@ -13,51 +14,57 @@
 
     var form11 = BrutusinForms.createForm(
             {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"species": {"title": "Species supported", "description": "Changes in this property (`$.species`) trigger the resolution of the actual (depending on the values being selected) schema of a dependent property (`$.subspecies`)", "type": "string", "enum": ["human", "dog", "cat"], "required": true}, "subspecies": {"dependsOn": ["species"]}}},
-            {"species":"dog","subspecies":"labrador"},
-            {customSchemaResolver: function (ids, data, callback) {
-                    var schemas = new Object();
-                    var schema = new Object();
-                    if (data.species === "human") {
-                        schema.type = "null"; // no such property for humans
-                    } else {
-                        schema.type = "string";
-                        if (data.species === "dog") {
-                            schema.title = "Dog breed";
-                            schema.enum = ["bulldog", "labrador"]
-                        } else {
-                            schema.title = "Cat breed";
-                            schema.enum = ["siamese", "persian"]
-                        }
-                    }
-                    schemas["$.subspecies"] = schema;
-                    callback(schemas);
-                }});
- document.getElementById("td11").appendChild(form11.getDOM());
- 
-     var form12 = BrutusinForms.createForm(
-             {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems":true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
-            null);
- document.getElementById("td12").appendChild(form12.getDOM());
- 
-     var form13 = BrutusinForms.createForm(
- {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties", "type": "object", "maxProperties": 2, "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "integer"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "maxProperties": 3, "additionalProperties": true}}},
-            null);
- document.getElementById("td13").appendChild(form13.getDOM());
- 
- var form21 = BrutusinForms.createForm(
- {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems":true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
- null);
- document.getElementById("td21").appendChild(form21.getDOM());
+    {"species": "dog", "subspecies": "labrador"},
+    {customSchemaResolver: function (ids, data, callback) {
+            var schemas = new Object();
+            var schema = new Object();
+            if (data.species === "human") {
+                schema.type = "null"; // no such property for humans
+            } else {
+                schema.type = "string";
+                if (data.species === "dog") {
+                    schema.title = "Dog breed";
+                    schema.enum = ["bulldog", "labrador"]
+                } else {
+                    schema.title = "Cat breed";
+                    schema.enum = ["siamese", "persian"]
+                }
+            }
+            schemas["$.subspecies"] = schema;
+            callback(schemas);
+        }});
+    document.getElementById("td11").appendChild(form11.getDOM());
 
- var form22 = BrutusinForms.createForm(
- {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string", "title": "A  string", "description": "A string"}}, "patternProperties": {"^ref_.*": {"required":true, "type": "number"}}},
-      null);
- document.getElementById("td22").appendChild(form22.getDOM());   
- 
-  var form23 = BrutusinForms.createForm(
- {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string"}, "s2": {"type": "string", "readOnly": true}, "a1": {"type": "array", "items": {"type": "string"}}, "a2": {"type": "array", "items": {"type": "string"}, "readOnly": true}}},
-                    {"s1": "foo", "s2": "bar", "a1": ["foo", "bar"], "a2": ["baz", "corge"]});
- document.getElementById("td23").appendChild(form23.getDOM());  
+    var form12 = BrutusinForms.createForm(
+            {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems": true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}},
+    null);
+    document.getElementById("td12").appendChild(form12.getDOM());
+
+    var form13 = BrutusinForms.createForm(
+            {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"fixed": {"description": "Object supporting schema-fixed additional properties", "type": "object", "maxProperties": 2, "additionalProperties": {"description": "Fixed-schema additional property", "type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "integer"}}}}, "free": {"description": "Object supporting schema-free additional properties", "type": "object", "maxProperties": 3, "additionalProperties": true}}},
+    null);
+    document.getElementById("td13").appendChild(form13.getDOM());
+
+    var form21 = BrutusinForms.createForm(
+            {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"prop1": {"type": "string", "title": "A short string", "description": "A short string property whose input is rendered as `input`"}, "prop2": {"type": "string", "title": "A long text", "format": "text", "description": "A long text property whose input is rendered as `textarea`"}}},
+    null);
+    document.getElementById("td21").appendChild(form21.getDOM());
+
+    var form22 = BrutusinForms.createForm(
+            {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string", "title": "A  string", "description": "A string"}}, "patternProperties": {"^ref_.*": {"required": true, "type": "number"}}},
+    null);
+    document.getElementById("td22").appendChild(form22.getDOM());
+
+    var form23 = BrutusinForms.createForm(
+            {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string"}, "s2": {"type": "string", "readOnly": true}, "a1": {"type": "array", "items": {"type": "string"}}, "a2": {"type": "array", "items": {"type": "string"}, "readOnly": true}}},
+    {"s1": "foo", "s2": "bar", "a1": ["foo", "bar"], "a2": ["baz", "corge"]});
+    document.getElementById("td23").appendChild(form23.getDOM());
+
+    var form31 = BrutusinForms.createForm(
+            {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]},
+    null);
+    document.getElementById("td31").appendChild(form31.getDOM());
+
 
 //          {
 //  "$schema": "http://json-schema.org/draft-03/schema#",
@@ -135,5 +142,5 @@
 //    form.schemaResolver.addListener("$.subspecies", function (schema) {
 //        form.schemaResolver.notifyChanged("$.species");
 //    });
-   
+
 </script>

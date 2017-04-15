@@ -71,20 +71,27 @@ function BrutusinForm(schema, initialData, config) {
 
     function createTypeComponent(schemaId, initialData, callback) {
         var listener = function (schema) {
-            if (!schema || !schema.type || schema.type === "null") {
+            if (!schema) {
                 return;
             }
-            if (typeFactories.hasOwnProperty(schema.type)) {
-                var component = new typeFactories[schema.type];
+            if (schema.hasOwnProperty("type")) {
+                if (typeFactories.hasOwnProperty(schema.type)) {
+                    var component = new typeFactories[schema.type];
+                    component.init(schemaId, initialData, formFunctions);
+                    schemaResolver.removeListener(schemaId, listener);
+                    callback(component);
+                } else {
+                    throw "Component factory not found for schemas of type '" + schema.type + "'";
+                }
+            } else if (schema.hasOwnProperty("oneOf")) {
+                var component = new typeFactories["oneOf"];
                 component.init(schemaId, initialData, formFunctions);
                 schemaResolver.removeListener(schemaId, listener);
                 callback(component);
             } else {
-                throw "Component factory not found for schemas of type '" + schema.type + "'";
+                throw "Component factory not found a valid schema for id '" + schemaId + "'";
             }
         };
         schemaResolver.addListener(schemaId, listener);
     }
-
-
 }
