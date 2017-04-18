@@ -369,7 +369,7 @@ function SchemaResolver() {
             var pseudoSchema = createPseudoSchema(schema);
             function containsStr(array, string) {
                 for (var i = 0; i < array.length; i++) {
-                    if (array[i] == string) {
+                    if (array[i] === string) {
                         return true;
                     }
                 }
@@ -625,55 +625,56 @@ function TypeComponent() {
      * @returns {undefined}
      */
     this.init = function (schemaId, initialData, formHelper) {
-        if (!this._) { // to group and represent protected fields
-            this._ = {};
-            this._.dom = document.createElement("div");
+        var instance = this;
+        if (!instance._) { // to group and represent protected fields
+            instance._ = {};
+            instance._.dom = document.createElement("div");
         }
-        var component = this;
-        this._.children = {};
-        this._.schemaListeners = [];
-        this._.schema = null;
+        instance._.children = {};
+        instance._.schemaListeners = [];
+        instance._.schema = null;
         if (schemaId) {
-            this.schemaId = schemaId;
+            instance._.schemaId = schemaId;
         }
         if (typeof initialData !== "undefined") {
-            this.initialData = initialData;
+            instance._.initialData = initialData;
         }
         if (formHelper) {
-            this._.appendChild = formHelper.appendChild;
-            this._.createTypeComponent = formHelper.createTypeComponent;
-            this._.registerSchemaListener = function (schemaId, callback) {
-                component._.schemaListeners.push({schemaId: schemaId, callback: callback});
+            instance._.appendChild = formHelper.appendChild;
+            instance._.createTypeComponent = formHelper.createTypeComponent;
+            instance._.registerSchemaListener = function (schemaId, callback) {
+                instance._.schemaListeners.push({schemaId: schemaId, callback: callback});
                 formHelper.schemaResolver.addListener(schemaId, callback);
             };
-            this._.unRegisterSchemaListener = function (schemaId, callback) {
+            instance._.unRegisterSchemaListener = function (schemaId, callback) {
                 var listener;
-                for (var i = 0; i < component._.schemaListeners.length; i++) {
-                    listener = component._.schemaListeners[i];
+                for (var i = 0; i < instance._.schemaListeners.length; i++) {
+                    listener = instance._.schemaListeners[i];
                     if (listener.schemaId === schemaId && listener.callback === callback) {
-                        component._.schemaListeners.splice(i, 1);
+                        instance._.schemaListeners.splice(i, 1);
                         break;
                     }
                 }
                 formHelper.schemaResolver.removeListener(schemaId, callback);
             };
-            this._.notifyChanged = function (schemaId) {
+            instance._.notifyChanged = function (schemaId) {
                 formHelper.schemaResolver.notifyChanged(schemaId);
             };
+            instance._.removeAllChildren = function (domnNode) {
+                while (domnNode.firstChild) {
+                    domnNode.removeChild(domnNode.firstChild);
+                }
+            };
         }
-        ;
-
-        while (this._.dom.firstChild) {
-            this._.dom.removeChild(this._.dom.firstChild);
-        }
-        this._.registerSchemaListener(this.schemaId, function (schema) {
-            if (component._.schema) {
-                component.dispose();
-                component.init();
+        instance._.removeAllChildren(instance._.dom);
+        instance._.registerSchemaListener(instance._.schemaId, function (schema) {
+            if (instance._.schema) {
+                instance.dispose();
+                instance.init();
             } else {
-                component._.schema = schema;
+                instance._.schema = schema;
                 if (schema) {
-                    component.render(schema);
+                    instance.render(schema);
                 }
             }
         });
@@ -705,11 +706,12 @@ BrutusinForms.TypeComponent = TypeComponent;
 
 function ArrayComponent() {
     this.render = function (schema) {
-        this._.children = [];
-        var appendChild = this._.appendChild;
+        var instance = this;
+        instance._.children = [];
+        var appendChild = instance._.appendChild;
         if (schema) {
-            var component = this;
-            this._.registerSchemaListener(this.schemaId, function (itemSchema) {
+            
+            this._.registerSchemaListener(instance._.schemaId, function (itemSchema) {
                 var div = document.createElement("div");
                 var table = document.createElement("table");
                 table.className = "array";
@@ -718,23 +720,6 @@ function ArrayComponent() {
                     addButton.disabled = true;
                 }
                 addButton.setAttribute('type', 'button');
-//            addButton.getValidationError = function () {
-//                if (schema.minItems && schema.minItems > table.rows.length) {
-//                    return BrutusinForms.messages["minItems"].format(schema.minItems);
-//                }
-//                if (schema.maxItems && schema.maxItems < table.rows.length) {
-//                    return BrutusinForms.messages["maxItems"].format(schema.maxItems);
-//                }
-//                if (schema.uniqueItems) {
-//                    for (var i = 0; i < current.length; i++) {
-//                        for (var j = i + 1; j < current.length; j++) {
-//                            if (JSON.stringify(current[i]) === JSON.stringify(current[j])) {
-//                                return BrutusinForms.messages["uniqueItems"];
-//                            }
-//                        }
-//                    }
-//                }
-//            };
                 addButton.onclick = function () {
                     addItem(table);
                 };
@@ -744,12 +729,12 @@ function ArrayComponent() {
                 appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
                 appendChild(div, table);
                 appendChild(div, addButton);
-                if (component.initialData && component.initialData instanceof Array) {
-                    for (var i = 0; i < component.initialData.length; i++) {
-                        addItem(table, component.initialData[i]);
+                if (instance._.initialData && instance._.initialData instanceof Array) {
+                    for (var i = 0; i < instance._.initialData.length; i++) {
+                        addItem(table, instance._.initialData[i]);
                     }
                 }
-                appendChild(component.getDOM(), div);
+                appendChild(instance.getDOM(), div);
 
             });
         }
@@ -779,9 +764,9 @@ function ArrayComponent() {
                 }
             };
             var childComponent;
-            component._.createTypeComponent(schema.items, initialData, function (child) {
+            instance._.createTypeComponent(schema.items, initialData, function (child) {
                 childComponent = child;
-                component._.children.push(child);
+                instance._.children.push(child);
                 appendChild(td3, child.getDOM());
             });
             removeButton.onclick = function () {
@@ -789,7 +774,7 @@ function ArrayComponent() {
                     childComponent.dispose();
                     childComponent = null;
                     tr.parentNode.removeChild(tr);
-                    component._.children.splice(tr.index, 1);
+                    instance._.children.splice(tr.index, 1);
                 }
                 computRowCount();
             };
@@ -821,16 +806,16 @@ BrutusinForms.factories.typeComponents["array"] = ArrayComponent;
 
 function ObjectComponent() {
     this.render = function (schema) {
-        var appendChild = this._.appendChild;
+        var instance = this;
+        var appendChild = instance._.appendChild;
         if (schema) {
             var table = document.createElement("table");
             table.className = "object";
             var tbody = document.createElement("tbody");
             appendChild(table, tbody);
-            var component = this;
             if (schema.hasOwnProperty("properties")) {
                 for (var p in schema.properties) {
-                    var tr = createPropertyInput(component.schemaId + "." + p, p, this.initialData ? this.initialData[p] : null);
+                    var tr = createPropertyInput(instance._.schemaId + "." + p, p, instance._.initialData ? instance._.initialData[p] : null);
                     appendChild(tbody, tr);
                 }
             }
@@ -845,7 +830,7 @@ function ObjectComponent() {
                     addButton.setAttribute('type', 'button');
                     addButton.pattern = pattern;
                     addButton.onclick = function () {
-                        var p = this.pattern;
+                        var p = instance.pattern;
                         var tr = createPatternPropertyInput(schema.patternProperties[p], p);
                         appendChild(tbody, tr);
                     };
@@ -855,8 +840,8 @@ function ObjectComponent() {
                         appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
                     }
                     appendChild(patdiv, addButton, schema);
-                    if (this.initialData) {
-                        for (var p in initialData) {
+                    if (instance._.initialData) {
+                        for (var p in instance._.initialData) {
                             if (schema.properties && schema.properties.hasOwnProperty(p)) {
                                 continue;
                             }
@@ -867,16 +852,16 @@ function ObjectComponent() {
                             if (usedProps.indexOf(p) !== -1) {
                                 continue;
                             }
-                            var tr = createPatternPropertyInput(schema.patternProperties[pattern], pattern, this.initialData[p]);
+                            var tr = createPatternPropertyInput(schema.patternProperties[pattern], pattern, instance._.initialData[p]);
                             appendChild(tbody, tr);
                             usedProps.push(p);
                         }
                     }
                     appendChild(div, patdiv);
                 }
-                appendChild(this.getDOM(), div);
+                appendChild(instance.getDOM(), div);
             } else {
-                appendChild(this.getDOM(), table);
+                appendChild(instance.getDOM(), table);
             }
         }
 
@@ -889,10 +874,10 @@ function ObjectComponent() {
                 }
                 var propertyName = null;
                 if (propertyName) {
-                    var child = component._.children[propertyName];
+                    var child = instance._.children[propertyName];
                     if (child) {
                         child.dispose();
-                        delete component._.children[propertyName];
+                        delete instance._.children[propertyName];
                     }
                 }
                 if (schema && schema.type && schema.type !== "null") {
@@ -922,18 +907,18 @@ function ObjectComponent() {
 
                     nameInput.onchange = function () {
                         if (propertyName) {
-                            delete component._.children[propertyName];
+                            delete instance._.children[propertyName];
                         }
                         if (nameInput.value && nameInput.value.search(regExp) !== -1) {
                             var name = nameInput.value;
                             var i = 1;
-                            while (propertyName !== name && component._.children.hasOwnProperty(name)) {
+                            while (propertyName !== name && instance._.children.hasOwnProperty(name)) {
                                 name = nameInput.value + "(" + i + ")";
                                 i++;
                             }
                             propertyName = name;
                             nameInput.value = propertyName;
-                            component._.children[propertyName] = childComponent;
+                            instance._.children[propertyName] = childComponent;
                         }
                     };
                     var removeButton = document.createElement("button");
@@ -942,14 +927,14 @@ function ObjectComponent() {
                     appendChild(removeButton, document.createTextNode("x"));
                     removeButton.onclick = function () {
                         if (propertyName) {
-                            delete component._.children[propertyName];
+                            delete instance._.children[propertyName];
                         }
                         if (childComponent) {
                             childComponent.dispose();
                             childComponent = null;
                             tr.parentNode.removeChild(tr);
                         }
-                        component._.unRegisterSchemaListener(propertySchemaId, schemaListener);
+                        instance._.unRegisterSchemaListener(propertySchemaId, schemaListener);
                     };
                     appendChild(innerTd1, nameInput);
                     appendChild(innerTd2, removeButton);
@@ -963,34 +948,33 @@ function ObjectComponent() {
                     appendChild(tbody, tr);
                     appendChild(table, tbody);
 
-                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
+                    instance._.createTypeComponent(propertySchemaId, initialData, function (child) {
                         childComponent = child;
                         if (propertyName) {
-                            component._.children[propertyName] = child;
+                            instance._.children[propertyName] = child;
                         }
                         appendChild(td2, child.getDOM());
                         child.onchange = function(evt){
-                            component._.notifyChanged(component.schemaId);
-                            component.onchange(evt);
+                            instance._.notifyChanged(instance._.schemaId);
+                            instance.onchange(evt);
                         };
                     });
-                    
                 }
-            }
-            component._.registerSchemaListener(propertySchemaId, schemaListener);
+            };
+            instance._.registerSchemaListener(propertySchemaId, schemaListener);
             return tr;
         }
 
         function createPropertyInput(propertySchemaId, propertyName, initialData) {
             var tr = document.createElement("tr");
-            component._.registerSchemaListener(propertySchemaId, function (schema) {
+            instance._.registerSchemaListener(propertySchemaId, function (schema) {
                 while (tr.firstChild) {
                     tr.removeChild(tr.firstChild);
                 }
-                var child = component._.children[propertyName];
+                var child = instance._.children[propertyName];
                 if (child) {
                     child.dispose();
-                    delete component._.children[propertyName];
+                    delete instance._.children[propertyName];
                 }
                 if (schema && schema.type && schema.type !== "null") {
                     var td1 = document.createElement("td");
@@ -1001,8 +985,8 @@ function ObjectComponent() {
                     appendChild(tr, td1);
                     appendChild(td1, document.createTextNode(propertyName));
                     appendChild(tr, td2);
-                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
-                        component._.children[propertyName] = child;
+                    instance._.createTypeComponent(propertySchemaId, initialData, function (child) {
+                        instance._.children[propertyName] = child;
                         appendChild(td2, child.getDOM());
                     });
                 }
@@ -1031,9 +1015,9 @@ BrutusinForms.factories.typeComponents["object"] = ObjectComponent;
 
 function OneOfComponent() {
     this.render = function (schema) {
-        var appendChild = this._.appendChild;
-        this._.children = [null];
-        var component = this;
+        var instance = this;
+        var appendChild = instance._.appendChild;
+        instance._.children = [null];
         var table = document.createElement("table");
         var tr1 = document.createElement("tr");
         var tr2 = document.createElement("tr");
@@ -1048,59 +1032,72 @@ function OneOfComponent() {
         var display = document.createElement("div");
         appendChild(td2, display);
         appendChild(select, document.createElement("option"));
-        var schemas = getSchemas();
 
-        for (var i = 0; i < schemas.length; i++) {
-            var ss = schemas[i];
-            var option = document.createElement("option");
-            var textNode = document.createTextNode(ss.title ? ss.title : ss.$id);
-            option.value = i;
-            appendChild(option, textNode);
-            appendChild(select, option);
+        var selectedIndex;
+
+        for (var i = 0; i < schema.oneOf.length; i++) {
+            runWithSchema(i, function (ss) {
+                var option = document.createElement("option");
+                var textNode = document.createTextNode(ss.title ? ss.title : ss.$id);
+                option.value = i;
+                appendChild(option, textNode);
+                appendChild(select, option);
+                if (typeof instance._.initialData !== "undefined" && selectedIndex !== 0) {
+                    if (doesDataMatchSchema(instance._.initialData, ss)) {
+                        if (typeof selectedIndex === "undefined") {
+                            selectedIndex = i + 1;
+                            selectSchema(instance._.schemaId + "." + i);
+                        } else { // data already matched another schema -> select none of them
+                            selectedIndex = 0;
+                        }
+                        select.selectedIndex = selectedIndex;
+                    }
+                }
+            });
         }
 
-        if (this.initialData) {
+        if (instance._.initialData) {
             if (schema.readOnly) {
                 select.disabled = true;
-            }
-            var selectedIndex = getSelectedSchemaIndex();
-            if (selectedIndex > -1) {
-                select.selectedIndex = selectedIndex + 1;
-                selectSchema(this.schemaId + "." + selectedIndex);
             }
         }
 
         select.onchange = function () {
-            selectSchema(component.schemaId + "." + (select.selectedIndex - 1));
+            selectSchema(instance._.schemaId + "." + (select.selectedIndex - 1));
         };
 
+        function doesDataMatchSchema(initialData, schema){
+            // TODO 
+        }
+        
         function selectSchema(schemaId) {
-            if (component._.children[0]) {
-                component._.children[0].dispose();
-                component._.children[0] = null;
+            if (instance._.children[0]) {
+                instance._.children[0].dispose();
+                instance._.children[0] = null;
             }
             while (display.firstChild) {
                 display.removeChild(display.firstChild);
             }
-            component._.createTypeComponent(schemaId, component.initialData, function (child) {
-                component._.children[0] = child;
+            instance._.createTypeComponent(schemaId, instance._.initialData, function (child) {
+                instance._.children[0] = child;
                 appendChild(display, child.getDOM());
                 child.onchange = function (evt) {
-                    component._.notifyChanged(component.schemaId);
-                    component.onchange(evt);
+                    instance._.notifyChanged(instance._.schemaId);
+                    instance.onchange(evt);
                 };
             });
         }
 
-        appendChild(this.getDOM(), table);
+        appendChild(instance.getDOM(), table);
 
-        function getSchemas() {
-            return [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}];
+        function runWithSchema(i, callback) {
+            var schemaListener = function (schema) {
+                callback(schema);
+                instance._.unRegisterSchemaListener(instance._.schemaId + "." + i, schemaListener);
+            };
+            instance._.registerSchemaListener(instance._.schemaId + "." + i, schemaListener);
         }
-        
-        function getSelectedSchemaIndex() {
-            return -1;
-        }
+
     };
 
     this.getSelectedSchema = function () {
@@ -1117,15 +1114,15 @@ BrutusinForms.factories.typeComponents["oneOf"] = OneOfComponent;
 /* global BrutusinForms */
 function SimpleComponent() {
     this.render = function (schema) {
-        var component = this;
-        var appendChild = this._.appendChild;
-        var initialData = this.initialData;
-        this._.input = createInput();
-        this._.input.onchange = function (evt) {
-            component._.notifyChanged(component.schemaId);
-            component.onchange(evt);
+        var instance = this;
+        var appendChild = instance._.appendChild;
+        var initialData = instance._.initialData;
+        instance._.input = createInput();
+        instance._.input.onchange = function (evt) {
+            instance._.notifyChanged(instance._.schemaId);
+            instance.onchange(evt);
         };
-        appendChild(this._.dom, this._.input);
+        appendChild(instance._.dom, instance._.input);
         function createInput() {
             var input;
             if (schema.type === "any") {

@@ -2,16 +2,16 @@
 
 function ObjectComponent() {
     this.render = function (schema) {
-        var appendChild = this._.appendChild;
+        var instance = this;
+        var appendChild = instance._.appendChild;
         if (schema) {
             var table = document.createElement("table");
             table.className = "object";
             var tbody = document.createElement("tbody");
             appendChild(table, tbody);
-            var component = this;
             if (schema.hasOwnProperty("properties")) {
                 for (var p in schema.properties) {
-                    var tr = createPropertyInput(component.schemaId + "." + p, p, this.initialData ? this.initialData[p] : null);
+                    var tr = createPropertyInput(instance._.schemaId + "." + p, p, instance._.initialData ? instance._.initialData[p] : null);
                     appendChild(tbody, tr);
                 }
             }
@@ -26,7 +26,7 @@ function ObjectComponent() {
                     addButton.setAttribute('type', 'button');
                     addButton.pattern = pattern;
                     addButton.onclick = function () {
-                        var p = this.pattern;
+                        var p = instance.pattern;
                         var tr = createPatternPropertyInput(schema.patternProperties[p], p);
                         appendChild(tbody, tr);
                     };
@@ -36,8 +36,8 @@ function ObjectComponent() {
                         appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
                     }
                     appendChild(patdiv, addButton, schema);
-                    if (this.initialData) {
-                        for (var p in initialData) {
+                    if (instance._.initialData) {
+                        for (var p in instance._.initialData) {
                             if (schema.properties && schema.properties.hasOwnProperty(p)) {
                                 continue;
                             }
@@ -48,16 +48,16 @@ function ObjectComponent() {
                             if (usedProps.indexOf(p) !== -1) {
                                 continue;
                             }
-                            var tr = createPatternPropertyInput(schema.patternProperties[pattern], pattern, this.initialData[p]);
+                            var tr = createPatternPropertyInput(schema.patternProperties[pattern], pattern, instance._.initialData[p]);
                             appendChild(tbody, tr);
                             usedProps.push(p);
                         }
                     }
                     appendChild(div, patdiv);
                 }
-                appendChild(this.getDOM(), div);
+                appendChild(instance.getDOM(), div);
             } else {
-                appendChild(this.getDOM(), table);
+                appendChild(instance.getDOM(), table);
             }
         }
 
@@ -70,10 +70,10 @@ function ObjectComponent() {
                 }
                 var propertyName = null;
                 if (propertyName) {
-                    var child = component._.children[propertyName];
+                    var child = instance._.children[propertyName];
                     if (child) {
                         child.dispose();
-                        delete component._.children[propertyName];
+                        delete instance._.children[propertyName];
                     }
                 }
                 if (schema && schema.type && schema.type !== "null") {
@@ -103,18 +103,18 @@ function ObjectComponent() {
 
                     nameInput.onchange = function () {
                         if (propertyName) {
-                            delete component._.children[propertyName];
+                            delete instance._.children[propertyName];
                         }
                         if (nameInput.value && nameInput.value.search(regExp) !== -1) {
                             var name = nameInput.value;
                             var i = 1;
-                            while (propertyName !== name && component._.children.hasOwnProperty(name)) {
+                            while (propertyName !== name && instance._.children.hasOwnProperty(name)) {
                                 name = nameInput.value + "(" + i + ")";
                                 i++;
                             }
                             propertyName = name;
                             nameInput.value = propertyName;
-                            component._.children[propertyName] = childComponent;
+                            instance._.children[propertyName] = childComponent;
                         }
                     };
                     var removeButton = document.createElement("button");
@@ -123,14 +123,14 @@ function ObjectComponent() {
                     appendChild(removeButton, document.createTextNode("x"));
                     removeButton.onclick = function () {
                         if (propertyName) {
-                            delete component._.children[propertyName];
+                            delete instance._.children[propertyName];
                         }
                         if (childComponent) {
                             childComponent.dispose();
                             childComponent = null;
                             tr.parentNode.removeChild(tr);
                         }
-                        component._.unRegisterSchemaListener(propertySchemaId, schemaListener);
+                        instance._.unRegisterSchemaListener(propertySchemaId, schemaListener);
                     };
                     appendChild(innerTd1, nameInput);
                     appendChild(innerTd2, removeButton);
@@ -144,34 +144,33 @@ function ObjectComponent() {
                     appendChild(tbody, tr);
                     appendChild(table, tbody);
 
-                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
+                    instance._.createTypeComponent(propertySchemaId, initialData, function (child) {
                         childComponent = child;
                         if (propertyName) {
-                            component._.children[propertyName] = child;
+                            instance._.children[propertyName] = child;
                         }
                         appendChild(td2, child.getDOM());
                         child.onchange = function(evt){
-                            component._.notifyChanged(component.schemaId);
-                            component.onchange(evt);
+                            instance._.notifyChanged(instance._.schemaId);
+                            instance.onchange(evt);
                         };
                     });
-                    
                 }
-            }
-            component._.registerSchemaListener(propertySchemaId, schemaListener);
+            };
+            instance._.registerSchemaListener(propertySchemaId, schemaListener);
             return tr;
         }
 
         function createPropertyInput(propertySchemaId, propertyName, initialData) {
             var tr = document.createElement("tr");
-            component._.registerSchemaListener(propertySchemaId, function (schema) {
+            instance._.registerSchemaListener(propertySchemaId, function (schema) {
                 while (tr.firstChild) {
                     tr.removeChild(tr.firstChild);
                 }
-                var child = component._.children[propertyName];
+                var child = instance._.children[propertyName];
                 if (child) {
                     child.dispose();
-                    delete component._.children[propertyName];
+                    delete instance._.children[propertyName];
                 }
                 if (schema && schema.type && schema.type !== "null") {
                     var td1 = document.createElement("td");
@@ -182,8 +181,8 @@ function ObjectComponent() {
                     appendChild(tr, td1);
                     appendChild(td1, document.createTextNode(propertyName));
                     appendChild(tr, td2);
-                    component._.createTypeComponent(propertySchemaId, initialData, function (child) {
-                        component._.children[propertyName] = child;
+                    instance._.createTypeComponent(propertySchemaId, initialData, function (child) {
+                        instance._.children[propertyName] = child;
                         appendChild(td2, child.getDOM());
                     });
                 }

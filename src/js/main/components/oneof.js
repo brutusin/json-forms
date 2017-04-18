@@ -2,9 +2,9 @@
 
 function OneOfComponent() {
     this.render = function (schema) {
-        var appendChild = this._.appendChild;
-        this._.children = [null];
-        var component = this;
+        var instance = this;
+        var appendChild = instance._.appendChild;
+        instance._.children = [null];
         var table = document.createElement("table");
         var tr1 = document.createElement("tr");
         var tr2 = document.createElement("tr");
@@ -19,59 +19,72 @@ function OneOfComponent() {
         var display = document.createElement("div");
         appendChild(td2, display);
         appendChild(select, document.createElement("option"));
-        var schemas = getSchemas();
 
-        for (var i = 0; i < schemas.length; i++) {
-            var ss = schemas[i];
-            var option = document.createElement("option");
-            var textNode = document.createTextNode(ss.title ? ss.title : ss.$id);
-            option.value = i;
-            appendChild(option, textNode);
-            appendChild(select, option);
+        var selectedIndex;
+
+        for (var i = 0; i < schema.oneOf.length; i++) {
+            runWithSchema(i, function (ss) {
+                var option = document.createElement("option");
+                var textNode = document.createTextNode(ss.title ? ss.title : ss.$id);
+                option.value = i;
+                appendChild(option, textNode);
+                appendChild(select, option);
+                if (typeof instance._.initialData !== "undefined" && selectedIndex !== 0) {
+                    if (doesDataMatchSchema(instance._.initialData, ss)) {
+                        if (typeof selectedIndex === "undefined") {
+                            selectedIndex = i + 1;
+                            selectSchema(instance._.schemaId + "." + i);
+                        } else { // data already matched another schema -> select none of them
+                            selectedIndex = 0;
+                        }
+                        select.selectedIndex = selectedIndex;
+                    }
+                }
+            });
         }
 
-        if (this.initialData) {
+        if (instance._.initialData) {
             if (schema.readOnly) {
                 select.disabled = true;
-            }
-            var selectedIndex = getSelectedSchemaIndex();
-            if (selectedIndex > -1) {
-                select.selectedIndex = selectedIndex + 1;
-                selectSchema(this.schemaId + "." + selectedIndex);
             }
         }
 
         select.onchange = function () {
-            selectSchema(component.schemaId + "." + (select.selectedIndex - 1));
+            selectSchema(instance._.schemaId + "." + (select.selectedIndex - 1));
         };
 
+        function doesDataMatchSchema(initialData, schema){
+            // TODO 
+        }
+        
         function selectSchema(schemaId) {
-            if (component._.children[0]) {
-                component._.children[0].dispose();
-                component._.children[0] = null;
+            if (instance._.children[0]) {
+                instance._.children[0].dispose();
+                instance._.children[0] = null;
             }
             while (display.firstChild) {
                 display.removeChild(display.firstChild);
             }
-            component._.createTypeComponent(schemaId, component.initialData, function (child) {
-                component._.children[0] = child;
+            instance._.createTypeComponent(schemaId, instance._.initialData, function (child) {
+                instance._.children[0] = child;
                 appendChild(display, child.getDOM());
                 child.onchange = function (evt) {
-                    component._.notifyChanged(component.schemaId);
-                    component.onchange(evt);
+                    instance._.notifyChanged(instance._.schemaId);
+                    instance.onchange(evt);
                 };
             });
         }
 
-        appendChild(this.getDOM(), table);
+        appendChild(instance.getDOM(), table);
 
-        function getSchema() {
-            return [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}];
+        function runWithSchema(i, callback) {
+            var schemaListener = function (schema) {
+                callback(schema);
+                instance._.unRegisterSchemaListener(instance._.schemaId + "." + i, schemaListener);
+            };
+            instance._.registerSchemaListener(instance._.schemaId + "." + i, schemaListener);
         }
-        
-        function getSelectedSchemaIndex() {
-            return -1;
-        }
+
     };
 
     this.getSelectedSchema = function () {

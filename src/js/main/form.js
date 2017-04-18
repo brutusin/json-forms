@@ -17,7 +17,7 @@ function BrutusinForm(schema, initialData, config) {
         }
     };
     var schemaResolver = createSchemaResolver(config);
-    schemaResolver.init(this);
+    schemaResolver.init(this.schema, this);
     var typeFactories = createFactories(config);
     var dOMForm = createDOMForm();
     this.getDOM = function () {

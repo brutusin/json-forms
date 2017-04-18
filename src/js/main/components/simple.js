@@ -1,29 +1,95 @@
 /* global BrutusinForms */
 function SimpleComponent() {
-    this.render = function (schema) {
-        var component = this;
-        var appendChild = this._.appendChild;
-        var initialData = this.initialData;
-        this._.input = createInput();
-        this._.input.onchange = function (evt) {
-            component._.notifyChanged(component.schemaId);
-            component.onchange(evt);
+
+    this.doInit = function (schema) {
+        this._.value = null;
+        this._.schema = schema;
+    };
+
+    this.getValue = function () {
+        return this._.value;
+    };
+
+    this.setValue = function (value) {
+        var errorKeys = [];
+        if (typeof value === "undefined" || value === "") {
+            value = null;
+        }
+        if (value === null) {
+            if (this._.schema.required) {
+                errorKeys.push("error.required");
+            }
+        } else if (this._.schema.type === "integer") {
+            if (typeof value !== "number") {
+                errorKeys.push("error.type");
+            } else if (!Number.isInteger(value)) {
+                errorKeys.push("error.integer");
+            }
+        } else if (this._.schema.type === "number") {
+            if (typeof value !== "number") {
+                errorKeys.push("error.type");
+            }
+        } else if (this._.schema.type === "boolean") {
+            if (typeof value !== "boolean") {
+                errorKeys.push("error.type");
+            }
+        } else if (this._.schema.type === "any") {
+            try {
+                value = JSON.parse(value);
+            } catch (err) {
+                errorKeys.push("error.any");
+            }
+        } else if (this._.schema.type === "string") {
+            if (typeof value !== "string") {
+                errorKeys.push("error.type");
+            }
+        }
+        
+        if (errorKeys.length === 0) {
+            this._.value = value;
+            this._.notifyChanged(this._.schemaId);
+            this.onchange(value);
+        } else {
+            return errorKeys;
+        }
+    };
+
+    this.doRender = function () {
+        var instance = this;
+        var appendChild = instance._.appendChild;
+        var input = createInput(instance._.schema, this.getValue());
+        if (instance._.initialData) {
+            input.setValue(instance._.initialData);
+        }
+        var changedExternally = true; // to avoid cyclic notifications of the change
+        input.onchange = function () {
+            changedExternally = false;
+            var errorsIds = instance.setValue(getInputValue(instance._.schema, input));
+            if (errorsIds) {
+                // TODO
+            }
+            changedExternally = true;
         };
-        appendChild(this._.dom, this._.input);
-        function createInput() {
+        instance.onchange = function () {
+            if (changedExternally) {
+                input.setValue(instance.getValue());
+            }
+        };
+        return input;
+
+        function createInput(schema) {
             var input;
             if (schema.type === "any") {
                 input = document.createElement("textarea");
-                if (initialData) {
-                    input.value = JSON.stringify(initialData, null, 4);
-                    if (schema.readOnly)
-                        input.disabled = true;
-                }
+                input.setValue = function (value) {
+                    input.value = JSON.stringify(value, null, 4);
+                };
             } else if (schema.media) {
                 input = document.createElement("input");
                 input.type = "file";
-                appendChild(input, option);
-                // XXX TODO, encode the SOB properly.
+                input.setValue = function (value) {
+                    input.value = value;
+                };
             } else if (schema.enum) {
                 input = document.createElement("select");
                 if (!schema.required) {
@@ -33,33 +99,31 @@ function SimpleComponent() {
                     appendChild(option, textNode);
                     appendChild(input, option);
                 }
-                var selectedIndex = 0;
                 for (var i = 0; i < schema.enum.length; i++) {
                     var option = document.createElement("option");
                     var textNode = document.createTextNode(schema.enum[i]);
                     option.value = schema.enum[i];
                     appendChild(option, textNode);
                     appendChild(input, option);
-                    if (initialData && schema.enum[i] === initialData) {
-                        selectedIndex = i;
-                        if (!schema.required) {
-                            selectedIndex++;
-                        }
-                        if (schema.readOnly)
-                            input.disabled = true;
-                    }
                 }
-                if (schema.enum.length === 1)
-                    input.selectedIndex = 1;
-                else
-                    input.selectedIndex = selectedIndex;
+                input.setValue = function (value) {
+                    for (var i = 0; i < input.options.length; i++) {
+                        var option = input.options[i];
+                        if (option.value === value) {
+                            input.selectedIndex = i;
+                            break;
+                        }
+                    }
+                };
             } else if (schema.type === "boolean") {
                 if (schema.required) {
                     input = document.createElement("input");
                     input.type = "checkbox";
-                    if (initialData === true) {
-                        input.checked = true;
-                    }
+                    input.setValue = function (value) {
+                        if (value === true) {
+                            input.checked = true;
+                        }
+                    };
                 } else {
                     input = document.createElement("select");
                     var emptyOption = document.createElement("option");
@@ -67,24 +131,25 @@ function SimpleComponent() {
                     textEmpty.value = "";
                     appendChild(emptyOption, textEmpty);
                     appendChild(input, emptyOption);
-
                     var optionTrue = document.createElement("option");
                     var textTrue = document.createTextNode(BrutusinForms.i18n.getTranslation("true"));
-                    optionTrue.value = "true";
+                    optionTrue.value = true;
                     appendChild(optionTrue, textTrue);
                     appendChild(input, optionTrue);
-
                     var optionFalse = document.createElement("option");
                     var textFalse = document.createTextNode(BrutusinForms.i18n.getTranslation("false"));
-                    optionFalse.value = "false";
+                    optionFalse.value = false;
                     appendChild(optionFalse, textFalse);
                     appendChild(input, optionFalse);
-
-                    if (initialData === true) {
-                        input.selectedIndex = 1;
-                    } else if (initialData === false) {
-                        input.selectedIndex = 2;
-                    }
+                    input.setValue = function (value) {
+                        for (var i = 0; i < input.options.length; i++) {
+                            var option = input.options[i];
+                            if (option.value === value) {
+                                input.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    };
                 }
             } else {
                 input = document.createElement("input");
@@ -109,26 +174,25 @@ function SimpleComponent() {
                     input.type = "text";
                 }
                 if (initialData !== null && typeof initialData !== "undefined") {
-                    // readOnly?
                     input.value = initialData;
                     if (schema.readOnly)
                         input.disabled = true;
-
                 }
+                input.setValue = function (value) {
+                    input.value = value;
+                };
             }
             if (schema.description) {
                 input.title = schema.description;
                 input.placeholder = schema.description;
             }
+            if (schema.readOnly) {
+                input.disabled = true;
+            }
             input.setAttribute("autocorrect", "off");
             return input;
         }
-    };
-
-    this.getData = function () {
-        return getValue(this._.schema, this._.input);
-
-        function getValue(schema, input) {
+        function getInputValue(schema, input) {
             if (!schema) {
                 return null;
             }

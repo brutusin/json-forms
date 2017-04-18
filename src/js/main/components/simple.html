@@ -1,0 +1,23 @@
+<meta charset="UTF-8"></meta>
+<script src="../pollyfills.js"></script>
+<script src="../header.js"></script>
+<script src="../i18n.js"></script>
+<script src="../schema-resolver.js"></script>
+<script src="../form.js"></script>
+
+<script src="prototype.js"></script>
+<script src="simple.js"></script>
+<body>
+    <div id="container">
+    </div>
+</body>
+<script>
+    var component = new SimpleComponent;
+    var schemaResolver = new BrutusinForms.factories.schemaResolver;
+    schemaResolver.init({"type": "integer"});
+    component.init("$", {schemaResolver: schemaResolver, appendChild: function (parent, child) {
+            parent.appendChild(child);
+        }});
+    document.getElementById("container").appendChild(component.render());
+
+</script>

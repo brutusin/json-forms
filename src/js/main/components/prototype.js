@@ -9,75 +9,62 @@ function TypeComponent() {
     /**
      * Called with all args the first time. Called with no args on schema change
      * @param {type} schemaId
-     * @param {type} initialData
      * @param {type} formHelper
      * @returns {undefined}
      */
-    this.init = function (schemaId, initialData, formHelper) {
-        if (!this._) { // to group and represent protected fields
-            this._ = {};
-            this._.dom = document.createElement("div");
+    this.init = function (schemaId, formHelper) {
+        var instance = this;
+        if (!instance._) { // to group and represent protected fields
+            instance._ = {};
+            instance._.dom = document.createElement("div");
         }
-        var component = this;
-        this._.children = {};
-        this._.schemaListeners = [];
-        this._.schema = null;
+        instance._.children = {};
+        instance._.schemaListeners = [];
+        instance._.schema = null;
         if (schemaId) {
-            this.schemaId = schemaId;
-        }
-        if (typeof initialData !== "undefined") {
-            this.initialData = initialData;
+            instance._.schemaId = schemaId;
         }
         if (formHelper) {
-            this._.appendChild = formHelper.appendChild;
-            this._.createTypeComponent = formHelper.createTypeComponent;
-            this._.registerSchemaListener = function (schemaId, callback) {
-                component._.schemaListeners.push({schemaId: schemaId, callback: callback});
+            instance._.appendChild = formHelper.appendChild;
+            instance._.createTypeComponent = formHelper.createTypeComponent;
+            instance._.registerSchemaListener = function (schemaId, callback) {
+                instance._.schemaListeners.push({schemaId: schemaId, callback: callback});
                 formHelper.schemaResolver.addListener(schemaId, callback);
             };
-            this._.unRegisterSchemaListener = function (schemaId, callback) {
+            instance._.unRegisterSchemaListener = function (schemaId, callback) {
                 var listener;
-                for (var i = 0; i < component._.schemaListeners.length; i++) {
-                    listener = component._.schemaListeners[i];
+                for (var i = 0; i < instance._.schemaListeners.length; i++) {
+                    listener = instance._.schemaListeners[i];
                     if (listener.schemaId === schemaId && listener.callback === callback) {
-                        component._.schemaListeners.splice(i, 1);
+                        instance._.schemaListeners.splice(i, 1);
                         break;
                     }
                 }
                 formHelper.schemaResolver.removeListener(schemaId, callback);
             };
-            this._.notifyChanged = function (schemaId) {
+            instance._.notifyChanged = function (schemaId) {
                 formHelper.schemaResolver.notifyChanged(schemaId);
             };
+            instance._.removeAllChildren = function (domnNode) {
+                while (domnNode.firstChild) {
+                    domnNode.removeChild(domnNode.firstChild);
+                }
+            };
         }
-        ;
-
-        while (this._.dom.firstChild) {
-            this._.dom.removeChild(this._.dom.firstChild);
-        }
-        this._.registerSchemaListener(this.schemaId, function (schema) {
-            if (component._.schema) {
-                component.dispose();
-                component.init();
+        instance._.removeAllChildren(instance._.dom);
+        instance._.registerSchemaListener(instance._.schemaId, function (schema) {
+            if (instance._.schema) {
+                instance.dispose();
+                instance.init();
+                if(instance._.container){ // schema changed after rendered
+                    instance.render(); // re-render
+                }
             } else {
-                component._.schema = schema;
                 if (schema) {
-                    component.render(schema);
+                    instance.doInit(schema);
                 }
             }
         });
-    };
-
-    this.render = function (schema) {
-    };
-    this.getDOM = function () {
-        return this._.dom;
-    };
-    this.getData = function () {
-    };
-    this.validate = function () {
-    };
-    this.onchange = function () {
     };
     this.dispose = function () {
         for (var i = this._.schemaListeners.length - 1; i >= 0; i--) {
@@ -88,5 +75,39 @@ function TypeComponent() {
             this._.children[p].dispose();
         }
     };
+    
+    this.getSchemaId = function () {
+        return this._.schemaId;
+    };
+
+    this.render = function () {
+        if (!this._.container) {
+            this._.container = document.createElement("div");
+            this._.container.schemaId = this._.schemaId;
+        }
+        this._.removeAllChildren(this._.container);
+        this._.appendChild(this._.container, this.doRender());
+        return this._.container;
+    };
+
+    /*
+     * To overwrite ....
+     */
+    this.doInit = function (schema) {
+        // ...
+    };
+    this.doRender = function () {
+        //return document.createElement("...");
+    };
+    this.getValue = function () {
+        // return null;
+    };
+    this.setValue = function (value) {
+        // return ["error.id"];
+    };
+    this.onchange = function () {
+        // ...
+    };
+
 }
 BrutusinForms.TypeComponent = TypeComponent;

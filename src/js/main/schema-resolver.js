@@ -121,7 +121,7 @@ function SchemaResolver() {
             var pseudoSchema = createPseudoSchema(schema);
             function containsStr(array, string) {
                 for (var i = 0; i < array.length; i++) {
-                    if (array[i] == string) {
+                    if (array[i] === string) {
                         return true;
                     }
                 }
@@ -283,9 +283,9 @@ function SchemaResolver() {
 
     }
 
-    this.init = function (form) {
-        this.form = form;
-        schemaMap = processSchema("$", form.schema, false);
+    this.init = function (schema, dataSource) {
+        this.dataSource = dataSource;
+        schemaMap = processSchema("$", schema, false);
     };
 
     this.notifyChanged = function (id) {
@@ -299,7 +299,7 @@ function SchemaResolver() {
     };
 
     this.resolve = function (ids, listeners) {
-        this.resolveSchemas(ids, this.form.getData(), function (schemas) {
+        this.resolveSchemas(ids, this.dataSource ? this.dataSource.getData() : null, function (schemas) {
             if (schemas) {
                 for (var id in schemas) {
                     if (ids.includes(id)) {

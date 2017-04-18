@@ -2,11 +2,12 @@
 
 function ArrayComponent() {
     this.render = function (schema) {
-        this._.children = [];
-        var appendChild = this._.appendChild;
+        var instance = this;
+        instance._.children = [];
+        var appendChild = instance._.appendChild;
         if (schema) {
-            var component = this;
-            this._.registerSchemaListener(this.schemaId, function (itemSchema) {
+            
+            this._.registerSchemaListener(instance._.schemaId, function (itemSchema) {
                 var div = document.createElement("div");
                 var table = document.createElement("table");
                 table.className = "array";
@@ -15,23 +16,6 @@ function ArrayComponent() {
                     addButton.disabled = true;
                 }
                 addButton.setAttribute('type', 'button');
-//            addButton.getValidationError = function () {
-//                if (schema.minItems && schema.minItems > table.rows.length) {
-//                    return BrutusinForms.messages["minItems"].format(schema.minItems);
-//                }
-//                if (schema.maxItems && schema.maxItems < table.rows.length) {
-//                    return BrutusinForms.messages["maxItems"].format(schema.maxItems);
-//                }
-//                if (schema.uniqueItems) {
-//                    for (var i = 0; i < current.length; i++) {
-//                        for (var j = i + 1; j < current.length; j++) {
-//                            if (JSON.stringify(current[i]) === JSON.stringify(current[j])) {
-//                                return BrutusinForms.messages["uniqueItems"];
-//                            }
-//                        }
-//                    }
-//                }
-//            };
                 addButton.onclick = function () {
                     addItem(table);
                 };
@@ -41,12 +25,12 @@ function ArrayComponent() {
                 appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
                 appendChild(div, table);
                 appendChild(div, addButton);
-                if (component.initialData && component.initialData instanceof Array) {
-                    for (var i = 0; i < component.initialData.length; i++) {
-                        addItem(table, component.initialData[i]);
+                if (instance._.initialData && instance._.initialData instanceof Array) {
+                    for (var i = 0; i < instance._.initialData.length; i++) {
+                        addItem(table, instance._.initialData[i]);
                     }
                 }
-                appendChild(component.getDOM(), div);
+                appendChild(instance.getDOM(), div);
 
             });
         }
@@ -76,9 +60,9 @@ function ArrayComponent() {
                 }
             };
             var childComponent;
-            component._.createTypeComponent(schema.items, initialData, function (child) {
+            instance._.createTypeComponent(schema.items, initialData, function (child) {
                 childComponent = child;
-                component._.children.push(child);
+                instance._.children.push(child);
                 appendChild(td3, child.getDOM());
             });
             removeButton.onclick = function () {
@@ -86,7 +70,7 @@ function ArrayComponent() {
                     childComponent.dispose();
                     childComponent = null;
                     tr.parentNode.removeChild(tr);
-                    component._.children.splice(tr.index, 1);
+                    instance._.children.splice(tr.index, 1);
                 }
                 computRowCount();
             };
