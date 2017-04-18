@@ -8,16 +8,42 @@
 <script src="prototype.js"></script>
 <script src="simple.js"></script>
 <body>
-    <div id="container">
-    </div>
+    <div id="container1"></div>
+    <div id="container2"></div>
+    <div id="container3"></div>
+    <div id="container4"></div>
 </body>
 <script>
-    var component = new SimpleComponent;
-    var schemaResolver = new BrutusinForms.factories.schemaResolver;
-    schemaResolver.init({"type": "integer"});
-    component.init("$", {schemaResolver: schemaResolver, appendChild: function (parent, child) {
+    var component1 = new SimpleComponent;
+    var schemaResolver1 = new BrutusinForms.factories.schemaResolver;
+    schemaResolver1.init({"type": "integer"});
+    component1.init("$", {schemaResolver: schemaResolver1, appendChild: function (parent, child) {
             parent.appendChild(child);
         }});
-    document.getElementById("container").appendChild(component.render());
+    document.getElementById("container1").appendChild(component1.render());
+
+    var component2 = new SimpleComponent;
+    var schemaResolver2 = new BrutusinForms.factories.schemaResolver;
+    schemaResolver2.init({"type": "boolean"});
+    component2.init("$", {schemaResolver: schemaResolver2, appendChild: function (parent, child) {
+            parent.appendChild(child);
+        }});
+    document.getElementById("container2").appendChild(component2.render());
+
+    var component3 = new SimpleComponent;
+    var schemaResolver3 = new BrutusinForms.factories.schemaResolver;
+    schemaResolver3.init({"type": "boolean", "required": true});
+    component3.init("$", {schemaResolver: schemaResolver3, appendChild: function (parent, child) {
+            parent.appendChild(child);
+        }});
+    document.getElementById("container3").appendChild(component3.render());
+    
+     var component4 = new SimpleComponent;
+    var schemaResolver4 = new BrutusinForms.factories.schemaResolver;
+    schemaResolver4.init({"type": "string", "enum": ["aaa", "bbb"]});
+    component4.init("$", {schemaResolver: schemaResolver4, appendChild: function (parent, child) {
+            parent.appendChild(child);
+        }});
+    document.getElementById("container4").appendChild(component4.render());
 
 </script>

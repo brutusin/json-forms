@@ -44,7 +44,7 @@ function SimpleComponent() {
                 errorKeys.push("error.type");
             }
         }
-        
+
         if (errorKeys.length === 0) {
             this._.value = value;
             this._.notifyChanged(this._.schemaId);
@@ -107,11 +107,15 @@ function SimpleComponent() {
                     appendChild(input, option);
                 }
                 input.setValue = function (value) {
-                    for (var i = 0; i < input.options.length; i++) {
-                        var option = input.options[i];
-                        if (option.value === value) {
-                            input.selectedIndex = i;
-                            break;
+                    if (value === null) {
+                        input.selectedIndex = 0;
+                    } else {
+                        for (var i = 0; i < input.options.length; i++) {
+                            var option = input.options[i];
+                            if (option.value === value) {
+                                input.selectedIndex = i;
+                                break;
+                            }
                         }
                     }
                 };
@@ -122,6 +126,8 @@ function SimpleComponent() {
                     input.setValue = function (value) {
                         if (value === true) {
                             input.checked = true;
+                        } else {
+                            input.checked = false;
                         }
                     };
                 } else {
@@ -142,11 +148,15 @@ function SimpleComponent() {
                     appendChild(optionFalse, textFalse);
                     appendChild(input, optionFalse);
                     input.setValue = function (value) {
-                        for (var i = 0; i < input.options.length; i++) {
-                            var option = input.options[i];
-                            if (option.value === value) {
-                                input.selectedIndex = i;
-                                break;
+                        if (value === null) {
+                            input.selectedIndex = 0;
+                        } else {
+                            for (var i = 0; i < input.options.length; i++) {
+                                var option = input.options[i];
+                                if (option.value === value.toString()) {
+                                    input.selectedIndex = i;
+                                    break;
+                                }
                             }
                         }
                     };
@@ -155,10 +165,7 @@ function SimpleComponent() {
                 input = document.createElement("input");
                 if (schema.type === "integer" || schema.type === "number") {
                     input.type = "number";
-                    input.step = "any";
-                    if (typeof initialData !== "number") {
-                        initialData = null;
-                    }
+                    input.step = schema.step ? schema.step.toString() : "any";
                 } else if (schema.format === "date-time") {
                     try {
                         input.type = "datetime-local";
@@ -172,11 +179,6 @@ function SimpleComponent() {
                     input = document.createElement("textarea");
                 } else {
                     input.type = "text";
-                }
-                if (initialData !== null && typeof initialData !== "undefined") {
-                    input.value = initialData;
-                    if (schema.readOnly)
-                        input.disabled = true;
                 }
                 input.setValue = function (value) {
                     input.value = value;
