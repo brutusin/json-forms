@@ -212,7 +212,7 @@ if (typeof brutusin === "undefined") {
                 input = document.createElement("input");
                 if (s.type === "integer" || s.type === "number") {
                     input.type = "number";
-                    input.step = "any";
+                    input.step = s.step?""+s.step:"any";
                     if (typeof value !== "number") {
                         value = null;
                     }
