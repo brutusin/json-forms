@@ -10,7 +10,11 @@ function SimpleComponent() {
         return this._.value;
     };
 
-    this.setValue = function (value) {
+    this.setValue = function (value, callback) {
+        if (this.getValue() === value) {
+            callback();
+            return;
+        }
         var errorKeys = [];
         if (typeof value === "undefined" || value === "") {
             value = null;
@@ -47,10 +51,10 @@ function SimpleComponent() {
 
         if (errorKeys.length === 0) {
             this._.value = value;
-            this._.notifyChanged(this._.schemaId);
-            this.onchange(value);
+            this._.fireOnChange();
+            callback();
         } else {
-            return errorKeys;
+            callback({id:this._.schemaId, errors: errorKeys});
         }
     };
 
@@ -58,8 +62,8 @@ function SimpleComponent() {
         var instance = this;
         var appendChild = instance._.appendChild;
         var input = createInput(instance._.schema, this.getValue());
-        if (instance._.initialData) {
-            input.setValue(instance._.initialData);
+        if (instance._.value) {
+            input.setValue(instance._.value);
         }
         var changedExternally = true; // to avoid cyclic notifications of the change
         input.onchange = function () {
@@ -70,11 +74,11 @@ function SimpleComponent() {
             }
             changedExternally = true;
         };
-        instance.onchange = function () {
+        instance.addChangeListener(function (value) {
             if (changedExternally) {
-                input.setValue(instance.getValue());
+                input.setValue(value);
             }
-        };
+        });
         return input;
 
         function createInput(schema) {

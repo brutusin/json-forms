@@ -14,6 +14,13 @@
     <div id="container4"></div>
 </body>
 <script>
+    function callback(errors){
+        if(errors){
+            console.log(JSON.stringify(errors));
+        } else {
+            console.log("ok");
+        }
+    }
     var component1 = new SimpleComponent;
     var schemaResolver1 = new BrutusinForms.factories.schemaResolver;
     schemaResolver1.init({"type": "integer"});
@@ -44,6 +51,7 @@
     component4.init("$", {schemaResolver: schemaResolver4, appendChild: function (parent, child) {
             parent.appendChild(child);
         }});
+    component4.setValue("bbb", callback);
     document.getElementById("container4").appendChild(component4.render());
 
 </script>

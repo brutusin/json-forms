@@ -69,7 +69,7 @@ function BrutusinForm(schema, initialData, config) {
         return ret;
     }
 
-    function createTypeComponent(schemaId, initialData, callback) {
+    function createTypeComponent(schemaId, callback) {
         var listener = function (schema) {
             if (!schema) {
                 return;
@@ -77,7 +77,7 @@ function BrutusinForm(schema, initialData, config) {
             if (schema.hasOwnProperty("type")) {
                 if (typeFactories.hasOwnProperty(schema.type)) {
                     var component = new typeFactories[schema.type];
-                    component.init(schemaId, initialData, formFunctions);
+                    component.init(schemaId, formFunctions);
                     schemaResolver.removeListener(schemaId, listener);
                     callback(component);
                 } else {
@@ -85,7 +85,7 @@ function BrutusinForm(schema, initialData, config) {
                 }
             } else if (schema.hasOwnProperty("oneOf")) {
                 var component = new typeFactories["oneOf"];
-                component.init(schemaId, initialData, formFunctions);
+                component.init(schemaId, formFunctions);
                 schemaResolver.removeListener(schemaId, listener);
                 callback(component);
             } else {
