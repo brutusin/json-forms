@@ -60,7 +60,8 @@
             schemaResolver1.addListener(schemaId, listener);
         }};
     component1.init("$", formHelper);
-    // document.getElementById("container1").appendChild(component1.render());
+    component1.setValue([1, 2, null], callback)
+    document.getElementById("container1").appendChild(component1.render());
 
 
 </script>

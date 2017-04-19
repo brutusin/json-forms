@@ -12,7 +12,9 @@ function SimpleComponent() {
 
     this.setValue = function (value, callback) {
         if (this.getValue() === value) {
-            callback();
+            if (callback) {
+                callback();
+            }
             return;
         }
         var errorKeys = [];
@@ -52,9 +54,13 @@ function SimpleComponent() {
         if (errorKeys.length === 0) {
             this._.value = value;
             this._.fireOnChange();
-            callback();
+            if (callback) {
+                callback();
+            }
         } else {
-            callback({id:this._.schemaId, errors: errorKeys});
+            if (callback) {
+                callback({id: this._.schemaId, errors: errorKeys});
+            }
         }
     };
 

@@ -39,10 +39,12 @@ function ArrayComponent() {
         if (errorKeys.length === 0) {
             updateChildren();
         } else {
-            if (errorKeys.length > 0) {
-                callback({id: this._.schemaId, errors: errorKeys});
-            } else {
-                callback();
+            if (callback) {
+                if (errorKeys.length > 0) {
+                    callback({id: this._.schemaId, errors: errorKeys});
+                } else {
+                    callback();
+                }
             }
         }
 
@@ -53,6 +55,7 @@ function ArrayComponent() {
             for (var i = 0; i < newLength; i++) {
                 remaining[i.toString()] = true;
             }
+            
             if (newLength > prevLength) {
                 instance._.children.length = newLength;
                 for (var i = 0; i < newLength; i++) {
@@ -60,6 +63,7 @@ function ArrayComponent() {
                         createChild(i);
                     }
                 }
+                instance._.fireOnChange();
             } else if (newLength < prevLength) {
                 for (var i = 0; i < prevLength; i++) {
                     if (i >= newLength) {
@@ -67,6 +71,7 @@ function ArrayComponent() {
                     }
                 }
                 instance._.children.length = newLength;
+                instance._.fireOnChange();
             }
             for (var i = 0; i < newLength; i++) {
                 updateChild(i, value[i]);
@@ -88,10 +93,12 @@ function ArrayComponent() {
                     }
                     delete remaining[i.toString()];
                     if (Object.keys(remaining).length === 0) {
-                        if (errorKeys.length > 0) {
-                            callback(errorKeys);
-                        } else {
-                            callback();
+                        if (callback) {
+                            if (errorKeys.length > 0) {
+                                callback(errorKeys);
+                            } else {
+                                callback();
+                            }
                         }
                     }
                 });
@@ -111,20 +118,37 @@ function ArrayComponent() {
         }
         addButton.setAttribute('type', 'button');
         addButton.onclick = function () {
-            addItem(table);
+            var value = instance.getValue();
+            if (value === null) {
+                value = [];
+            }
+            value.push(null);
+            instance.setValue(value);
         };
+
         appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
         appendChild(div, table);
         appendChild(div, addButton);
-        var initialData = this.getValue();
-        if (initialData) {
-            for (var i = 0; i < initialData.length; i++) {
-                addItem(table, initialData[i]);
+        var value = this.getValue();
+        if (value) {
+            for (var i = 0; i < value.length; i++) {
+                addItem();
             }
         }
+        instance.addChangeListener(function (value) {
+            var length = value !== null ? value.length : 0;
+            var tableLength = table.rows.length;
+            for (var i = tableLength; i < length; i++) {
+                addItem();
+            }
+            for (var i = length; i < tableLength; i++) {
+                removeItem();
+            }
+        });
         return div;
 
-        function addItem(table, initialData) {
+        function addItem() {
+            var i = table.rows.length;
             var tbody = document.createElement("tbody");
             var tr = document.createElement("tr");
             tr.className = "item";
@@ -141,36 +165,24 @@ function ArrayComponent() {
                 removeButton.disabled = true;
             }
             appendChild(removeButton, document.createTextNode("x"));
-            var computRowCount = function () {
-                for (var i = 0; i < table.rows.length; i++) {
-                    var tr = table.rows[i];
-                    tr.cells[0].innerHTML = i + 1;
-                    tr.index = i;
-                }
-            };
-            var childComponent;
-            instance._.createTypeComponent(instance._.schema.items, initialData, function (child) {
-                childComponent = child;
-                instance._.children.push(child);
-                appendChild(td3, child.render());
-            });
+            appendChild(td3, instance._.children[i].render());
+
             removeButton.onclick = function () {
-                if (childComponent) {
-                    childComponent.dispose();
-                    childComponent = null;
-                    tr.parentNode.removeChild(tr);
-                    instance._.children.splice(tr.index, 1);
-                }
-                computRowCount();
+                var value = instance.getValue();
+                value.splice(tr.rowIndex,1);
+                instance.setValue(value);
             };
             appendChild(td2, removeButton);
-            var number = document.createTextNode(table.rows.length + 1);
+            var number = document.createTextNode(i + 1);
             appendChild(td1, number);
             appendChild(tr, td1);
             appendChild(tr, td2);
             appendChild(tr, td3);
             appendChild(tbody, tr);
             appendChild(table, tbody);
+        }
+        function removeItem() {
+            table.deleteRow(table.rows.length - 1);
         }
     };
 
