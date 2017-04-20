@@ -23,21 +23,21 @@ function SimpleComponent() {
         }
         if (value === null) {
             if (this._.schema.required) {
-                errorKeys.push("error.required");
+                errorKeys.push(["error.required"]);
             }
         } else if (this._.schema.type === "integer") {
             if (typeof value !== "number") {
-                errorKeys.push("error.type");
+                errorKeys.push(["error.type", "integer", typeof value]);
             } else if (!Number.isInteger(value)) {
                 errorKeys.push("error.integer");
             }
         } else if (this._.schema.type === "number") {
             if (typeof value !== "number") {
-                errorKeys.push("error.type");
+                errorKeys.push(["error.type", "number", typeof value]);
             }
         } else if (this._.schema.type === "boolean") {
             if (typeof value !== "boolean") {
-                errorKeys.push("error.type");
+                errorKeys.push(["error.type", "boolean", typeof value]);
             }
         } else if (this._.schema.type === "any") {
             try {
@@ -47,7 +47,7 @@ function SimpleComponent() {
             }
         } else if (this._.schema.type === "string") {
             if (typeof value !== "string") {
-                errorKeys.push("error.type");
+                errorKeys.push(["error.type", "string", typeof value]);
             }
         }
 

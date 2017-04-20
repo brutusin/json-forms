@@ -10,8 +10,7 @@ BrutusinForms.appendChild = function (parent, child, schema) {
 //            for (var i = 0; i < BrutusinForms.decorators.length; i++) {
 //                BrutusinForms.decorators[i](child, schema);
 //            }
-}
-
+};
 
 function BrutusinForm(schema, initialData, config) {
     this.schema = schema;

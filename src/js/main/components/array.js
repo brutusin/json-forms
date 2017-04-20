@@ -20,11 +20,14 @@ function ArrayComponent() {
 
     this.setValue = function (value, callback) {
         if (this.getValue() === value) {
+            if (callback) {
+                callback();
+            }
             return;
         }
         var instance = this;
         var errorKeys = [];
-        if (typeof value === "undefined" || value === "") {
+        if (typeof value === "undefined") {
             value = null;
         }
         if (value === null) {
@@ -54,7 +57,7 @@ function ArrayComponent() {
             for (var i = 0; i < newLength; i++) {
                 remaining[i.toString()] = true;
             }
-            
+
             if (newLength > prevLength) {
                 instance._.children.length = newLength;
                 for (var i = 0; i < newLength; i++) {

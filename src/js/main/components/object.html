@@ -6,11 +6,11 @@
 <script src="../form.js"></script>
 
 <script src="prototype.js"></script>
-<script src="array.js"></script>
+<script src="object.js"></script>
 <script src="simple.js"></script>
 
 <script src="renderers/prototype.js"></script>
-<script src="renderers/array.js"></script>
+<script src="renderers/object.js"></script>
 <script src="renderers/simple.js"></script>
 <body>
     <div id="container1"></div>
@@ -28,7 +28,7 @@
     }
     var component1;
     var schemaResolver1 = new BrutusinForms.factories.schemaResolver;
-    schemaResolver1.init({"type": "array", "items": {"type": "integer"}});
+    schemaResolver1.init({"type": "object", "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}});
     var componentFactory1 = function (schemaId, callback) {
         var typeFactories = {};
         var rendererFactories = {};
@@ -49,7 +49,8 @@
             if (schema.hasOwnProperty("type")) {
                 if (typeFactories.hasOwnProperty(schema.type)) {
                     var component = new typeFactories[schema.type];
-                    if (rendererFactories[schema.type]) {
+                    var renderer;
+                    if(rendererFactories[schema.type]){
                         var renderer = new rendererFactories[schema.type];
                     }
                     component.init(schemaId, schemaResolver1, componentFactory1, renderer);
@@ -72,7 +73,7 @@
     };
     componentFactory1("$", function (component) {
         component1 = component;
-        component1.setValue([1, 2, null], callback)
+        component1.setValue({number: 1, name: "nacho"}, callback);
         document.getElementById("container1").appendChild(component1.render());
     });
 
