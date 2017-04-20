@@ -3,22 +3,21 @@
 function OneOfComponent() {
     this.render = function (schema) {
         var instance = this;
-        var appendChild = instance._.appendChild;
         instance._.children = [null];
         var table = document.createElement("table");
         var tr1 = document.createElement("tr");
         var tr2 = document.createElement("tr");
         var td1 = document.createElement("td");
         var td2 = document.createElement("td");
-        appendChild(table, tr1);
-        appendChild(table, tr2);
-        appendChild(tr1, td1);
-        appendChild(tr2, td2);
+        BrutusinForms.appendChild(table, tr1);
+        BrutusinForms.appendChild(table, tr2);
+        BrutusinForms.appendChild(tr1, td1);
+        BrutusinForms.appendChild(tr2, td2);
         var select = document.createElement("select");
-        appendChild(td1, select);
+        BrutusinForms.appendChild(td1, select);
         var display = document.createElement("div");
-        appendChild(td2, display);
-        appendChild(select, document.createElement("option"));
+        BrutusinForms.appendChild(td2, display);
+        BrutusinForms.appendChild(select, document.createElement("option"));
 
         var selectedIndex;
 
@@ -27,8 +26,8 @@ function OneOfComponent() {
                 var option = document.createElement("option");
                 var textNode = document.createTextNode(ss.title ? ss.title : ss.$id);
                 option.value = i;
-                appendChild(option, textNode);
-                appendChild(select, option);
+                BrutusinForms.appendChild(option, textNode);
+                BrutusinForms.appendChild(select, option);
                 if (typeof instance._.initialData !== "undefined" && selectedIndex !== 0) {
                     if (doesDataMatchSchema(instance._.initialData, ss)) {
                         if (typeof selectedIndex === "undefined") {
@@ -67,7 +66,7 @@ function OneOfComponent() {
             }
             instance._.createTypeComponent(schemaId, instance._.initialData, function (child) {
                 instance._.children[0] = child;
-                appendChild(display, child.getDOM());
+                BrutusinForms.appendChild(display, child.getDOM());
                 child.onchange = function (evt) {
                     instance._.notifyChanged(instance._.schemaId);
                     instance.onchange(evt);
@@ -75,7 +74,7 @@ function OneOfComponent() {
             });
         }
 
-        appendChild(instance.getDOM(), table);
+        BrutusinForms.appendChild(instance.getDOM(), table);
 
         function runWithSchema(i, callback) {
             var schemaListener = function (schema) {

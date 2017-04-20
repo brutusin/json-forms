@@ -4,6 +4,15 @@ BrutusinForms.createForm = function (schema, initialData, config) {
     return new BrutusinForm(schema, initialData, config);
 };
 
+BrutusinForms.appendChild = function (parent, child, schema) {
+    parent.appendChild(child);
+    // TODO
+//            for (var i = 0; i < BrutusinForms.decorators.length; i++) {
+//                BrutusinForms.decorators[i](child, schema);
+//            }
+}
+
+
 function BrutusinForm(schema, initialData, config) {
     this.schema = schema;
     this.initialData = initialData;
@@ -23,20 +32,13 @@ function BrutusinForm(schema, initialData, config) {
     this.getDOM = function () {
         return dOMForm;
     };
-    var formFunctions = {schemaResolver: schemaResolver, createTypeComponent: createTypeComponent, appendChild: appendChild};
+    var formFunctions = {schemaResolver: schemaResolver, createTypeComponent: createTypeComponent};
 
     createTypeComponent("$", initialData, function (component) {
         rootComponent = component;
-        appendChild(dOMForm, component.getDOM());
+        BrutusinForms.appendChild(dOMForm, component.getDOM());
     });
 
-    function appendChild(parent, child, schema) {
-        parent.appendChild(child);
-        // TODO
-//            for (var i = 0; i < BrutusinForms.decorators.length; i++) {
-//                BrutusinForms.decorators[i](child, schema);
-//            }
-    }
 
     function createDOMForm() {
         var ret = document.createElement("form");

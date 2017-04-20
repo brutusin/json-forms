@@ -2,7 +2,6 @@
 
 function ArrayComponent() {
 
-
     this.doInit = function (schema) {
         this._.children = [];
         this._.schema = schema;
@@ -78,7 +77,7 @@ function ArrayComponent() {
             }
 
             function createChild(i) {
-                instance._.createTypeComponent(instance._.schema.items, function (child) {
+                instance._.componentFactory(instance._.schema.items, function (child) {
                     instance._.children[i] = child;
                     child.addChangeListener(function () {
                         instance._.fireOnChange();
@@ -103,86 +102,6 @@ function ArrayComponent() {
                     }
                 });
             }
-        }
-    };
-
-    this.doRender = function () {
-        var instance = this;
-        var appendChild = instance._.appendChild;
-        var div = document.createElement("div");
-        var table = document.createElement("table");
-        table.className = "array";
-        var addButton = document.createElement("button");
-        if (instance._.schema.readOnly) {
-            addButton.disabled = true;
-        }
-        addButton.setAttribute('type', 'button');
-        addButton.onclick = function () {
-            var value = instance.getValue();
-            if (value === null) {
-                value = [];
-            }
-            value.push(null);
-            instance.setValue(value);
-        };
-
-        appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
-        appendChild(div, table);
-        appendChild(div, addButton);
-        var value = this.getValue();
-        if (value) {
-            for (var i = 0; i < value.length; i++) {
-                addItem();
-            }
-        }
-        instance.addChangeListener(function (value) {
-            var length = value !== null ? value.length : 0;
-            var tableLength = table.rows.length;
-            for (var i = tableLength; i < length; i++) {
-                addItem();
-            }
-            for (var i = length; i < tableLength; i++) {
-                removeItem();
-            }
-        });
-        return div;
-
-        function addItem() {
-            var i = table.rows.length;
-            var tbody = document.createElement("tbody");
-            var tr = document.createElement("tr");
-            tr.className = "item";
-            var td1 = document.createElement("td");
-            td1.className = "item-index";
-            var td2 = document.createElement("td");
-            td2.className = "item-action";
-            var td3 = document.createElement("td");
-            td3.className = "item-value";
-            var removeButton = document.createElement("button");
-            removeButton.setAttribute('type', 'button');
-            removeButton.className = "remove";
-            if (instance._.schema.readOnly === true) {
-                removeButton.disabled = true;
-            }
-            appendChild(removeButton, document.createTextNode("x"));
-            appendChild(td3, instance._.children[i].render());
-
-            removeButton.onclick = function () {
-                var value = instance.getValue();
-                value.splice(tr.rowIndex,1);
-                instance.setValue(value);
-            };
-            appendChild(td2, removeButton);
-            var number = document.createTextNode(i + 1);
-            appendChild(td1, number);
-            appendChild(tr, td1);
-            appendChild(tr, td2);
-            appendChild(tr, td3);
-            appendChild(tbody, tr);
-            appendChild(table, tbody);
-        }
-        function removeItem() {
-            table.deleteRow(table.rows.length - 1);
         }
     };
 

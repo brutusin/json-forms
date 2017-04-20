@@ -3,22 +3,21 @@
 function ObjectComponent() {
     this.render = function (schema) {
         var instance = this;
-        var appendChild = instance._.appendChild;
         if (schema) {
             var table = document.createElement("table");
             table.className = "object";
             var tbody = document.createElement("tbody");
-            appendChild(table, tbody);
+            BrutusinForms.appendChild(table, tbody);
             if (schema.hasOwnProperty("properties")) {
                 for (var p in schema.properties) {
                     var tr = createPropertyInput(instance._.schemaId + "." + p, p, instance._.initialData ? instance._.initialData[p] : null);
-                    appendChild(tbody, tr);
+                    BrutusinForms.appendChild(tbody, tr);
                 }
             }
             if (schema.patternProperties) {
                 var usedProps = [];
                 var div = document.createElement("div");
-                appendChild(div, table);
+               BrutusinForms.appendChild(div, table);
                 for (var pattern in schema.patternProperties) {
                     var patdiv = document.createElement("div");
                     patdiv.className = "add-pattern-div";
@@ -28,14 +27,14 @@ function ObjectComponent() {
                     addButton.onclick = function () {
                         var p = instance.pattern;
                         var tr = createPatternPropertyInput(schema.patternProperties[p], p);
-                        appendChild(tbody, tr);
+                        BrutusinForms.appendChild(tbody, tr);
                     };
                     if (Object.keys(schema.patternProperties).length === 1) {
-                        appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
+                        BrutusinForms.appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem")));
                     } else {
-                        appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
+                        BrutusinForms.appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
                     }
-                    appendChild(patdiv, addButton, schema);
+                    BrutusinForms.appendChild(patdiv, addButton, schema);
                     if (instance._.initialData) {
                         for (var p in instance._.initialData) {
                             if (schema.properties && schema.properties.hasOwnProperty(p)) {
@@ -49,15 +48,15 @@ function ObjectComponent() {
                                 continue;
                             }
                             var tr = createPatternPropertyInput(schema.patternProperties[pattern], pattern, instance._.initialData[p]);
-                            appendChild(tbody, tr);
+                            BrutusinForms.appendChild(tbody, tr);
                             usedProps.push(p);
                         }
                     }
-                    appendChild(div, patdiv);
+                    BrutusinForms.appendChild(div, patdiv);
                 }
-                appendChild(instance.getDOM(), div);
+                BrutusinForms.appendChild(instance.getDOM(), div);
             } else {
-                appendChild(instance.getDOM(), table);
+                BrutusinForms.appendChild(instance.getDOM(), table);
             }
         }
 
@@ -120,7 +119,7 @@ function ObjectComponent() {
                     var removeButton = document.createElement("button");
                     removeButton.setAttribute('type', 'button');
                     removeButton.className = "remove";
-                    appendChild(removeButton, document.createTextNode("x"));
+                    BrutusinForms.appendChild(removeButton, document.createTextNode("x"));
                     removeButton.onclick = function () {
                         if (propertyName) {
                             delete instance._.children[propertyName];
@@ -132,24 +131,24 @@ function ObjectComponent() {
                         }
                         instance._.unRegisterSchemaListener(propertySchemaId, schemaListener);
                     };
-                    appendChild(innerTd1, nameInput);
-                    appendChild(innerTd2, removeButton);
-                    appendChild(innerTr, innerTd1);
-                    appendChild(innerTr, innerTd2);
-                    appendChild(innerTab, innerTr);
-                    appendChild(td1, innerTab);
+                    BrutusinForms.appendChild(innerTd1, nameInput);
+                    BrutusinForms.appendChild(innerTd2, removeButton);
+                    BrutusinForms.appendChild(innerTr, innerTd1);
+                    BrutusinForms.appendChild(innerTr, innerTd2);
+                    BrutusinForms.appendChild(innerTab, innerTr);
+                    BrutusinForms.appendChild(td1, innerTab);
 
-                    appendChild(tr, td1);
-                    appendChild(tr, td2);
-                    appendChild(tbody, tr);
-                    appendChild(table, tbody);
+                    BrutusinForms.appendChild(tr, td1);
+                    BrutusinForms.appendChild(tr, td2);
+                    BrutusinForms.appendChild(tbody, tr);
+                    BrutusinForms.appendChild(table, tbody);
 
                     instance._.createTypeComponent(propertySchemaId, initialData, function (child) {
                         childComponent = child;
                         if (propertyName) {
                             instance._.children[propertyName] = child;
                         }
-                        appendChild(td2, child.getDOM());
+                        BrutusinForms.appendChild(td2, child.getDOM());
                         child.onchange = function(evt){
                             instance._.notifyChanged(instance._.schemaId);
                             instance.onchange(evt);
@@ -177,13 +176,13 @@ function ObjectComponent() {
                     td1.className = "prop-name";
                     var td2 = document.createElement("td");
                     td2.className = "prop-value";
-                    appendChild(tbody, tr);
-                    appendChild(tr, td1);
-                    appendChild(td1, document.createTextNode(propertyName));
-                    appendChild(tr, td2);
+                    BrutusinForms.appendChild(tbody, tr);
+                    BrutusinForms.appendChild(tr, td1);
+                    BrutusinForms.appendChild(td1, document.createTextNode(propertyName));
+                    BrutusinForms.appendChild(tr, td2);
                     instance._.createTypeComponent(propertySchemaId, initialData, function (child) {
                         instance._.children[propertyName] = child;
-                        appendChild(td2, child.getDOM());
+                        BrutusinForms.appendChild(td2, child.getDOM());
                     });
                 }
             });

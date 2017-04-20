@@ -36,6 +36,16 @@ BrutusinForms.factories = {
         integer: null,
         any: null,
         oneOf: null
+    },
+    renderers: {
+        string: null,
+        object: null,
+        array: null,
+        boolean: null,
+        number: null,
+        integer: null,
+        any: null,
+        oneOf: null
     }
 };
 brutusin["json-forms"] = BrutusinForms;
