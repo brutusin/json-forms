@@ -41,13 +41,7 @@ function ArrayComponent() {
         if (errorKeys.length === 0) {
             updateChildren();
         } else {
-            if (callback) {
-                if (errorKeys.length > 0) {
-                    callback({id: this._.schemaId, errors: errorKeys});
-                } else {
-                    callback();
-                }
-            }
+            doCallback([{id: this._.schemaId, errors: errorKeys}]);
         }
 
         function updateChildren() {
@@ -95,15 +89,24 @@ function ArrayComponent() {
                     }
                     delete remaining[i.toString()];
                     if (Object.keys(remaining).length === 0) {
-                        if (callback) {
-                            if (errorKeys.length > 0) {
-                                callback(errorKeys);
-                            } else {
-                                callback();
-                            }
-                        }
+                        doCallback(errorKeys);
                     }
                 });
+            }
+        }
+
+        var doneCallback = false;
+        function doCallback(errorKeys) {
+            if (doneCallback) {
+                return;
+            }
+            doneCallback = true;
+            if (callback) {
+                if (errorKeys && errorKeys.length > 0) {
+                    callback(errorKeys);
+                } else {
+                    callback();
+                }
             }
         }
     };
