@@ -43,7 +43,6 @@ function ArrayRenderer() {
 
         function addItem() {
             var i = table.rows.length;
-            var tbody = document.createElement("tbody");
             var tr = document.createElement("tr");
             tr.className = "item";
             var td1 = document.createElement("td");
@@ -72,8 +71,7 @@ function ArrayRenderer() {
             BrutusinForms.appendChild(tr, td1);
             BrutusinForms.appendChild(tr, td2);
             BrutusinForms.appendChild(tr, td3);
-            BrutusinForms.appendChild(tbody, tr);
-            BrutusinForms.appendChild(table, tbody);
+            BrutusinForms.appendChild(table, tr);
         }
         function removeItem() {
             table.deleteRow(table.rows.length - 1);
