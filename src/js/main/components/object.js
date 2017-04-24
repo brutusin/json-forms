@@ -2,9 +2,17 @@
 
 function ObjectComponent() {
 
+    var instance = this;
+
     this.doInit = function (schema) {
         this._.children = {};
         this._.schema = schema;
+        if (schema.properties) {
+            for (var p in schema.properties) {
+                createChild(p);
+            }
+        }
+        ;
     };
 
     this.getValue = function () {
@@ -29,7 +37,6 @@ function ObjectComponent() {
             }
             return;
         }
-        var instance = this;
 
         if (typeof value === "undefined") {
             value = null;
@@ -104,9 +111,11 @@ function ObjectComponent() {
                 }
             }
             for (var p in nonVisited) {
-                createdOrDeleted = true;
-                instance._.children[p].dispose();
-                delete instance._.children[p];
+                if (!(instance._.schema.properties && instance._.schema.properties.hasOwnProperty(p))) {
+                    createdOrDeleted = true;
+                    instance._.children[p].dispose();
+                    delete instance._.children[p];
+                }
             }
             if (createdOrDeleted) {
                 instance._.fireOnChange();
@@ -114,22 +123,6 @@ function ObjectComponent() {
             if (Object.keys(remaining).length === 0) {
                 doCallback(errorKeys);
             }
-
-            function createChild(p, patternMap) {
-                var propertySchema;
-                if (patternMap.hasOwnProperty(p)) {
-                    propertySchema = instance._.schema.patternProperties[patternMap[p]];
-                } else {
-                    propertySchema = instance._.schema.properties[p];
-                }
-                instance._.componentFactory(propertySchema, function (child) {
-                    instance._.children[p] = child;
-                    child.addChangeListener(function () {
-                        instance._.fireOnChange();
-                    });
-                });
-            }
-            ;
 
             function updateChild(p, value) {
                 delete nonVisited[p];
@@ -160,6 +153,21 @@ function ObjectComponent() {
                 }
             }
         }
+    }
+
+    function createChild(p, patternMap) {
+        var propertySchema;
+        if (patternMap && patternMap.hasOwnProperty(p)) {
+            propertySchema = instance._.schema.patternProperties[patternMap[p]];
+        } else {
+            propertySchema = instance._.schema.properties[p];
+        }
+        instance._.componentFactory(propertySchema, function (child) {
+            instance._.children[p] = child;
+            child.addChangeListener(function () {
+                instance._.fireOnChange();
+            });
+        });
     }
 }
 ObjectComponent.prototype = new BrutusinForms.TypeComponent;
