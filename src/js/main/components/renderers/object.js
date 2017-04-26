@@ -28,12 +28,11 @@ function ObjectRenderer() {
                 var addButton = document.createElement("button");
                 addButton.setAttribute('type', 'button');
                 addButton.pattern = pattern;
+                addButton.counter = 0;
                 addButton.onclick = function () {
-                    var p = this.pattern;
-                    var tr = addPatternProperty(schema.patternProperties[p], p);
-                    BrutusinForms.appendChild(table, tr);
+                    addPatternProperty(null, pattern);
                 };
-                    BrutusinForms.appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
+                BrutusinForms.appendChild(addButton, document.createTextNode(BrutusinForms.i18n.getTranslation("addItem") + " /" + pattern + "/"));
                 BrutusinForms.appendChild(patdiv, addButton);
                 BrutusinForms.appendChild(div, patdiv);
             }
@@ -101,7 +100,9 @@ function ObjectRenderer() {
                         tr.propertyName = p;
                     }
                     component.setValue(value, function () {
-                        BrutusinForms.appendChild(td2, component.getChildren()[p].render());
+                        if (p) {
+                            BrutusinForms.appendChild(td2, component.getChildren()[p].render());
+                        }
                     });
                 };
                 var removeButton = document.createElement("button");
@@ -121,7 +122,13 @@ function ObjectRenderer() {
                 BrutusinForms.appendChild(td1, document.createTextNode(p));
             }
             BrutusinForms.appendChild(tr, td2);
-            BrutusinForms.appendChild(td2, component.getChildren()[p].render());
+            if (p) {
+                BrutusinForms.appendChild(td2, component.getChildren()[p].render());
+            } else if (pattern) {
+                component.createPatternPropertyComponent(pattern, function (helper) {
+                    BrutusinForms.appendChild(td2, helper.render());
+                });
+            }
             BrutusinForms.appendChild(table, tr);
         }
 

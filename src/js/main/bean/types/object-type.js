@@ -1,17 +1,33 @@
-/* global BrutusinForms */
+/* global schemas */
 
-function ObjectComponent() {
+schemas.ObjectBean = function() {
 
     var instance = this;
 
-    this.doInit = function (schema) {
+    this.doInit = function () {
         this._.children = {};
-        this._.schema = schema;
         if (schema.properties) {
             for (var p in schema.properties) {
                 createChild(p);
             }
         }
+    };
+    
+    this._.updateSchema = function (schema) {
+        // ...
+    };
+    
+    this._.updateValue = function (schema) {
+        // ...
+    };
+    
+
+    this.getValue = function () {
+        // return null;
+    };
+
+    this.getErrors = function () {
+        // return null;
     };
 
     this.getValue = function () {
@@ -179,5 +195,4 @@ function ObjectComponent() {
         });
     }
 }
-ObjectComponent.prototype = new BrutusinForms.TypeComponent;
-BrutusinForms.factories.typeComponents["object"] = ObjectComponent;
+schemas.ObjectBean.prototype = new schemas.SchemaBean;

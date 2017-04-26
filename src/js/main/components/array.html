@@ -28,7 +28,7 @@
     }
     var component1;
     var schemaResolver1 = new BrutusinForms.factories.schemaResolver;
-    schemaResolver1.init({"type": "array", "items": {"type": "integer"}});
+    schemaResolver1.init({"type": "array", "items": {"type": "integer","required":true}});
     var componentFactory1 = function (schemaId, callback) {
         var typeFactories = {};
         var rendererFactories = {};

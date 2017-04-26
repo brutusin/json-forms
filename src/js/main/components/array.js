@@ -19,7 +19,7 @@ function ArrayComponent() {
     };
 
     this.setValue = function (value, callback) {
-        if (this.getValue() === value) {
+        if (JSON.stringify(this.getValue()) === JSON.stringify(value)) {
             if (callback) {
                 callback();
             }
