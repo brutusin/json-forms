@@ -1,13 +1,17 @@
 /* global schemas */
 
-schemas.SchemaBean = function SchemaBean() {
+schemas.SchemaBean = function SchemaBean(schema) {
+    
     var instance = this;
+    var schemaResolver = new schemas.SchemaResolver;
+    schemaResolver.updateFrom(schema);
+    
     /**
      * 
      * @param {type} factory
      * @returns {undefined}
      */
-    this.init = function (factory) {
+    this.init = function (schema) {
         if (!factory) {
             factory = new schemas.TypeFactory;
         }

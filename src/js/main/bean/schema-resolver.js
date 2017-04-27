@@ -1,42 +1,21 @@
-/* global BrutusinForms */
-
-/**
- * Async schema resolution. Schema listeners are notified once initially and later when a subschema item changes
- * @returns {SchemaResolver}
- */
-var SCHEMA_ANY = {"type": "any"};
+/* global schemas */
 
 schemas.SchemaResolver = function () {
+
+    var SCHEMA_ANY = {"type": "any"};
     var listeners = {};
-    var schemaMap;
+    var schemaMap = {};
 
     function normalizeId(id) {
         // return id.replace(/\["[^"]*"\]/g, "[*]").replace(/\[\d*\]/g, "[#]"); // problems for pattern properties
         return id;
     }
 
-    function cleanNonExistingEntries(id, newEntries) {
-        for (var prop in schemaMap) {
-            if (prop.startsWith(id) && !newEntries.hasOwnProperty(prop)) {
-                var listenerCallbacks = listeners[prop];
-                if (listenerCallbacks) {
-                    for (var i = 0; i < listenerCallbacks.length; i++) {
-                        listenerCallbacks[i](null);
-                    }
-                }
-                delete schemaMap[prop];
-            }
-        }
-    }
-
-    function processSchema(id, schema, dynamic) {
+    function processSchema(id, schema) {
         var entryMap = {};
-        var dependencyMap = {};
         renameRequiredPropeties(schema); // required v4 (array) -> requiredProperties
         renameAdditionalPropeties(schema); // additionalProperties -> patternProperties
         populateSchemaMap(id, schema);
-        validateDepencyGraphIsAcyclic();
-        merge();
         return entryMap;
 
         function visitSchema(schema, visitor) {
@@ -127,7 +106,37 @@ schemas.SchemaResolver = function () {
                 }
                 return false;
             }
-            entryMap[id] = {id: id, schema: pseudoSchema, static: !dynamic};
+
+            function createValidator(schema) {
+                if (!schema) {
+                    throw "A schema is required";
+                }
+                if (schema.type === "object") {
+                    var validator = new schemas.validator.ObjectValidator;
+                    validator.init(schema);
+                    return validator;
+                } if (schema.type === "array") {
+                    var validator = new schemas.validator.ArrayValidator;
+                    validator.init(schema);
+                    return validator;
+                } if (schema.type === "string") {
+                    var validator = new schemas.validator.StringValidator;
+                    validator.init(schema);
+                    return validator;
+                } if (schema.type === "integer" || schema.type === "number") {
+                    var validator = new schemas.validator.NumberValidator;
+                    validator.init(schema);
+                    return validator;
+                } else if (schema.type) {
+                    return null;
+                } else if (schema.oneOf) {
+                    return null;
+                } else {
+                    throw "Unsupported schema structure found";
+                }
+            }
+
+            entryMap[id] = {id: id, schema: pseudoSchema, validator: createValidator(pseudoSchema)};
             if (!schema) {
                 return;
             } else if (schema.hasOwnProperty("oneOf")) {
@@ -191,69 +200,6 @@ schemas.SchemaResolver = function () {
                 pseudoSchema.items = id + "[#]";
                 populateSchemaMap(pseudoSchema.items, schema.items);
             }
-            if (schema.hasOwnProperty("dependsOn")) {
-                if (schema.dependsOn === null) {
-                    schema.dependsOn = ["$"];
-                }
-                var arr = new Array();
-                for (var i = 0; i < schema.dependsOn.length; i++) {
-                    if (!schema.dependsOn[i]) {
-                        arr[i] = "$";
-                        // Relative cases 
-                    } else if (schema.dependsOn[i].startsWith("$")) {
-                        arr[i] = schema.dependsOn[i];
-                        // Relative cases 
-                    } else if (id.endsWith("]")) {
-                        arr[i] = id + "." + schema.dependsOn[i];
-                    } else {
-                        arr[i] = id.substring(0, id.lastIndexOf(".")) + "." + schema.dependsOn[i];
-                    }
-                }
-                entryMap[id].dependsOn = arr;
-                for (var i = 0; i < arr.length; i++) {
-                    var entry = dependencyMap[arr[i]];
-                    if (!entry) {
-                        entry = new Array();
-                        dependencyMap[arr[i]] = entry;
-                    }
-                    entry[entry.length] = id;
-                }
-            }
-        }
-        function validateDepencyGraphIsAcyclic() {
-            function dfs(visitInfo, stack, id) {
-                if (stack.hasOwnProperty(id)) {
-                    throw "Schema dependency graph has cycles";
-                }
-                stack[id] = null;
-                if (visitInfo.hasOwnProperty(id)) {
-                    return;
-                }
-                visitInfo[id] = null;
-                var arr = dependencyMap[id];
-                if (arr) {
-                    for (var i = 0; i < arr.length; i++) {
-                        dfs(visitInfo, stack, arr[i]);
-                    }
-                }
-                delete stack[id];
-            }
-            var visitInfo = new Object();
-            for (var id in dependencyMap) {
-                if (visitInfo.hasOwnProperty(id)) {
-                    continue;
-                }
-                dfs(visitInfo, new Object(), id);
-            }
-        }
-        function merge() {
-            for (var id in dependencyMap) {
-                if (entryMap.hasOwnProperty(id)) {
-                    entryMap[id].dependedBy = dependencyMap[id];
-                } else {
-                    throw "Invalid schema id found in dependecies: " + id;
-                }
-            }
         }
         function createPseudoSchema(schema) {
             var pseudoSchema = {};
@@ -280,48 +226,38 @@ schemas.SchemaResolver = function () {
             }
             return def;
         }
-
     }
 
-    this.init = function (schema, dataSource) {
-        this.dataSource = dataSource;
-        schemaMap = processSchema("$", schema, false);
-    };
-
-    this.notifyChanged = function (id) {
-        if (schemaMap.hasOwnProperty(id)) {
-            var dependentIds = schemaMap[id].dependedBy;
-            if (!dependentIds) {
-                return;
+    this.updateFrom = function (schema) {
+        var changedIds = [];
+        var newEntries = processSchema("$", schema, false);
+        for (var id in newEntries) {
+            if (!schemaMap.hasOwnProperty(id) || JSON.stringify(newEntries[id]) !== JSON.stringify(schemaMap[id])) {
+                changedIds.push(id);
             }
-            this.resolve(dependentIds, listeners);
+        }
+        for (var id in schemaMap) {
+            if (!newEntries.hasOwnProperty(id)) {
+                changedIds.push(id);
+            }
+        }
+        schemaMap = newEntries;
+        for (var i = 0; i < changedIds.length; i++) {
+            var listenerCallbacks = listeners[changedIds[i]];
+            if (listenerCallbacks) {
+                for (var i = 0; i < listenerCallbacks.length; i++) {
+                    listenerCallbacks[i](this.getSchemaEntry(changedIds[i]));
+                }
+            }
         }
     };
 
-    this.resolve = function (ids, listeners) {
-        this.resolveSchemas(ids, this.dataSource ? this.dataSource.getData() : null, function (schemas) {
-            if (schemas) {
-                for (var id in schemas) {
-                    if (ids.includes(id)) {
-                        if (!schemaMap.hasOwnProperty(id) || JSON.stringify(schemaMap[id].schema) !== JSON.stringify(schemas[id])) {
-                            var newEntries = processSchema(id, schemas[id], true);
-                            cleanNonExistingEntries(id, newEntries);
-                            for (var prop in newEntries) {
-                                schemaMap[prop] = newEntries[prop];
-                                var listenerCallbacks = listeners[prop];
-                                if (listenerCallbacks) {
-                                    for (var i = 0; i < listenerCallbacks.length; i++) {
-                                        listenerCallbacks[i](newEntries[prop].schema);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                throw "Couldn't resolve schema item '" + id + "'";
-            }
-        });
+    this.getSchemaEntry = function (id) {
+        if (schemaMap.hasOwnProperty(id)) {
+            return schemaMap[id];
+        } else {
+            return null;
+        }
     };
 
     this.addListener = function (id, callback) {
@@ -330,16 +266,6 @@ schemas.SchemaResolver = function () {
             listeners[id].push(callback);
         } else {
             listeners[id] = [callback];
-        }
-        if (schemaMap.hasOwnProperty(id)) {
-            if (!schemaMap[id].dependsOn) {
-                callback(schemaMap[id].schema);
-            } else {
-                var listenerMap = {};
-                listenerMap[id] = [callback]
-                this.resolve(id, listenerMap);
-            }
-            return;
         }
     };
 
@@ -355,7 +281,4 @@ schemas.SchemaResolver = function () {
             }
         }
     };
-
-    this.resolveSchemas = function (ids, data, callback) {
-    };
-}
+};
