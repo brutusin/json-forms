@@ -5,11 +5,13 @@
 </script>
 <script src="schema-resolver.js"></script>
 <script src="schema-value.js"></script>
+<script src="validator/factory.js"></script>
 <script src="validator/validator.js"></script>
-<script src="validator/object-validator.js"></script>
-<script src="validator/array-validator.js"></script>
-<script src="validator/string-validator.js"></script>
-<script src="validator/number-validator.js"></script>
+<script src="validator/draft-06/version-factory.js"></script>
+<script src="validator/draft-06/object-validator.js"></script>
+<script src="validator/draft-06/array-validator.js"></script>
+<script src="validator/draft-06/string-validator.js"></script>
+<script src="validator/draft-06/number-validator.js"></script>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};
     var schemaResolver1 = new schemas.SchemaResolver;

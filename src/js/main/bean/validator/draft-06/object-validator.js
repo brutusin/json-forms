@@ -2,8 +2,10 @@
 if (!schemas.validator) {
     schemas.validator = {};
 }
-schemas.validator.ObjectValidator = function () {
-
+if (!schemas.validator.ObjectValidator) {
+    schemas.validator.ObjectValidator = {};
+}
+schemas.validator.ObjectValidator["draft-06"] = function () {
     this._validate = function (value, errors) {
         if (!value) {
             if (this.schema.required) {
@@ -46,4 +48,4 @@ schemas.validator.ObjectValidator = function () {
         }
     };
 };
-schemas.validator.ObjectValidator.prototype = new schemas.validator.Validator;
+schemas.validator.ObjectValidator["draft-06"].prototype = new schemas.validator.Validator;

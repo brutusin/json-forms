@@ -2,7 +2,10 @@
 if (!schemas.validator) {
     schemas.validator = {};
 }
-schemas.validator.NumberValidator = function () {
+if (!schemas.validator.NumberValidator) {
+    schemas.validator.NumberValidator = {};
+}
+schemas.validator.NumberValidator["draft-06"] = function () {
 
     this._validate = function (value, errors) {
         if (!value) {
@@ -32,4 +35,4 @@ schemas.validator.NumberValidator = function () {
         }
     };
 };
-schemas.validator.NumberValidator.prototype = new schemas.validator.Validator;
+schemas.validator.NumberValidator["draft-06"].prototype = new schemas.validator.Validator;

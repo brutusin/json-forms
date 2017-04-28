@@ -15,7 +15,7 @@ schemas.SchemaResolver = function () {
         var entryMap = {};
         renameRequiredPropeties(schema); // required v4 (array) -> requiredProperties
         renameAdditionalPropeties(schema); // additionalProperties -> patternProperties
-        populateSchemaMap(id, schema);
+        populateSchemaMap(id, schema, schema.$schema);
         return entryMap;
 
         function visitSchema(schema, visitor) {
@@ -96,8 +96,9 @@ schemas.SchemaResolver = function () {
                 }
             });
         }
-        function populateSchemaMap(id, schema) {
-            var pseudoSchema = createPseudoSchema(schema);
+
+        function populateSchemaMap(id, schema, $schema) {
+            var pseudoSchema = createPseudoSchema(schema, $schema);
             function containsStr(array, string) {
                 for (var i = 0; i < array.length; i++) {
                     if (array[i] === string) {
@@ -107,36 +108,7 @@ schemas.SchemaResolver = function () {
                 return false;
             }
 
-            function createValidator(schema) {
-                if (!schema) {
-                    throw "A schema is required";
-                }
-                if (schema.type === "object") {
-                    var validator = new schemas.validator.ObjectValidator;
-                    validator.init(schema);
-                    return validator;
-                } if (schema.type === "array") {
-                    var validator = new schemas.validator.ArrayValidator;
-                    validator.init(schema);
-                    return validator;
-                } if (schema.type === "string") {
-                    var validator = new schemas.validator.StringValidator;
-                    validator.init(schema);
-                    return validator;
-                } if (schema.type === "integer" || schema.type === "number") {
-                    var validator = new schemas.validator.NumberValidator;
-                    validator.init(schema);
-                    return validator;
-                } else if (schema.type) {
-                    return null;
-                } else if (schema.oneOf) {
-                    return null;
-                } else {
-                    throw "Unsupported schema structure found";
-                }
-            }
-
-            entryMap[id] = {id: id, schema: pseudoSchema, validator: createValidator(pseudoSchema)};
+            entryMap[id] = {id: id, schema: pseudoSchema, validator: schemas.validator.validatorFactory.createValidator(pseudoSchema)};
             if (!schema) {
                 return;
             } else if (schema.hasOwnProperty("oneOf")) {
@@ -145,7 +117,7 @@ schemas.SchemaResolver = function () {
                 for (var i in schema.oneOf) {
                     var childProp = id + "." + i;
                     pseudoSchema.oneOf[i] = childProp;
-                    populateSchemaMap(childProp, schema.oneOf[i]);
+                    populateSchemaMap(childProp, schema.oneOf[i], $schema);
                 }
             } else if (schema.hasOwnProperty("$ref")) {
                 var refSchema = getDefinition(schema["$ref"]);
@@ -163,7 +135,7 @@ schemas.SchemaResolver = function () {
                         }
                         refSchema = clonedRefSchema;
                     }
-                    populateSchemaMap(id, refSchema);
+                    populateSchemaMap(id, refSchema, $schema);
                 }
             } else if (schema.type === "object") {
                 if (schema.properties) {
@@ -179,7 +151,7 @@ schemas.SchemaResolver = function () {
                                 subSchema.required = false;
                             }
                         }
-                        populateSchemaMap(childProp, subSchema);
+                        populateSchemaMap(childProp, subSchema, $schema);
                     }
                 }
                 if (schema.patternProperties) {
@@ -190,18 +162,18 @@ schemas.SchemaResolver = function () {
                         var s = schema.patternProperties[pat];
 
                         if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
-                            populateSchemaMap(patChildProp, schema.patternProperties[pat]);
+                            populateSchemaMap(patChildProp, schema.patternProperties[pat], $schema);
                         } else {
-                            populateSchemaMap(patChildProp, SCHEMA_ANY);
+                            populateSchemaMap(patChildProp, SCHEMA_ANY, $schema);
                         }
                     }
                 }
             } else if (schema.type === "array") {
                 pseudoSchema.items = id + "[#]";
-                populateSchemaMap(pseudoSchema.items, schema.items);
+                populateSchemaMap(pseudoSchema.items, schema.items, $schema);
             }
         }
-        function createPseudoSchema(schema) {
+        function createPseudoSchema(schema, $schema) {
             var pseudoSchema = {};
             for (var p in schema) {
                 if (p === "items" || p === "properties" || p === "additionalProperties") {
@@ -212,7 +184,9 @@ schemas.SchemaResolver = function () {
                 } else {
                     pseudoSchema[p] = schema[p];
                 }
-
+            }
+            if (!pseudoSchema.$schema && $schema) {
+                pseudoSchema.$schema = $schema;
             }
             return pseudoSchema;
         }

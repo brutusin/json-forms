@@ -2,8 +2,10 @@
 if (!schemas.validator) {
     schemas.validator = {};
 }
-schemas.validator.StringValidator = function () {
-
+if (!schemas.validator.StringValidator) {
+    schemas.validator.StringValidator = {};
+}
+schemas.validator.StringValidator["draft-06"] = function () {
     this._validate = function (value, errors) {
         if (!value) {
             if (this.schema.required) {
@@ -25,4 +27,4 @@ schemas.validator.StringValidator = function () {
         }
     };
 };
-schemas.validator.StringValidator.prototype = new schemas.validator.Validator;
+schemas.validator.StringValidator["draft-06"].prototype = new schemas.validator.Validator;
