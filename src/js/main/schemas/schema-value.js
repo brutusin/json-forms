@@ -21,31 +21,13 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
         }
         if (schemaEntry) {
             children = [];
-            if (Array.isArray(value)) {
-                for (var i = 0; i < value.length; i++) {
-                    var child = new schemas.SchemaValue(id + "[" + i + "]", schemaId + "[#]", schemaResolver);
-                    child.setValue(value[i]);
-                    children.push(child);
-                }
-            } else if (typeof value === "object") {
-                for (var p in value) {
-                    if (schemaEntry.schema.properties.hasOwnProperty(p)) {
-                        var child = new schemas.SchemaValue(id + "." + p, schemaId + "." + p, schemaResolver);
-                        child.setValue(value[p]);
-                        children.push(child);
-                    }
-                    if (schemaEntry.schema.patternProperties) {
-                        for (var pattern in schemaEntry.schema.patternProperties) {
-                            var r = RegExp(pattern);
-                            if (p.search(r) !== -1) {
-                                var child = new schemas.SchemaValue(id + "." + p, schemaId + "[/" + pattern + "/]", schemaResolver);
-                                child.setValue(value[p]);
-                                children.push(child);
-                            }
-                        }
-                    }
-                }
-            }
+            var version = schemas.getVersion(schemaEntry.schema);
+            var visitor = schemas.version[version].visitor;
+            visitor.visitInstanceChildren(value, schemaEntry.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
+                var child = new schemas.SchemaValue(id + childRelativeId, schemaId + childRelativeSchemaId, schemaResolver);
+                child.setValue(childValue);
+                children.push(child);
+            });
             errors = schemaEntry.validator.validate(value);
         }
     }

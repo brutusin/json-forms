@@ -1,8 +1,5 @@
 /* global schemas */
-if (!schemas.validator) {
-    schemas.validator = {};
-}
-schemas.validator.Validator = function () {
+schemas.Validator = function () {
 
     this.init = function (schema) {
         this.schema = schema;

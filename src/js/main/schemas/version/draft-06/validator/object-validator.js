@@ -1,16 +1,14 @@
 /* global schemas */
-if (!schemas.validator) {
-    schemas.validator = {};
+if (!schemas.version) {
+    schemas.version = {};
 }
-if (!schemas.validator.ObjectValidator) {
-    schemas.validator.ObjectValidator = {};
+if (!schemas.version["draft-06"]) {
+    schemas.version["draft-06"] = {};
 }
-schemas.validator.ObjectValidator["draft-06"] = function () {
+schemas.version["draft-06"].ObjectValidator = function () {
     this._validate = function (value, errors) {
         if (!value) {
-            if (this.schema.required) {
-                errors.push("error.required");
-            }
+            return;
         } else if (Array.isArray(value)) {
             errors.push(["error.type", "object", "array"]);
         } else if (typeof value !== "object") {
@@ -18,23 +16,20 @@ schemas.validator.ObjectValidator["draft-06"] = function () {
         } else {
             for (var p in value) {
                 if (!this.schema.properties || !this.schema.properties.hasOwnProperty(p)) {
-                    var matchingPattern = null;
+                    var matched = false;
                     if (this.schema.patternProperties) {
                         for (var pattern in this.schema.patternProperties) {
                             var r = RegExp(pattern);
-                            if (p.search(r) === -1) {
-                                continue;
-                            }
-                            if (matchingPattern === null) {
-                                matchingPattern = pattern;
-                            } else {
-                                errors.push(["error.multiplePatternProperties", p]);
+                            if (p.search(r) !== -1) {
+                                matched = true;
                                 break;
                             }
                         }
                     }
-                    if (matchingPattern === null) {
-                        errors.push(["error.invalidProperty", p]);
+                    if (!matched) {
+                        if (!this.schema.additionalProperties) {
+                            errors.push(["error.invalidProperty", p]);
+                        }
                     }
                 }
             }
@@ -45,7 +40,15 @@ schemas.validator.ObjectValidator["draft-06"] = function () {
             if (this.schema.maxProperties && this.schema.maxProperties > propCount) {
                 errors.push(["error.maxProperties", this.schema.maxProperties, propCount]);
             }
+            if (Array.isArray(this.schema.required)) {
+                for (var i = 0; i < this.schema.required.length; i++) {
+                    var requriedProperty = this.schema.required[i];
+                    if (!value.hasOwnProperty(requriedProperty) || typeof value[requriedProperty] === "undefined" || value[requriedProperty] === null) {
+                        errors.push(["error.required", requriedProperty]);
+                    }
+                }
+            }
         }
     };
 };
-schemas.validator.ObjectValidator["draft-06"].prototype = new schemas.validator.Validator;
+schemas.version["draft-06"].ObjectValidator.prototype = new schemas.Validator;

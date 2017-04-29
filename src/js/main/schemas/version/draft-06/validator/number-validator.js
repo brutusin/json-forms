@@ -1,17 +1,15 @@
 /* global schemas */
-if (!schemas.validator) {
-    schemas.validator = {};
+if (!schemas.version) {
+    schemas.version = {};
 }
-if (!schemas.validator.NumberValidator) {
-    schemas.validator.NumberValidator = {};
+if (!schemas.version["draft-06"]) {
+    schemas.version["draft-06"] = {};
 }
-schemas.validator.NumberValidator["draft-06"] = function () {
+schemas.version["draft-06"].NumberValidator = function () {
 
     this._validate = function (value, errors) {
         if (!value) {
-            if (this.schema.required) {
-                errors.push("error.required");
-            }
+            return;
         } else if (typeof value !== "number") {
             errors.push(["error.type", "number", typeof value]);
         } else {
@@ -35,4 +33,4 @@ schemas.validator.NumberValidator["draft-06"] = function () {
         }
     };
 };
-schemas.validator.NumberValidator["draft-06"].prototype = new schemas.validator.Validator;
+schemas.version["draft-06"].NumberValidator.prototype = new schemas.Validator;

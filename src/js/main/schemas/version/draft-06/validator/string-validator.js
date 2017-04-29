@@ -1,16 +1,14 @@
 /* global schemas */
-if (!schemas.validator) {
-    schemas.validator = {};
+if (!schemas.version) {
+    schemas.version = {};
 }
-if (!schemas.validator.StringValidator) {
-    schemas.validator.StringValidator = {};
+if (!schemas.version["draft-06"]) {
+    schemas.version["draft-06"] = {};
 }
-schemas.validator.StringValidator["draft-06"] = function () {
+schemas.version["draft-06"].StringValidator = function () {
     this._validate = function (value, errors) {
         if (!value) {
-            if (this.schema.required) {
-                errors.push("error.required");
-            }
+            return;
         } else if (typeof value !== "string") {
             errors.push(["error.type", "string", typeof value]);
         } else {
@@ -27,4 +25,4 @@ schemas.validator.StringValidator["draft-06"] = function () {
         }
     };
 };
-schemas.validator.StringValidator["draft-06"].prototype = new schemas.validator.Validator;
+schemas.version["draft-06"].StringValidator.prototype = new schemas.Validator;
