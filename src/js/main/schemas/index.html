@@ -23,6 +23,10 @@
     var schema2 = {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "required": ["pageNum"], "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems": true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}};
     var schemaResolver2 = new schemas.SchemaResolver;
     schemaResolver2.updateFrom(schema2);
+    
+    var schema3 = {"type":"array","additionalItems":true,"items":[{"type":"number"},{"type":"string"},{"type":"string","enum":["Street","Avenue","Boulevard"]},{"type":"string","enum":["NW","NE","SW","SE"]}]};
+    var schemaResolver3 = new schemas.SchemaResolver;
+    schemaResolver3.updateFrom(schema3);
 
-    var sv = new schemas.SchemaValue("$", "$", schemaResolver2);
+    var sv = new schemas.SchemaValue("$", "$", schemaResolver3);
 </script>

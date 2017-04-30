@@ -53,11 +53,11 @@ schemas.version["draft-06"].visitor = {
             } else if (schema.type === "array") {
                 if (schema.items) {
                     if (Array.isArray(schema.items)) {
-                        if(schema.additionalItems){
-                             visit(schemaId + "[$]", {}, callback);
+                        if (schema.additionalItems) {
+                            visit(schemaId + "[$]", {}, callback);
                         }
                         for (var i = 0; i < schema.items.length; i++) {
-                            visit(schemaId + "[" + i + "]", schema.items, callback);
+                            visit(schemaId + "[" + i + "]", schema.items[i], callback);
                         }
                     } else {
                         visit(schemaId + "[#]", schema.items, callback);
@@ -70,15 +70,13 @@ schemas.version["draft-06"].visitor = {
         if (Array.isArray(value)) {
             if (Array.isArray(schema.items)) {
                 if (schema.additionalItems) {
-                    if (schema.items.length <= value.length) {
-                        for (var i = 0; i < schema.items.length; i++) {
-                            callback("[" + i + "]", "[" + i + "]", value[i]);
-                        }
-                        for (var i = schema.items.length; i < value.items.length; i++) {
-                            callback("[" + i + "]", "[$]", value[i]);
-                        }
+                    for (var i = 0; i < schema.items.length; i++) {
+                        callback("[" + i + "]", "[" + i + "]", value[i]);
                     }
-                } else if (schema.items.length === value.length) {
+                    for (var i = schema.items.length; i < value.length; i++) {
+                        callback("[" + i + "]", "[$]", value[i]);
+                    }
+                } else {
                     for (var i = 0; i < value.length; i++) {
                         callback("[" + i + "]", "[" + i + "]", value[i]);
                     }
@@ -90,7 +88,7 @@ schemas.version["draft-06"].visitor = {
             }
         } else if (typeof value === "object") {
             for (var p in value) {
-                if (schema.properties.hasOwnProperty(p)) {
+                if (schema.properties && schema.properties.hasOwnProperty(p)) {
                     callback("." + p, "." + p, value[p]);
                 } else if (schema.patternProperties) {
                     for (var pattern in schema.patternProperties) {

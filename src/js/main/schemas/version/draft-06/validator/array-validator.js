@@ -9,7 +9,7 @@ schemas.version["draft-06"].ArrayValidator = function () {
 
     this._validate = function (value, errors) {
         if (!value) {
-           return;
+            return;
         } else if (!Array.isArray(value)) {
             errors.push(["error.type", "array", typeof value]);
         } else {
@@ -18,6 +18,11 @@ schemas.version["draft-06"].ArrayValidator = function () {
             }
             if (this.schema.maxItems && this.schema.maxItems < value.length) {
                 errors.push(["error.maxItems", this.schema.maxItems, value.length]);
+            }
+            if (Array.isArray(this.schema.items)) {
+                if (!this.schema.additionalItems && this.schema.items.length < value.length) {
+                    errors.push("error.additionalItems");
+                }
             }
 
             if (this.schema.uniqueItems) {
