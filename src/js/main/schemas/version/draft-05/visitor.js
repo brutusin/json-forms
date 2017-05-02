@@ -2,10 +2,10 @@
 if (!schemas.version) {
     schemas.version = {};
 }
-if (!schemas.version["draft-06"]) {
-    schemas.version["draft-06"] = {};
+if (!schemas.version["draft-05"]) {
+    schemas.version["draft-05"] = {};
 }
-schemas.version["draft-06"].visitor = {
+schemas.version["draft-05"].visitor = {
     visitSchema: function (schema, callback) {
         visit("$", schema, callback);
 
@@ -15,7 +15,7 @@ schemas.version["draft-06"].visitor = {
             }
             callback(schemaId, schema);
             if (schema.hasOwnProperty("oneOf")) {
-                for (var i in schema.oneOf) {
+                for (var i = 0; i < schema.oneOf.length; i++) {
                     visit(schemaId + "." + i, schema.oneOf[i], callback);
                 }
             } else if (schema.hasOwnProperty("$ref")) {
@@ -67,7 +67,11 @@ schemas.version["draft-06"].visitor = {
         }
     },
     visitInstanceChildren: function (value, schema, callback) {
-        if (Array.isArray(value)) {
+        if (schema.oneOf) {
+            for (var i = 0; i < schema.oneOf.length; i++) {
+                callback("", "." + i, value);
+            }
+        } else if (Array.isArray(value)) {
             if (Array.isArray(schema.items)) {
                 if (schema.additionalItems) {
                     for (var i = 0; i < schema.items.length; i++) {

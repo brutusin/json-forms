@@ -2,12 +2,13 @@
 if (!schemas.version) {
     schemas.version = {};
 }
-if (!schemas.version["draft-06"]) {
-    schemas.version["draft-06"] = {};
+if (!schemas.version["draft-05"]) {
+    schemas.version["draft-05"] = {};
 }
-schemas.version["draft-06"].NumberValidator = function () {
+schemas.version["draft-05"].NumberValidator = function () {
 
-    this._validate = function (value, errors) {
+    this.doValidate = function (value) {
+        var errors = [];
         if (!value) {
             return;
         } else if (typeof value !== "number") {
@@ -31,6 +32,7 @@ schemas.version["draft-06"].NumberValidator = function () {
                 }
             }
         }
+        return errors;
     };
 };
-schemas.version["draft-06"].NumberValidator.prototype = new schemas.Validator;
+schemas.version["draft-05"].NumberValidator.prototype = new schemas.Validator;

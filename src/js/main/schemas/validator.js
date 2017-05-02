@@ -5,13 +5,19 @@ schemas.Validator = function () {
         this.schema = schema;
     };
 
-    this.validate = function (value) {
-        var errors = [];
-        this._validate(value, errors);
-        if (errors.length === 0) {
+    this.validate = function (value, childrenErrors) {
+        var errors = this.doValidate(value, childrenErrors);
+        if (!errors || errors.length === 0) {
             return null;
         } else {
             return errors;
         }
+    };
+
+    this.doValidate = function (value, childrenErrors) {
+    };
+
+    this.isAbsorvedChildrenErrors = function () {
+        return false;
     };
 };

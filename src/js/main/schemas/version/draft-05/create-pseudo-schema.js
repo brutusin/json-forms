@@ -2,10 +2,10 @@
 if (!schemas.version) {
     schemas.version = {};
 }
-if (!schemas.version["draft-06"]) {
-    schemas.version["draft-06"] = {};
+if (!schemas.version["draft-05"]) {
+    schemas.version["draft-05"] = {};
 }
-schemas.version["draft-06"].createPseudoSchema = function (schemaId, schema) {
+schemas.version["draft-05"].createPseudoSchema = function (schemaId, schema) {
     var pseudoSchema = {};
     for (var p in schema) {
         if (p === "items") {
@@ -34,7 +34,7 @@ schemas.version["draft-06"].createPseudoSchema = function (schemaId, schema) {
         }
     }
     if (!pseudoSchema.$schema) {
-        pseudoSchema.$schema = "http://json-schema.org/draft-06/schema#";
+        pseudoSchema.$schema = "http://json-schema.org/draft-05/schema#";
     }
     return pseudoSchema;
 };

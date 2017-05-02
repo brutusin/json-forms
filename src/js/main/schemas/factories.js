@@ -2,7 +2,7 @@
 if (!schemas.factories) {
     schemas.factories = {};
 }
-schemas.defaultVersion = "draft-06";
+schemas.defaultVersion = "draft-05";
 
 schemas.getVersion = function (schema) {
     var version = schemas.defaultVersion;

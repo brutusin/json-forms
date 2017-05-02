@@ -5,6 +5,7 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
     var value = null;
     var schemaEntry = schemaResolver.getSchemaEntry(schemaId);
     var errors = null;
+    var absorvedChildrenErrors = null;
 
     var schemaListener = function (se) {
         schemaEntry = se;
@@ -21,14 +22,20 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
         }
         if (schemaEntry) {
             children = [];
+            var childrenErrors = [];
             var version = schemas.getVersion(schemaEntry.schema);
             var visitor = schemas.version[version].visitor;
             visitor.visitInstanceChildren(value, schemaEntry.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
                 var child = new schemas.SchemaValue(id + childRelativeId, schemaId + childRelativeSchemaId, schemaResolver);
                 child.setValue(childValue);
                 children.push(child);
+                var childErrors = child.getErrors();
+                if(childErrors){
+                    childrenErrors.push(childErrors);
+                }
             });
-            errors = schemaEntry.validator.validate(value);
+            errors = schemaEntry.validator.validate(value, childrenErrors);
+            absorvedChildrenErrors = schemaEntry.validator.isAbsorvedChildrenErrors(value, childrenErrors);
         }
     }
 
@@ -59,13 +66,16 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
         if (errors !== null) {
             ret[id] = errors;
         }
-        if (children) {
+        if (children && !absorvedChildrenErrors) {
             for (var i = 0; i < children.length; i++) {
                 var childErrors = children[i].getErrors();
                 if (childErrors) {
                     for (var p in childErrors) {
-                        ret[p] = childErrors[p];
-                    }
+                        if(!ret[p]){
+                           ret[p] = []; 
+                        }
+                        ret[p].push(childErrors[p]);
+                    } 
                 }
             }
         }

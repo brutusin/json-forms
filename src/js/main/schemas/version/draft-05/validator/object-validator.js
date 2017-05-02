@@ -2,11 +2,12 @@
 if (!schemas.version) {
     schemas.version = {};
 }
-if (!schemas.version["draft-06"]) {
-    schemas.version["draft-06"] = {};
+if (!schemas.version["draft-05"]) {
+    schemas.version["draft-05"] = {};
 }
-schemas.version["draft-06"].ObjectValidator = function () {
-    this._validate = function (value, errors) {
+schemas.version["draft-05"].ObjectValidator = function () {
+    this.doValidate = function (value) {
+        var errors = [];
         if (!value) {
             return;
         } else if (Array.isArray(value)) {
@@ -49,6 +50,7 @@ schemas.version["draft-06"].ObjectValidator = function () {
                 }
             }
         }
+        return errors;
     };
 };
-schemas.version["draft-06"].ObjectValidator.prototype = new schemas.Validator;
+schemas.version["draft-05"].ObjectValidator.prototype = new schemas.Validator;
