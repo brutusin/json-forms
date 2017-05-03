@@ -1251,6 +1251,7 @@ if (typeof brutusin === "undefined") {
                 return input.getValue();
             }
             var value;
+            
             if (input.tagName.toLowerCase() === "select") {
                 value = input.options[input.selectedIndex].value;
             } else {
