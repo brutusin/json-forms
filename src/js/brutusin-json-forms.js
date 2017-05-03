@@ -358,13 +358,13 @@ if (typeof brutusin === "undefined") {
 
                 var optionTrue = document.createElement("option");
                 var textTrue = document.createTextNode(BrutusinForms.messages["true"]);
-                textTrue.value = "true";
+                optionTrue.value = "true";
                 appendChild(optionTrue, textTrue, s);
                 appendChild(input, optionTrue, s);
 
                 var optionFalse = document.createElement("option");
                 var textFalse = document.createTextNode(BrutusinForms.messages["false"]);
-                textFalse.value = "false";
+                optionFalse.value = "false";
                 appendChild(optionFalse, textFalse, s);
                 appendChild(input, optionFalse, s);
 
