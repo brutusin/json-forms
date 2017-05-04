@@ -32,7 +32,9 @@
     var schema4 = {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]};
     var schemaResolver4 = new schemas.SchemaResolver;
     schemaResolver4.updateFrom(schema4);
-
-
-    var sv = new schemas.SchemaValue("$", "$", schemaResolver4);
+    
+    var sv1 = new schemas.SchemaValue("$", "$", schemaResolver1);
+    var sv2 = new schemas.SchemaValue("$", "$", schemaResolver2);
+    var sv3 = new schemas.SchemaValue("$", "$", schemaResolver3);
+    var sv4 = new schemas.SchemaValue("$", "$", schemaResolver4);
 </script>

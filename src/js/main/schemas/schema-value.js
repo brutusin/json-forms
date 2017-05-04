@@ -1,7 +1,10 @@
 /* global schemas */
 
 schemas.SchemaValue = function (id, schemaId, schemaResolver) {
-    var children;
+    this.id = id;
+    this.schemaId = schemaId;
+
+    var children = {};
     var value = null;
     var schemaEntry = schemaResolver.getSchemaEntry(schemaId);
     var errors = null;
@@ -14,26 +17,56 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
     schemaResolver.addListener(schemaId, schemaListener);
     refresh();
 
-    function refresh() {
-        if (children) {
-            for (var i = 0; i < children.length; i++) {
-                children[i].dispose();
+    function dispose(childMap) {
+        for (var id in childMap) {
+            for (var schemaId in childMap[id]) {
+                childMap[id][schemaId].dispose();
             }
         }
+    }
+
+    function removeChild(childMap, id, schemaId) {
+        var schemaMap = childMap[id];
+        if (schemaMap) {
+            var ret = schemaMap[schemaId];
+            delete schemaMap[schemaId];
+            return ret;
+        }
+    }
+
+    function setChild(child, childMap, id, schemaId) {
+        var schemaMap = childMap[id];
+        if (!schemaMap) {
+            schemaMap = {};
+            childMap[id] = schemaMap;
+        }
+        schemaMap[schemaId] = child;
+    }
+
+    function refresh() {
         if (schemaEntry) {
-            children = [];
+            var newChildren = {};
             var childrenErrors = [];
             var version = schemas.getVersion(schemaEntry.schema);
             var visitor = schemas.version[version].visitor;
             visitor.visitInstanceChildren(value, schemaEntry.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
-                var child = new schemas.SchemaValue(id + childRelativeId, schemaId + childRelativeSchemaId, schemaResolver);
+                var childId = id + childRelativeId;
+                var childSchemaId = schemaId + childRelativeSchemaId;
+                var child = removeChild(children, childId, childSchemaId);
+                if (!child) {
+                    child = new schemas.SchemaValue(childId, childSchemaId, schemaResolver);
+                }
+                setChild(child, newChildren, childId, childSchemaId);
                 child.setValue(childValue);
-                children.push(child);
+
                 var childErrors = child.getErrors();
-                if(childErrors){
+                if (childErrors) {
                     childrenErrors.push(childErrors);
                 }
             });
+            dispose(children);
+            children = newChildren;
+
             errors = schemaEntry.validator.validate(value, childrenErrors);
             absorvedChildrenErrors = schemaEntry.validator.isAbsorvedChildrenErrors(value, childrenErrors);
         }
@@ -53,6 +86,10 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
         return value;
     };
 
+    this.getChildren = function () {
+        return children;
+    };
+
     this.setValue = function (v) {
         var isChanged = JSON.stringify(v) !== JSON.stringify(value);
         value = v;
@@ -67,15 +104,18 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
             ret[id] = errors;
         }
         if (children && !absorvedChildrenErrors) {
-            for (var i = 0; i < children.length; i++) {
-                var childErrors = children[i].getErrors();
-                if (childErrors) {
-                    for (var p in childErrors) {
-                        if(!ret[p]){
-                           ret[p] = []; 
+            for (var id in children) {
+                var childIdMap = children[id];
+                for (var schemaId in childIdMap) {
+                    var childErrors = childIdMap[schemaId].getErrors();
+                    if (childErrors) {
+                        for (var p in childErrors) {
+                            if (!ret[p]) {
+                                ret[p] = [];
+                            }
+                            ret[p].push(childErrors[p]);
                         }
-                        ret[p].push(childErrors[p]);
-                    } 
+                    }
                 }
             }
         }
@@ -85,4 +125,5 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
             return null;
         }
     };
+
 };
