@@ -6,8 +6,17 @@ if (!schemas.version["draft-05"]) {
     schemas.version["draft-05"] = {};
 }
 schemas.version["draft-05"].visitor = {
-    visitSchema: function (schema, callback) {
-        visit("$", schema, callback);
+    visitSchema: function (rootSchema, callback) {
+        visit("$", rootSchema, callback);
+
+        function getDefinition(path) {
+            var parts = path.split('/');
+            var def = rootSchema;
+            for (var i = 1; i < parts.length; i++) {
+                def = def[parts[i]];
+            }
+            return def;
+        }
 
         function visit(schemaId, schema, callback) {
             if (!schema) {
@@ -34,7 +43,7 @@ schemas.version["draft-05"].visitor = {
                         }
                         newSchema = clonedRefSchema;
                     }
-                    visit("$ref:" + schema.$ref, newSchema, callback);
+                    visit(schemaId, newSchema, callback);
                 }
             } else if (schema.type === "object") {
                 if (schema.properties) {

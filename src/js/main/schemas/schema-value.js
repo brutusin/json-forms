@@ -104,8 +104,8 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
             ret[id] = errors;
         }
         if (children && !absorvedChildrenErrors) {
-            for (var id in children) {
-                var childIdMap = children[id];
+            for (var childId in children) {
+                var childIdMap = children[childId];
                 for (var schemaId in childIdMap) {
                     var childErrors = childIdMap[schemaId].getErrors();
                     if (childErrors) {

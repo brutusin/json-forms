@@ -32,9 +32,14 @@
     var schema4 = {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]};
     var schemaResolver4 = new schemas.SchemaResolver;
     schemaResolver4.updateFrom(schema4);
-    
+
+    var schema5 = {"definitions": {"address": {"type": "object", "properties": {"street_address": {"type": "string"}, "city": {"type": "string"}, "state": {"type": "string"}}, "required": ["street_address", "city", "state"]}}, "$ref": "#/definitions/address"};
+    var schemaResolver5 = new schemas.SchemaResolver;
+    schemaResolver5.updateFrom(schema5);
+
     var sv1 = new schemas.SchemaValue("$", "$", schemaResolver1);
     var sv2 = new schemas.SchemaValue("$", "$", schemaResolver2);
     var sv3 = new schemas.SchemaValue("$", "$", schemaResolver3);
     var sv4 = new schemas.SchemaValue("$", "$", schemaResolver4);
+    var sv5 = new schemas.SchemaValue("$", "$", schemaResolver5);
 </script>
