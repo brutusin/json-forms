@@ -5,28 +5,32 @@ if (!schemas.version) {
 if (!schemas.version["draft-05"]) {
     schemas.version["draft-05"] = {};
 }
+
 schemas.version["draft-05"].ArrayValidator = function () {
 
-    this.doValidate = function (value) {
+    this.doValidate = function (schema, value) {
+        if (schema.type !== "array") {
+            return;
+        }
         var errors = [];
         if (!value) {
             return;
         } else if (!Array.isArray(value)) {
             errors.push(["error.type", "array", typeof value]);
         } else {
-            if (this.schema.minItems && this.schema.minItems > value.length) {
-                errors.push(["error.minItems", this.schema.minItems, value.length]);
+            if (schema.minItems && schema.minItems > value.length) {
+                errors.push(["error.minItems", schema.minItems, value.length]);
             }
-            if (this.schema.maxItems && this.schema.maxItems < value.length) {
-                errors.push(["error.maxItems", this.schema.maxItems, value.length]);
+            if (schema.maxItems && schema.maxItems < value.length) {
+                errors.push(["error.maxItems", schema.maxItems, value.length]);
             }
-            if (Array.isArray(this.schema.items)) {
-                if (!this.schema.additionalItems && this.schema.items.length < value.length) {
+            if (Array.isArray(schema.items)) {
+                if (!schema.additionalItems && schema.items.length < value.length) {
                     errors.push("error.additionalItems");
                 }
             }
 
-            if (this.schema.uniqueItems) {
+            if (schema.uniqueItems) {
                 outer:for (var i = 0; i < value.length; i++) {
                     for (var j = i + 1; j < value.length; j++) {
                         if (JSON.stringify(value[i]) === JSON.stringify(value[j])) {
@@ -40,4 +44,9 @@ schemas.version["draft-05"].ArrayValidator = function () {
         return errors;
     };
 };
-schemas.version["draft-05"].ArrayValidator.prototype = new schemas.Validator;
+schemas.version["draft-05"].ArrayValidator.prototype = new schemas.validation.Validator;
+
+if (!schemas.version["draft-05"].validator) {
+    schemas.version["draft-05"].validator = new schemas.validation.DelegatorValidator;
+}
+schemas.version["draft-05"].validator.registerConcreteValidator(new schemas.version["draft-05"].ArrayValidator);

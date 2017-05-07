@@ -17,7 +17,7 @@ schemas.SchemaResolver = function () {
         var createPseudoSchema = schemas.version[version].createPseudoSchema;
         visitor.visitSchema(schema, function (schemaId, schema) {
             var pseudoSchema = createPseudoSchema(schemaId, schema, version);
-            entryMap[schemaId] = {id: schemaId, schema: pseudoSchema, validator: schemas.version[version].validatorFactory.createValidator(schema)};
+            entryMap[schemaId] = pseudoSchema;
         });
         return entryMap;
     }
@@ -40,13 +40,13 @@ schemas.SchemaResolver = function () {
             var listenerCallbacks = listeners[changedIds[i]];
             if (listenerCallbacks) {
                 for (var i = 0; i < listenerCallbacks.length; i++) {
-                    listenerCallbacks[i](this.getSchemaEntry(changedIds[i]));
+                    listenerCallbacks[i](this.getSubSchema(changedIds[i]));
                 }
             }
         }
     };
 
-    this.getSchemaEntry = function (id) {
+    this.getSubSchema = function (id) {
         if (schemaMap.hasOwnProperty(id)) {
             return schemaMap[id];
         } else {

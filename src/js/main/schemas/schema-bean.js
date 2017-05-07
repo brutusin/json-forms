@@ -1,17 +1,29 @@
 /* global schemas */
 
-schemas.SchemaValue = function (id, schemaId, schemaResolver) {
+schemas.SchemaBean = function (schemaResolver, id, schemaId) {
+    if (!schemaResolver) {
+        throw "schemaResolver is required";
+    }
+    if (!id) {
+        id = "$";
+    }
+    if (!schemaId) {
+        schemaId = "$";
+    }
+    var instance = this;
     this.id = id;
     this.schemaId = schemaId;
+    this.schema = schemaResolver.getSubSchema(schemaId);
 
     var children = {};
+    var changeListeners = [];
     var value = null;
-    var schemaEntry = schemaResolver.getSchemaEntry(schemaId);
+
     var errors = null;
     var absorvedChildrenErrors = null;
 
-    var schemaListener = function (se) {
-        schemaEntry = se;
+    var schemaListener = function (ss) {
+        instance.schema = ss;
         refresh();
     };
     schemaResolver.addListener(schemaId, schemaListener);
@@ -43,18 +55,25 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
         schemaMap[schemaId] = child;
     }
 
+    function fireOnChange() {
+        for (var i = 0; i < changeListeners.length; i++) {
+            changeListeners[i](instance);
+        }
+    }
+
     function refresh() {
-        if (schemaEntry) {
+        if (instance.schema) {
             var newChildren = {};
             var childrenErrors = [];
-            var version = schemas.getVersion(schemaEntry.schema);
+            var version = schemas.getVersion(instance.schema);
             var visitor = schemas.version[version].visitor;
-            visitor.visitInstanceChildren(value, schemaEntry.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
+            var validator = schemas.version[version].validator;
+            visitor.visitInstanceChildren(value, instance.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
                 var childId = id + childRelativeId;
                 var childSchemaId = schemaId + childRelativeSchemaId;
                 var child = removeChild(children, childId, childSchemaId);
                 if (!child) {
-                    child = new schemas.SchemaValue(childId, childSchemaId, schemaResolver);
+                    child = new schemas.SchemaBean(schemaResolver, childId, childSchemaId);
                 }
                 setChild(child, newChildren, childId, childSchemaId);
                 child.setValue(childValue);
@@ -66,10 +85,10 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
             });
             dispose(children);
             children = newChildren;
-
-            errors = schemaEntry.validator.validate(value, childrenErrors);
-            absorvedChildrenErrors = schemaEntry.validator.isAbsorvedChildrenErrors(value, childrenErrors);
+            errors = validator.validate(instance.schema, value, childrenErrors);
+            absorvedChildrenErrors = validator.isAbsorvedChildrenErrors(instance.schema, value, childrenErrors);
         }
+        fireOnChange();
     }
 
     this.dispose = function () {
@@ -79,6 +98,7 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
                 children[i].dispose();
             }
         }
+        changeListeners = null;
         children = null;
     };
 
@@ -126,4 +146,30 @@ schemas.SchemaValue = function (id, schemaId, schemaResolver) {
         }
     };
 
+    /**
+     * 
+     * @param {type} onchange
+     * @returns {undefined}
+     */
+    this.addChangeListener = function (onchange) {
+        if (onchange) {
+            if (!changeListeners.includes(onchange)) {
+                changeListeners.push(onchange);
+            }
+        }
+    };
+
+    /**
+     * 
+     * @param {type} onchange
+     * @returns {undefined}
+     */
+    this.removeChangeListener = function (onchange) {
+        if (onchange) {
+            var index = changeListeners.indexOf(onchange);
+            if (index > -1) {
+                changeListeners.splice(index, 1);
+            }
+        }
+    };
 };

@@ -4,18 +4,22 @@
     var schemas = {};
 </script>
 <script src="schema-resolver.js"></script>
-<script src="schema-value.js"></script>
+<script src="schema-bean.js"></script>
+<script src="renderer.js"></script>
+<script src="i18n.js"></script>
+<script src="utils.js"></script>
 <script src="factories.js"></script>
-<script src="validator.js"></script>
+<script src="validation.js"></script>
 <script src="version/draft-05/visitor.js"></script>
 <script src="version/draft-05/create-pseudo-schema.js"></script>
-<script src="version/draft-05/validator/validator-factory.js"></script>
+
 <script src="version/draft-05/validator/object-validator.js"></script>
 <script src="version/draft-05/validator/oneof-validator.js"></script>
 <script src="version/draft-05/validator/array-validator.js"></script>
 <script src="version/draft-05/validator/string-validator.js"></script>
 <script src="version/draft-05/validator/number-validator.js"></script>
-<script src="version/draft-05/validator/empty-validator.js"></script>
+<script src="render/simple-renderer.js"></script>
+<div id="div1"></div>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};
     var schemaResolver1 = new schemas.SchemaResolver;
@@ -36,10 +40,19 @@
     var schema5 = {"definitions": {"address": {"type": "object", "properties": {"street_address": {"type": "string"}, "city": {"type": "string"}, "state": {"type": "string"}}, "required": ["street_address", "city", "state"]}}, "$ref": "#/definitions/address"};
     var schemaResolver5 = new schemas.SchemaResolver;
     schemaResolver5.updateFrom(schema5);
+    
+    var schema6 = {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]};
+    var schemaResolver6 = new schemas.SchemaResolver;
+    schemaResolver6.updateFrom(schema6);
 
-    var sv1 = new schemas.SchemaValue("$", "$", schemaResolver1);
-    var sv2 = new schemas.SchemaValue("$", "$", schemaResolver2);
-    var sv3 = new schemas.SchemaValue("$", "$", schemaResolver3);
-    var sv4 = new schemas.SchemaValue("$", "$", schemaResolver4);
-    var sv5 = new schemas.SchemaValue("$", "$", schemaResolver5);
+    var sv1 = new schemas.SchemaBean(schemaResolver1);
+    var sv2 = new schemas.SchemaBean(schemaResolver2);
+    var sv3 = new schemas.SchemaBean(schemaResolver3);
+    var sv4 = new schemas.SchemaBean(schemaResolver4);
+    var sv5 = new schemas.SchemaBean(schemaResolver5);
+    var sv6 = new schemas.SchemaBean(schemaResolver6);
+    
+    var sr = new schemas.render.SimpleRenderer;
+    sr.init(sv6);
+    sr.render(document.getElementById("div1"));
 </script>

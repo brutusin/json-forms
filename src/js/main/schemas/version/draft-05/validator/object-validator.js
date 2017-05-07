@@ -6,7 +6,10 @@ if (!schemas.version["draft-05"]) {
     schemas.version["draft-05"] = {};
 }
 schemas.version["draft-05"].ObjectValidator = function () {
-    this.doValidate = function (value) {
+    this.doValidate = function (schema, value) {
+        if (schema.type !== "object") {
+            return;
+        }
         var errors = [];
         if (!value) {
             return;
@@ -16,10 +19,10 @@ schemas.version["draft-05"].ObjectValidator = function () {
             errors.push(["error.type", "object", typeof value]);
         } else {
             for (var p in value) {
-                if (!this.schema.properties || !this.schema.properties.hasOwnProperty(p)) {
+                if (!schema.properties || !schema.properties.hasOwnProperty(p)) {
                     var matched = false;
-                    if (this.schema.patternProperties) {
-                        for (var pattern in this.schema.patternProperties) {
+                    if (schema.patternProperties) {
+                        for (var pattern in schema.patternProperties) {
                             var r = RegExp(pattern);
                             if (p.search(r) !== -1) {
                                 matched = true;
@@ -28,22 +31,22 @@ schemas.version["draft-05"].ObjectValidator = function () {
                         }
                     }
                     if (!matched) {
-                        if (!this.schema.additionalProperties) {
+                        if (!schema.additionalProperties) {
                             errors.push(["error.invalidProperty", p]);
                         }
                     }
                 }
             }
             var propCount = Object.keys(value).length;
-            if (this.schema.minProperties && this.schema.minProperties < propCount) {
-                errors.push(["error.minProperties", this.schema.minProperties, propCount]);
+            if (schema.minProperties && schema.minProperties < propCount) {
+                errors.push(["error.minProperties", schema.minProperties, propCount]);
             }
-            if (this.schema.maxProperties && this.schema.maxProperties > propCount) {
-                errors.push(["error.maxProperties", this.schema.maxProperties, propCount]);
+            if (schema.maxProperties && schema.maxProperties > propCount) {
+                errors.push(["error.maxProperties", schema.maxProperties, propCount]);
             }
-            if (Array.isArray(this.schema.required)) {
-                for (var i = 0; i < this.schema.required.length; i++) {
-                    var requriedProperty = this.schema.required[i];
+            if (Array.isArray(schema.required)) {
+                for (var i = 0; i < schema.required.length; i++) {
+                    var requriedProperty = schema.required[i];
                     if (!value.hasOwnProperty(requriedProperty) || typeof value[requriedProperty] === "undefined" || value[requriedProperty] === null) {
                         errors.push(["error.required", requriedProperty]);
                     }
@@ -53,4 +56,9 @@ schemas.version["draft-05"].ObjectValidator = function () {
         return errors;
     };
 };
-schemas.version["draft-05"].ObjectValidator.prototype = new schemas.Validator;
+schemas.version["draft-05"].ObjectValidator.prototype = new schemas.validation.Validator;
+
+if (!schemas.version["draft-05"].validator) {
+    schemas.version["draft-05"].validator = new schemas.validation.DelegatorValidator;
+}
+schemas.version["draft-05"].validator.registerConcreteValidator(new schemas.version["draft-05"].ObjectValidator);
