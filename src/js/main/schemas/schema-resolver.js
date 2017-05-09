@@ -14,9 +14,8 @@ schemas.SchemaResolver = function () {
         var entryMap = {};
         var version = schemas.version.getVersion(schema);
         var visitor = schemas.version[version].visitor;
-        var createPseudoSchema = schemas.version[version].createPseudoSchema;
         visitor.visitSchema(schema, function (schemaId, schema) {
-            var pseudoSchema = createPseudoSchema(schemaId, schema, version);
+            var pseudoSchema = schemas.version[version].initializer.createPseudoSchema(schemaId, schema, version);
             entryMap[schemaId] = pseudoSchema;
         });
         return entryMap;

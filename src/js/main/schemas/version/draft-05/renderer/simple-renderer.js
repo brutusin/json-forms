@@ -33,7 +33,7 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
 
         function createInput(schema) {
             var input;
-            if (schema.type === "any") {
+            if (!schema.type) {
                 input = document.createElement("textarea");
                 input.setValue = function (value) {
                     input.value = JSON.stringify(value, null, 4);
@@ -46,13 +46,11 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
                 };
             } else if (schema.enum) {
                 input = document.createElement("select");
-                if (!schema.required) {
-                    var option = document.createElement("option");
-                    var textNode = document.createTextNode("");
-                    option.value = "";
-                    schemas.utils.appendChild(option, textNode, schemaBean);
-                    schemas.utils.appendChild(input, option, schemaBean);
-                }
+                var option = document.createElement("option");
+                var textNode = document.createTextNode("");
+                option.value = "";
+                schemas.utils.appendChild(option, textNode, schemaBean);
+                schemas.utils.appendChild(input, option, schemaBean);
                 for (var i = 0; i < schema.enum.length; i++) {
                     var option = document.createElement("option");
                     var textNode = document.createTextNode(schema.enum[i]);
@@ -74,47 +72,35 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
                     }
                 };
             } else if (schema.type === "boolean") {
-                if (schema.required) {
-                    input = document.createElement("input");
-                    input.type = "checkbox";
-                    input.setValue = function (value) {
-                        if (value === true) {
-                            input.checked = true;
-                        } else {
-                            input.checked = false;
-                        }
-                    };
-                } else {
-                    input = document.createElement("select");
-                    var emptyOption = document.createElement("option");
-                    var textEmpty = document.createTextNode("");
-                    textEmpty.value = "";
-                    schemas.utils.appendChild(emptyOption, textEmpty, schemaBean);
-                    schemas.utils.appendChild(input, emptyOption, schemaBean);
-                    var optionTrue = document.createElement("option");
-                    var textTrue = document.createTextNode(schemas.utils.i18n.getTranslation("true"));
-                    optionTrue.value = true;
-                    schemas.utils.appendChild(optionTrue, textTrue, schemaBean);
-                    schemas.utils.appendChild(input, optionTrue, schemaBean);
-                    var optionFalse = document.createElement("option");
-                    var textFalse = document.createTextNode(schemas.utils.i18n.getTranslation("false"));
-                    optionFalse.value = false;
-                    schemas.utils.appendChild(optionFalse, textFalse, schemaBean);
-                    schemas.utils.appendChild(input, optionFalse, schemaBean);
-                    input.setValue = function (value) {
-                        if (value === null) {
-                            input.selectedIndex = 0;
-                        } else {
-                            for (var i = 0; i < input.options.length; i++) {
-                                var option = input.options[i];
-                                if (option.value === value.toString()) {
-                                    input.selectedIndex = i;
-                                    break;
-                                }
+                input = document.createElement("select");
+                var emptyOption = document.createElement("option");
+                var textEmpty = document.createTextNode("");
+                textEmpty.value = "";
+                schemas.utils.appendChild(emptyOption, textEmpty, schemaBean);
+                schemas.utils.appendChild(input, emptyOption, schemaBean);
+                var optionTrue = document.createElement("option");
+                var textTrue = document.createTextNode(schemas.utils.i18n.getTranslation("true"));
+                optionTrue.value = true;
+                schemas.utils.appendChild(optionTrue, textTrue, schemaBean);
+                schemas.utils.appendChild(input, optionTrue, schemaBean);
+                var optionFalse = document.createElement("option");
+                var textFalse = document.createTextNode(schemas.utils.i18n.getTranslation("false"));
+                optionFalse.value = false;
+                schemas.utils.appendChild(optionFalse, textFalse, schemaBean);
+                schemas.utils.appendChild(input, optionFalse, schemaBean);
+                input.setValue = function (value) {
+                    if (value === null) {
+                        input.selectedIndex = 0;
+                    } else {
+                        for (var i = 0; i < input.options.length; i++) {
+                            var option = input.options[i];
+                            if (option.value === value.toString()) {
+                                input.selectedIndex = i;
+                                break;
                             }
                         }
-                    };
-                }
+                    }
+                };
             } else {
                 input = document.createElement("input");
                 if (schema.type === "integer" || schema.type === "number") {
@@ -148,6 +134,7 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
             input.setAttribute("autocorrect", "off");
             return input;
         }
+        
         function getInputValue(schema, input) {
             if (!schema) {
                 return null;
