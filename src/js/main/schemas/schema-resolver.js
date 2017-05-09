@@ -12,7 +12,7 @@ schemas.SchemaResolver = function () {
 
     function processSchema(schema) {
         var entryMap = {};
-        var version = schemas.getVersion(schema);
+        var version = schemas.version.getVersion(schema);
         var visitor = schemas.version[version].visitor;
         var createPseudoSchema = schemas.version[version].createPseudoSchema;
         visitor.visitSchema(schema, function (schemaId, schema) {

@@ -5,11 +5,11 @@
 </script>
 <script src="schema-resolver.js"></script>
 <script src="schema-bean.js"></script>
-<script src="renderer.js"></script>
 <script src="i18n.js"></script>
 <script src="utils.js"></script>
-<script src="factories.js"></script>
+<script src="version.js"></script>
 <script src="validation.js"></script>
+<script src="rendering.js"></script>
 <script src="version/draft-05/visitor.js"></script>
 <script src="version/draft-05/create-pseudo-schema.js"></script>
 
@@ -18,7 +18,8 @@
 <script src="version/draft-05/validator/array-validator.js"></script>
 <script src="version/draft-05/validator/string-validator.js"></script>
 <script src="version/draft-05/validator/number-validator.js"></script>
-<script src="render/simple-renderer.js"></script>
+<script src="version/draft-05/validator/common-validator.js"></script>
+<script src="version/draft-05/renderer/simple-renderer.js"></script>
 <div id="div1"></div>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};
@@ -52,7 +53,4 @@
     var sv5 = new schemas.SchemaBean(schemaResolver5);
     var sv6 = new schemas.SchemaBean(schemaResolver6);
     
-    var sr = new schemas.render.SimpleRenderer;
-    sr.init(sv6);
-    sr.render(document.getElementById("div1"));
 </script>

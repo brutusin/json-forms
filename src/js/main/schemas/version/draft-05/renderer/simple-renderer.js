@@ -1,8 +1,11 @@
 /* global schemas */
-if (!schemas.render) {
-    schemas.render = {};
+if (!schemas.version) {
+    schemas.version = {};
 }
-schemas.render.SimpleRenderer = function () {
+if (!schemas.version["draft-05"]) {
+    schemas.version["draft-05"] = {};
+}
+schemas.version["draft-05"].SimpleRenderer = function () {
 
     this.render = function (htmlContainer) {
         if (!htmlContainer) {
@@ -198,4 +201,9 @@ schemas.render.SimpleRenderer = function () {
     };
 };
 
-schemas.render.SimpleRenderer.prototype = new schemas.Renderer;
+schemas.version["draft-05"].SimpleRenderer.prototype = new schemas.rendering.Renderer;
+
+if (!schemas.version["draft-05"].renderer) {
+    schemas.version["draft-05"].renderer = new schemas.rendering.DelegatorRenderer;
+}
+schemas.version["draft-05"].renderer.registerConcreteRenderer(new schemas.version["draft-05"].SimpleRenderer);

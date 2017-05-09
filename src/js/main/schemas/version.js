@@ -1,11 +1,10 @@
 /* global schemas */
-if (!schemas.factories) {
-    schemas.factories = {};
+if (!schemas.version) {
+    schemas.version = {};
 }
-schemas.defaultVersion = "draft-05";
-
-schemas.getVersion = function (schema) {
-    var version = schemas.defaultVersion;
+schemas.version.defaultVersion = "draft-05";
+schemas.version.getVersion = function (schema) {
+    var version = this.defaultVersion;
     if (schema.$schema) {
         for (var v in  schemas.versions) {
             if (schema.$schema.includes(v)) {
