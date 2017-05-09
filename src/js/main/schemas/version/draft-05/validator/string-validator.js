@@ -7,7 +7,7 @@ if (!schemas.version["draft-05"]) {
 }
 schemas.version["draft-05"].StringValidator = function () {
     this.doValidate = function (schema, value) {
-        if (schema.type !== "strin") {
+        if (schema.type !== "string") {
             return;
         }
         var errors = [];
