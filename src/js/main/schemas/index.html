@@ -5,11 +5,12 @@
 </script>
 <script src="schema-resolver.js"></script>
 <script src="schema-bean.js"></script>
-<script src="i18n.js"></script>
+<script src="graphic-bean.js"></script>
 <script src="utils.js"></script>
-<script src="version.js"></script>
-<script src="validation.js"></script>
-<script src="rendering.js"></script>
+<script src="version/version.js"></script>
+<script src="validation/validator.js"></script>
+<script src="validation/delegating-validator.js"></script>
+<script src="rendering/renderer.js"></script>
 <script src="version/draft-05/visitor.js"></script>
 <script src="version/draft-05/create-pseudo-schema.js"></script>
 
@@ -20,6 +21,7 @@
 <script src="version/draft-05/validator/number-validator.js"></script>
 <script src="version/draft-05/validator/common-validator.js"></script>
 <script src="version/draft-05/renderer/simple-renderer.js"></script>
+<script src="version/draft-05/renderer/renderer-factory.js"></script>
 <div id="div1"></div>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};
@@ -52,5 +54,7 @@
     var sv4 = new schemas.SchemaBean(schemaResolver4);
     var sv5 = new schemas.SchemaBean(schemaResolver5);
     var sv6 = new schemas.SchemaBean(schemaResolver6);
+    
+    var gb = new schemas.GraphicBean(sv6, document.getElementById("div1"));
     
 </script>

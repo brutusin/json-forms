@@ -59,6 +59,6 @@ schemas.version["draft-05"].ObjectValidator = function () {
 schemas.version["draft-05"].ObjectValidator.prototype = new schemas.validation.Validator;
 
 if (!schemas.version["draft-05"].validator) {
-    schemas.version["draft-05"].validator = new schemas.validation.DelegatorValidator;
+    schemas.version["draft-05"].validator = new schemas.validation.DelegatingValidator;
 }
 schemas.version["draft-05"].validator.registerConcreteValidator(new schemas.version["draft-05"].ObjectValidator);

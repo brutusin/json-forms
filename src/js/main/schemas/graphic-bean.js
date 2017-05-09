@@ -7,20 +7,56 @@ schemas.GraphicBean = function (schemaBean, container) {
     if (!container) {
         throw "container is required";
     }
-    var instance = this;
     this.schemaBean = schemaBean;
     this.container = container;
-
+    var renderer;
+    refreshRenderer();
     var children = {};
 
-    schemaBean.addValueListener()(function () {
-        // update children
+    function refreshRenderer() {
+        schemas.utils.cleanNode(container);
+        var version = schemas.version.getVersion(schemaBean.schema);
+        renderer = schemas.version[version].rendererFactory.createRender(schemaBean, container);
+        renderer.render();
+    }
+
+    function removeChild(childMap, id, schemaId) {
+        var schemaMap = childMap[id];
+        if (schemaMap) {
+            var ret = schemaMap[schemaId];
+            delete schemaMap[schemaId];
+            return ret;
+        }
+    }
+
+    function setChild(child, childMap, id, schemaId) {
+        var schemaMap = childMap[id];
+        if (!schemaMap) {
+            schemaMap = {};
+            childMap[id] = schemaMap;
+        }
+        schemaMap[schemaId] = child;
+    }
+
+    schemaBean.addValueListener(function () {
+        var newChildren = {};
+        var sbChildren = schemaBean.getChildren();
+        for (var childId in sbChildren) {
+            for (var childSchemaId in sbChildren[childId]) {
+                var child = removeChild(children, childId, childSchemaId);
+                if (!child) {
+                    child = new schemas.GraphicBean(sbChildren[childId][childSchemaId], renderer.getChildContainer(childId, childSchemaId));
+                }
+                setChild(child, newChildren, childId, childSchemaId);
+            }
+        }
+        children = newChildren;
     });
-    
+
     schemaBean.addSchemaListener(function () {
-        // update renderer
+        refreshRenderer();
     });
-    
+
     schemaBean.addDisposeListener(function () {
         schemas.utils.cleanNode(container);
     });

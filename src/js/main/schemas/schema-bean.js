@@ -193,7 +193,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
      * @returns {undefined}
      */
     this.addSchemaListener = function (listener) {
-        addListenerTo(listener, schemaListener());
+        addListenerTo(listener, schemaListeners);
     };
 
     /**
@@ -202,7 +202,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
      * @returns {undefined}
      */
     this.removeSchemaListener = function (listener) {
-        removeListenerFrom(listener, schemaListener);
+        removeListenerFrom(listener, schemaListeners);
     };
     
     /**

@@ -5,13 +5,11 @@ if (!schemas.version) {
 if (!schemas.version["draft-05"]) {
     schemas.version["draft-05"] = {};
 }
-schemas.version["draft-05"].SimpleRenderer = function () {
-
-    this.render = function (htmlContainer) {
-        if (!htmlContainer) {
+schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
+    this.render = function () {
+        if (!container) {
             throw "A html container is required to render";
         }
-        var schemaBean = this.schemaBean;
         if (!schemaBean || !schemaBean.schema) {
             return;
         }
@@ -26,12 +24,12 @@ schemas.version["draft-05"].SimpleRenderer = function () {
             schemaBean.setValue(getInputValue(schemaBean.schema, input));
             changedExternally = true;
         };
-        schemaBean.addChangeListener(function () {
+        schemaBean.addValueListener(function () {
             if (changedExternally) {
                 input.setValue(schemaBean.getValue());
             }
         });
-        schemas.utils.appendChild(htmlContainer, input, schemaBean);
+        schemas.utils.appendChild(container, input, schemaBean);
 
         function createInput(schema) {
             var input;
@@ -94,12 +92,12 @@ schemas.version["draft-05"].SimpleRenderer = function () {
                     schemas.utils.appendChild(emptyOption, textEmpty, schemaBean);
                     schemas.utils.appendChild(input, emptyOption, schemaBean);
                     var optionTrue = document.createElement("option");
-                    var textTrue = document.createTextNode(schemas.i18n.getTranslation("true"));
+                    var textTrue = document.createTextNode(schemas.utils.i18n.getTranslation("true"));
                     optionTrue.value = true;
                     schemas.utils.appendChild(optionTrue, textTrue, schemaBean);
                     schemas.utils.appendChild(input, optionTrue, schemaBean);
                     var optionFalse = document.createElement("option");
-                    var textFalse = document.createTextNode(schemas.i18n.getTranslation("false"));
+                    var textFalse = document.createTextNode(schemas.utils.i18n.getTranslation("false"));
                     optionFalse.value = false;
                     schemas.utils.appendChild(optionFalse, textFalse, schemaBean);
                     schemas.utils.appendChild(input, optionFalse, schemaBean);
@@ -202,8 +200,3 @@ schemas.version["draft-05"].SimpleRenderer = function () {
 };
 
 schemas.version["draft-05"].SimpleRenderer.prototype = new schemas.rendering.Renderer;
-
-if (!schemas.version["draft-05"].renderer) {
-    schemas.version["draft-05"].renderer = new schemas.rendering.DelegatorRenderer;
-}
-schemas.version["draft-05"].renderer.registerConcreteRenderer(new schemas.version["draft-05"].SimpleRenderer);
