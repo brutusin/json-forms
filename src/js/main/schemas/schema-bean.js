@@ -14,24 +14,49 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.id = id;
     this.schemaId = schemaId;
     this.schema = schemaResolver.getSubSchema(schemaId);
-
     var children = {};
     var valueListeners = [];
     var schemaListeners = [];
     var disposeListeners = [];
     var value = null;
-
     var errors = null;
     var absorvedChildrenErrors = null;
-
     var schemaListener = function (ss) {
         instance.schema = ss;
         refresh();
         fireListeners(schemaListeners);
     };
+
+    var changedExternally = true;
+    var childValueListener = function (child) {
+        if (changedExternally) {
+            var childId;
+            var entry;
+            if (Array.isArray(value)) {
+                for (var i = 0; i < value.length; i++) {
+                    childId = id + "[" + i + "]";
+                    if (childId === child.id) {
+                        entry = i;
+                        break;
+                    }
+                }
+            } else {
+                for (var prop in value) {
+                    childId = id + "." + prop;
+                    if (childId === child.id) {
+                        entry = prop;
+                        break;
+                    }
+                }
+            }
+            if (!child.getErrors() || Object.keys(children[childId]) === 1) {
+                value[entry] = child.getValue();
+            }
+        }
+    };
+
     schemaResolver.addListener(schemaId, schemaListener);
     refresh();
-
     function addListenerTo(listener, listeners) {
         if (listener) {
             if (!listeners.includes(listener)) {
@@ -40,7 +65,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
         }
     }
     ;
-
     function removeListenerFrom(listener, listeners) {
         if (listener) {
             var index = listeners.indexOf(listener);
@@ -50,7 +74,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
         }
     }
     ;
-
     function dispose(childMap) {
         for (var id in childMap) {
             for (var schemaId in childMap[id]) {
@@ -96,10 +119,10 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                 var child = removeChild(children, childId, childSchemaId);
                 if (!child) {
                     child = new schemas.SchemaBean(schemaResolver, childId, childSchemaId);
+                    child.addValueListener(childValueListener);
                 }
                 setChild(child, newChildren, childId, childSchemaId);
                 child.setValue(childValue);
-
                 var childErrors = child.getErrors();
                 if (childErrors) {
                     childrenErrors.push(childErrors);
@@ -127,7 +150,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     };
 
     this.getValue = function () {
-        return value;
+        return JSON.parse(JSON.stringify(value));
     };
 
     this.getChildren = function () {
@@ -135,14 +158,15 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     };
 
     this.setValue = function (v) {
+        changedExternally = false;
         var isChanged = JSON.stringify(v) !== JSON.stringify(value);
         value = v;
         if (isChanged) {
             refresh();
             fireListeners(valueListeners);
         }
+        changedExternally = true;
     };
-
     this.getErrors = function () {
         var ret = {};
         if (errors !== null) {
@@ -170,7 +194,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             return null;
         }
     };
-
     /**
      * 
      * @param {type} listener
@@ -179,7 +202,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.addValueListener = function (listener) {
         addListenerTo(listener, valueListeners);
     };
-
     /**
      * 
      * @param {type} listener
@@ -188,7 +210,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.removeValueListener = function (listener) {
         removeListenerFrom(listener, valueListeners);
     };
-
     /**
      * 
      * @param {type} listener
@@ -197,7 +218,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.addSchemaListener = function (listener) {
         addListenerTo(listener, schemaListeners);
     };
-
     /**
      * 
      * @param {type} listener
@@ -206,7 +226,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.removeSchemaListener = function (listener) {
         removeListenerFrom(listener, schemaListeners);
     };
-
     /**
      * 
      * @param {type} listener
@@ -215,7 +234,6 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.addDisposeListener = function (listener) {
         addListenerTo(listener, disposeListeners);
     };
-
     /**
      * 
      * @param {type} listener
@@ -224,6 +242,5 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.removeDisposeListener = function (listener) {
         removeListenerFrom(listener, disposeListeners);
     };
-
     schemas.version[schemas.version.getVersion(this.schema)].initializer.initSchemaBean(this);
 };

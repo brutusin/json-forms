@@ -7,17 +7,19 @@ schemas.GraphicBean = function (schemaBean, container) {
     if (!container) {
         throw "container is required";
     }
+    var instance = this;
     this.schemaBean = schemaBean;
     this.container = container;
+    this.id = schemaBean.id;
+    this.schemaId = schemaBean.schemaId;
     var renderer;
-    refreshRenderer();
     var children = {};
 
     function refreshRenderer() {
+        instance.schema = schemaBean.schema;
         schemas.utils.cleanNode(container);
         var version = schemas.version.getVersion(schemaBean.schema);
         renderer = schemas.version[version].rendererFactory.createRender(schemaBean, container);
-        renderer.render();
     }
 
     function removeChild(childMap, id, schemaId) {
@@ -39,12 +41,13 @@ schemas.GraphicBean = function (schemaBean, container) {
     }
 
     schemaBean.addValueListener(function () {
+        renderer.setValue(schemaBean.getValue());
         var newChildren = {};
         var sbChildren = schemaBean.getChildren();
         for (var childId in sbChildren) {
             for (var childSchemaId in sbChildren[childId]) {
                 var child = removeChild(children, childId, childSchemaId);
-                if (!child) {
+                if (!child || child.schemaBean !== sbChildren[childId][childSchemaId]) {
                     child = new schemas.GraphicBean(sbChildren[childId][childSchemaId], renderer.getChildContainer(childId, childSchemaId));
                 }
                 setChild(child, newChildren, childId, childSchemaId);
@@ -62,11 +65,11 @@ schemas.GraphicBean = function (schemaBean, container) {
     });
 
     this.dispose = function () {
-        this.schemaBean.dispose();
+        schemaBean.dispose();
     };
 
     this.getValue = function () {
-        return this.schemaBean.getValue();
+        return schemaBean.getValue();
     };
 
     this.getChildren = function () {
@@ -74,11 +77,11 @@ schemas.GraphicBean = function (schemaBean, container) {
     };
 
     this.setValue = function (value) {
-        this.schemaBean.setValue(value);
+        schemaBean.setValue(value);
     };
 
     this.getErrors = function () {
-        return this.schemaBean.getErrors();
+        return schemaBean.getErrors();
     };
 
     /**
@@ -87,7 +90,7 @@ schemas.GraphicBean = function (schemaBean, container) {
      * @returns {undefined}
      */
     this.addValueListener = function (listener) {
-        this.schemaBean.addValueListener(listener);
+        schemaBean.addValueListener(listener);
     };
 
     /**
@@ -96,7 +99,7 @@ schemas.GraphicBean = function (schemaBean, container) {
      * @returns {undefined}
      */
     this.removeValueListener = function (listener) {
-        this.schemaBean.removeValueListener(listener);
+        schemaBean.removeValueListener(listener);
     };
 
     /**
@@ -105,7 +108,7 @@ schemas.GraphicBean = function (schemaBean, container) {
      * @returns {undefined}
      */
     this.addSchemaListener = function (listener) {
-        this.schemaBean.addSchemaListener(listener);
+        schemaBean.addSchemaListener(listener);
     };
 
     /**
@@ -114,7 +117,7 @@ schemas.GraphicBean = function (schemaBean, container) {
      * @returns {undefined}
      */
     this.removeSchemaListener = function (listener) {
-        this.schemaBean.removeSchemaListener(listener);
+        schemaBean.removeSchemaListener(listener);
     };
 
     /**
@@ -123,7 +126,7 @@ schemas.GraphicBean = function (schemaBean, container) {
      * @returns {undefined}
      */
     this.addDisposeListener = function (listener) {
-        this.schemaBean.addDisposeListener(listener);
+        schemaBean.addDisposeListener(listener);
     };
 
     /**
@@ -132,6 +135,8 @@ schemas.GraphicBean = function (schemaBean, container) {
      * @returns {undefined}
      */
     this.removeDisposeListener = function (listener) {
-        this.schemaBean.removeDisposeListener(listener);
+        schemaBean.removeDisposeListener(listener);
     };
+
+    refreshRenderer();
 };

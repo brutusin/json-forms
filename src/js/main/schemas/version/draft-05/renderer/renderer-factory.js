@@ -11,7 +11,7 @@ schemas.version["draft-05"].rendererFactory = {
             throw "A valid schema bean is required";
         }
         if (schemaBean.schema.type === "array") {
-
+            return new schemas.version["draft-05"].ArrayRenderer(schemaBean, container);
         } else if (schemaBean.schema.type === "object") {
 
         } else if (schemaBean.schema.oneof) {

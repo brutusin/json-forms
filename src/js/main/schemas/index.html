@@ -21,6 +21,7 @@
 <script src="version/draft-05/validator/boolean-validator.js"></script>
 <script src="version/draft-05/validator/common-validator.js"></script>
 <script src="version/draft-05/renderer/simple-renderer.js"></script>
+<script src="version/draft-05/renderer/array-renderer.js"></script>
 <script src="version/draft-05/renderer/renderer-factory.js"></script>
 <div id="div1"></div>
 <script>
@@ -43,10 +44,14 @@
     var schema5 = {"definitions": {"address": {"type": "object", "properties": {"street_address": {"type": "string"}, "city": {"type": "string"}, "state": {"type": "string"}}, "required": ["street_address", "city", "state"]}}, "$ref": "#/definitions/address"};
     var schemaResolver5 = new schemas.SchemaResolver;
     schemaResolver5.updateFrom(schema5);
-    
+
     var schema6 = {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]};
     var schemaResolver6 = new schemas.SchemaResolver;
     schemaResolver6.updateFrom(schema6);
+
+    var schema7 = {"type": "array", "items": {"type": "integer", "default": 50, "enum": [10, 25, 50, 100]}};
+    var schemaResolver7 = new schemas.SchemaResolver;
+    schemaResolver7.updateFrom(schema7);
 
     var sv1 = new schemas.SchemaBean(schemaResolver1);
     var sv2 = new schemas.SchemaBean(schemaResolver2);
@@ -54,7 +59,8 @@
     var sv4 = new schemas.SchemaBean(schemaResolver4);
     var sv5 = new schemas.SchemaBean(schemaResolver5);
     var sv6 = new schemas.SchemaBean(schemaResolver6);
-    
-    var gb = new schemas.GraphicBean(sv6, document.getElementById("div1"));
-    
+    var sv7 = new schemas.SchemaBean(schemaResolver7);
+
+    var gb = new schemas.GraphicBean(sv7, document.getElementById("div1"));
+
 </script>
