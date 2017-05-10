@@ -38,8 +38,8 @@ schemas.SchemaResolver = function () {
         for (var i = 0; i < changedIds.length; i++) {
             var listenerCallbacks = listeners[changedIds[i]];
             if (listenerCallbacks) {
-                for (var i = 0; i < listenerCallbacks.length; i++) {
-                    listenerCallbacks[i](this.getSubSchema(changedIds[i]));
+                for (var j = 0; j < listenerCallbacks.length; j++) {
+                    listenerCallbacks[j](this.getSubSchema(changedIds[i]));
                 }
             }
         }
