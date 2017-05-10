@@ -113,6 +113,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             var version = schemas.version.getVersion(instance.schema);
             var visitor = schemas.version[version].visitor;
             var validator = schemas.version[version].validator;
+            var newlyCreatedWithInitialValues = [];
             visitor.visitInstanceChildren(value, instance.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
                 var childId = id + childRelativeId;
                 var childSchemaId = schemaId + childRelativeSchemaId;
@@ -120,6 +121,9 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                 if (!child) {
                     child = new schemas.SchemaBean(schemaResolver, childId, childSchemaId);
                     child.addValueListener(childValueListener);
+                    if (child.getValue() !== null) {
+                        newlyCreatedWithInitialValues.push(child);
+                    }
                 }
                 setChild(child, newChildren, childId, childSchemaId);
                 child.setValue(childValue);
@@ -132,6 +136,12 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             children = newChildren;
             errors = validator.validate(instance.schema, value, childrenErrors);
             absorvedChildrenErrors = validator.isAbsorvedChildrenErrors(instance.schema, value, childrenErrors);
+            var changedExternallySaved = changedExternally;
+            changedExternally = true;
+            for (var i = 0; i < newlyCreatedWithInitialValues.length; i++) {
+                childValueListener(newlyCreatedWithInitialValues[i]);
+            }
+            changedExternally = changedExternallySaved;
         }
     }
 
@@ -150,7 +160,9 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     };
 
     this.getValue = function () {
-        return JSON.parse(JSON.stringify(value));
+        if (typeof value !== "undefined") {
+            return JSON.parse(JSON.stringify(value));
+        }
     };
 
     this.getChildren = function () {
@@ -158,14 +170,16 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     };
 
     this.setValue = function (v) {
-        changedExternally = false;
-        var isChanged = JSON.stringify(v) !== JSON.stringify(value);
-        value = v;
-        if (isChanged) {
-            refresh();
-            fireListeners(valueListeners);
+        if (typeof v !== "undefined") {
+            changedExternally = false;
+            var isChanged = JSON.stringify(v) !== JSON.stringify(value);
+            value = v;
+            if (isChanged) {
+                refresh();
+                fireListeners(valueListeners);
+            }
+            changedExternally = true;
         }
-        changedExternally = true;
     };
     this.getErrors = function () {
         var ret = {};

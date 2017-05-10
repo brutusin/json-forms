@@ -56,9 +56,8 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
                 schemas.utils.appendChild(input, option, schemaBean);
             }
             input.setValue = function (value) {
-                if (value === null) {
-                    input.selectedIndex = 0;
-                } else {
+                input.selectedIndex = 0;
+                if (value !== null) {
                     for (var i = 0; i < input.options.length; i++) {
                         var option = input.options[i];
                         if (option.value === value.toString()) {
@@ -86,9 +85,8 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
             schemas.utils.appendChild(optionFalse, textFalse, schemaBean);
             schemas.utils.appendChild(input, optionFalse, schemaBean);
             input.setValue = function (value) {
-                if (value === null) {
-                    input.selectedIndex = 0;
-                } else {
+                input.selectedIndex = 0;
+                if (value !== null) {
                     for (var i = 0; i < input.options.length; i++) {
                         var option = input.options[i];
                         if (option.value === value.toString()) {
