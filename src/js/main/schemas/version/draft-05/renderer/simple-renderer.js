@@ -33,13 +33,21 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
         if (!schema.type) {
             input = document.createElement("textarea");
             input.setValue = function (value) {
-                input.value = JSON.stringify(value, null, 4);
+                if (value === null || typeof value === "undefined") {
+                    input.value = "";
+                } else {
+                    input.value = JSON.stringify(value, null, 4);
+                }
             };
         } else if (schema.media) {
             input = document.createElement("input");
             input.type = "file";
             input.setValue = function (value) {
-                input.value = value;
+                if (value === null || typeof value === "undefined") {
+                    input.value = "";
+                } else {
+                    input.value = value;
+                }
             };
         } else if (schema.enum) {
             input = document.createElement("select");
@@ -116,7 +124,11 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
                 input.type = "text";
             }
             input.setValue = function (value) {
-                input.value = value;
+                if (value === null || typeof value === "undefined") {
+                    input.value = "";
+                } else {
+                    input.value = value;
+                }
             };
         }
         if (schema.description) {
@@ -171,7 +183,7 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
                     value = null;
                 }
             }
-        } else if (schema.type === "any") {
+        } else if (!schema.type) {
             if (value) {
                 value = JSON.parse(value);
             }
