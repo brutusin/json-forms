@@ -5,7 +5,7 @@ if (!schemas.version) {
 if (!schemas.version["draft-05"]) {
     schemas.version["draft-05"] = {};
 }
-schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
+schemas.version["draft-05"].SimpleRenderer = function (renderingBean, container) {
 
     var input;
     var changedExternally = true; // to avoid cyclic notifications of the change
@@ -13,20 +13,28 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
     if (!container) {
         throw "A html container is required to render";
     }
-    if (!schemaBean || !schemaBean.schema) {
+    if (!renderingBean || !renderingBean.schema) {
         return;
     }
 
-    input = createInput(schemaBean.schema);
-    if (schemaBean.getValue()) {
-        input.setValue(schemaBean.getValue());
+    input = createInput(renderingBean.schema);
+
+    if (renderingBean.getValue()) {
+        input.setValue(renderingBean.getValue());
     }
     input.onchange = function () {
         changedExternally = false;
-        schemaBean.setValue(getInputValue(schemaBean.schema, input));
+        renderingBean.setValue(getInputValue(renderingBean.schema, input));
         changedExternally = true;
     };
-    schemas.utils.appendChild(container, input, schemaBean);
+
+    renderingBean.onValueChanged = function (value) {
+        if (changedExternally) {
+            input.setValue(value);
+        }
+    };
+
+    schemas.utils.appendChild(container, input, renderingBean);
 
     function createInput(schema) {
         var input;
@@ -54,14 +62,14 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
             var option = document.createElement("option");
             var textNode = document.createTextNode("");
             option.value = "";
-            schemas.utils.appendChild(option, textNode, schemaBean);
-            schemas.utils.appendChild(input, option, schemaBean);
+            schemas.utils.appendChild(option, textNode, renderingBean);
+            schemas.utils.appendChild(input, option, renderingBean);
             for (var i = 0; i < schema.enum.length; i++) {
                 var option = document.createElement("option");
                 var textNode = document.createTextNode(schema.enum[i]);
                 option.value = schema.enum[i];
-                schemas.utils.appendChild(option, textNode, schemaBean);
-                schemas.utils.appendChild(input, option, schemaBean);
+                schemas.utils.appendChild(option, textNode, renderingBean);
+                schemas.utils.appendChild(input, option, renderingBean);
             }
             input.setValue = function (value) {
                 input.selectedIndex = 0;
@@ -80,18 +88,18 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
             var emptyOption = document.createElement("option");
             var textEmpty = document.createTextNode("");
             textEmpty.value = "";
-            schemas.utils.appendChild(emptyOption, textEmpty, schemaBean);
-            schemas.utils.appendChild(input, emptyOption, schemaBean);
+            schemas.utils.appendChild(emptyOption, textEmpty, renderingBean);
+            schemas.utils.appendChild(input, emptyOption, renderingBean);
             var optionTrue = document.createElement("option");
             var textTrue = document.createTextNode(schemas.utils.i18n.getTranslation("true"));
             optionTrue.value = true;
-            schemas.utils.appendChild(optionTrue, textTrue, schemaBean);
-            schemas.utils.appendChild(input, optionTrue, schemaBean);
+            schemas.utils.appendChild(optionTrue, textTrue, renderingBean);
+            schemas.utils.appendChild(input, optionTrue, renderingBean);
             var optionFalse = document.createElement("option");
             var textFalse = document.createTextNode(schemas.utils.i18n.getTranslation("false"));
             optionFalse.value = false;
-            schemas.utils.appendChild(optionFalse, textFalse, schemaBean);
-            schemas.utils.appendChild(input, optionFalse, schemaBean);
+            schemas.utils.appendChild(optionFalse, textFalse, renderingBean);
+            schemas.utils.appendChild(input, optionFalse, renderingBean);
             input.setValue = function (value) {
                 input.selectedIndex = 0;
                 if (value !== null) {
@@ -190,12 +198,6 @@ schemas.version["draft-05"].SimpleRenderer = function (schemaBean, container) {
         }
         return value;
     }
-
-    this.setValue = function (value) {
-        if (changedExternally) {
-            input.setValue(value);
-        }
-    };
 };
 
 schemas.version["draft-05"].SimpleRenderer.prototype = new schemas.rendering.Renderer;

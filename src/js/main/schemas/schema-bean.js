@@ -51,6 +51,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             }
             if (!child.getErrors() || Object.keys(children[childId]).length === 1) {
                 value[entry] = child.getValue();
+                fireListeners(valueListeners);
             }
         }
     };

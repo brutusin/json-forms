@@ -10,6 +10,7 @@
 <script src="version/version.js"></script>
 <script src="validation/validator.js"></script>
 <script src="validation/delegating-validator.js"></script>
+<script src="rendering/renderering-bean.js"></script>
 <script src="rendering/renderer.js"></script>
 <script src="version/draft-05/visitor.js"></script>
 <script src="version/draft-05/initialization/initializer.js"></script>
@@ -23,6 +24,7 @@
 <script src="version/draft-05/renderer/simple-renderer.js"></script>
 <script src="version/draft-05/renderer/array-renderer.js"></script>
 <script src="version/draft-05/renderer/renderer-factory.js"></script>
+<script src="version/draft-05/renderer/object-renderer.js"></script>
 <div id="div1"></div>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};
@@ -49,9 +51,13 @@
     var schemaResolver6 = new schemas.SchemaResolver;
     schemaResolver6.updateFrom(schema6);
 
-    var schema7 = {"type": "array", "items": {"type": "integer", "default": 55, "enum": [10, 25, 50, 100]}};
+    var schema7 = {"type": "array", "items": {"type": "array", "items": {"type": "integer", "default": 55, "enum": [10, 25, 50, 100]}}};
     var schemaResolver7 = new schemas.SchemaResolver;
     schemaResolver7.updateFrom(schema7);
+
+    var schema8 = {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems": true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}};
+    var schemaResolver8 = new schemas.SchemaResolver;
+    schemaResolver8.updateFrom(schema8);
 
     var sv1 = new schemas.SchemaBean(schemaResolver1);
     var sv2 = new schemas.SchemaBean(schemaResolver2);
@@ -60,7 +66,8 @@
     var sv5 = new schemas.SchemaBean(schemaResolver5);
     var sv6 = new schemas.SchemaBean(schemaResolver6);
     var sv7 = new schemas.SchemaBean(schemaResolver7);
+    var sv8 = new schemas.SchemaBean(schemaResolver8);
 
-    var gb = new schemas.GraphicBean(sv7, document.getElementById("div1"));
+    var gb = new schemas.GraphicBean(sv8, document.getElementById("div1"));
 
 </script>
