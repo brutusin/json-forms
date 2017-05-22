@@ -15,17 +15,16 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
     var value = renderingBean.getValue();
     if (renderingBean.schema.properties) {
         for (var p in renderingBean.schema.properties) {
-            addProperty(p);
+            renderProperty(p);
         }
     }
-    if (value) {
-        // pattern properties at the end:
-        for (var p in value) {
-            if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
-                addProperty(p);
-            }
+    // pattern properties at the end:
+    for (var p in value) {
+        if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
+            renderProperty(p);
         }
     }
+
     if (renderingBean.schema.patternProperties) {
         for (var pattern in renderingBean.schema.patternProperties) {
             var patdiv = document.createElement("div");
@@ -45,7 +44,7 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
 
     schemas.utils.appendChild(container, div, renderingBean);
 
-    function addProperty(p) {
+    function renderProperty(p) {
         var pattern;
         if (!renderingBean.schema.properties || !renderingBean.schema.properties.hasOwnProperty(p)) {
             if (renderingBean.schema.patternProperties) {
@@ -63,10 +62,10 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
                 pattern = ".*";
             }
         }
-        addSimpleProperty(p);
+        renderSimpleProperty(p);
     }
 
-    function addSimpleProperty(p) {
+    function renderSimpleProperty(p) {
         var tr = document.createElement("tr");
         var td1 = document.createElement("td");
         td1.className = "prop-name";
@@ -80,8 +79,8 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
         childContainers[renderingBean.id + "." + p][renderingBean.schemaId + "." + p] = td2;
         schemas.utils.appendChild(table, tr, renderingBean);
     }
-    
-    function addPatternProperty(p, pattern, schema) {
+
+    function renderPatternProperty(p, pattern, schema) {
         var tr = document.createElement("tr");
         var td1 = document.createElement("td");
         td1.className = "prop-name";
@@ -162,7 +161,7 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
         for (var p in value) {
             if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
                 if (!prevValue.hasOwnProperty(p)) {
-                    addProperty(p);
+                    renderProperty(p);
                 }
             }
         }

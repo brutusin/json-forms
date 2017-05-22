@@ -50,7 +50,11 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                 }
             }
             if (!child.getErrors() || Object.keys(children[childId]).length === 1) {
-                value[entry] = child.getValue();
+                if (typeof entry !== "undefined") {
+                    value[entry] = child.getValue();
+                } else {
+                    value = child.getValue();
+                }
                 fireListeners(valueListeners);
             }
         }
@@ -58,6 +62,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
 
     schemaResolver.addListener(schemaId, schemaListener);
     refresh();
+
     function addListenerTo(listener, listeners) {
         if (listener) {
             if (!listeners.includes(listener)) {
@@ -65,7 +70,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             }
         }
     }
-    ;
+
     function removeListenerFrom(listener, listeners) {
         if (listener) {
             var index = listeners.indexOf(listener);
@@ -74,7 +79,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             }
         }
     }
-    ;
+
     function dispose(childMap) {
         for (var id in childMap) {
             for (var schemaId in childMap[id]) {
@@ -173,8 +178,9 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.setValue = function (v) {
         if (typeof v !== "undefined") {
             changedExternally = false;
-            var isChanged = JSON.stringify(v) !== JSON.stringify(value);
-            value = v;
+            var strV = JSON.stringify(v);
+            var isChanged = strV !== JSON.stringify(value);
+            value = JSON.parse(strV);
             if (isChanged) {
                 refresh();
                 fireListeners(valueListeners);
@@ -182,6 +188,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
             changedExternally = true;
         }
     };
+
     this.getErrors = function () {
         var ret = {};
         if (errors !== null) {

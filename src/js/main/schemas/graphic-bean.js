@@ -15,6 +15,7 @@ schemas.GraphicBean = function (schemaBean, container) {
     this.schemaId = schemaBean.schemaId;
     var renderer;
     var children = {};
+    this.schemaBean.setValue(fillValue(this.schemaBean.getValue()));
 
     function refreshRenderer() {
         instance.schema = schemaBean.schema;
@@ -41,32 +42,60 @@ schemas.GraphicBean = function (schemaBean, container) {
         }
         schemaMap[schemaId] = child;
     }
-    
-    function valueListener(){
-         renderingBean.onValueChanged(schemaBean.getValue());
-        var newChildren = {};
-        var sbChildren = schemaBean.getChildren();
-        for (var childId in sbChildren) {
-            for (var childSchemaId in sbChildren[childId]) {
-                var child = removeChild(children, childId, childSchemaId);
-                if (!child || child.schemaBean !== sbChildren[childId][childSchemaId]) {
-                    child = new schemas.GraphicBean(sbChildren[childId][childSchemaId], renderer.getChildContainer(childId, childSchemaId));
+
+    function isFilled(value) {
+        if (renderingBean.schema.type !== "object") {
+            return true;
+        }
+        if (!value) {
+            return false;
+        }
+        if (renderingBean.schema.properties) {
+            for (var p in renderingBean.schema.properties) {
+                if (!value.hasOwnProperty(p)) {
+                    return false;
                 }
-                setChild(child, newChildren, childId, childSchemaId);
             }
         }
-        children = newChildren;
+        return true;
     }
 
-    schemaBean.addValueListener(valueListener);
+    function fillValue(value) {
+        if (renderingBean.schema.type === "object") {
+            if (!value) {
+                value = {};
+            }
+            if (renderingBean.schema.properties) {
+                for (var p in renderingBean.schema.properties) {
+                    if (!value.hasOwnProperty(p)) {
+                        value[p] = null;
+                    }
+                }
+            }
+        }
+        return value;
+    }
 
-    schemaBean.addSchemaListener(function () {
-        refreshRenderer();
-    });
-
-    schemaBean.addDisposeListener(function () {
-        schemas.utils.cleanNode(container);
-    });
+    function valueListener() {
+        var value = schemaBean.getValue();
+        if (isFilled(value)) {
+            renderingBean.onValueChanged(value);
+            var newChildren = {};
+            var sbChildren = schemaBean.getChildren();
+            for (var childId in sbChildren) {
+                for (var childSchemaId in sbChildren[childId]) {
+                    var child = removeChild(children, childId, childSchemaId);
+                    if (!child || child.schemaBean !== sbChildren[childId][childSchemaId]) {
+                        child = new schemas.GraphicBean(sbChildren[childId][childSchemaId], renderer.getChildContainer(childId, childSchemaId));
+                    }
+                    setChild(child, newChildren, childId, childSchemaId);
+                }
+            }
+            children = newChildren;
+        } else {
+            schemaBean.setValue(fillValue(value));
+        }
+    }
 
     this.dispose = function () {
         schemaBean.dispose();
@@ -143,4 +172,15 @@ schemas.GraphicBean = function (schemaBean, container) {
     };
 
     refreshRenderer();
+
+    schemaBean.addValueListener(valueListener);
+
+    schemaBean.addSchemaListener(function () {
+        refreshRenderer();
+    });
+
+    schemaBean.addDisposeListener(function () {
+        schemas.utils.cleanNode(container);
+    });
+
 };

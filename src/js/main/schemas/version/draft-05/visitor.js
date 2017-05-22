@@ -114,6 +114,11 @@ schemas.version["draft-05"].visitor = {
                     callback("." + p, "[*]", value[p]);
                 }
             }
+//            for (var p in schema.properties) {
+//                if (value && !value.hasOwnProperty(p)) {
+//                    callback("." + p, "." + p, null);
+//                }
+//            }
         }
     }
 };

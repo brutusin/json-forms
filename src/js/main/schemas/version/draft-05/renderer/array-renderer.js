@@ -27,7 +27,7 @@ schemas.version["draft-05"].ArrayRenderer = function (renderingBean, container) 
         if (value === null) {
             value = [];
         }
-        value.length = value.length + 1;
+        value[value.length] = null;
         renderingBean.setValue(value);
     };
 
