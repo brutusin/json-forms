@@ -15,7 +15,7 @@ schemas.GraphicBean = function (schemaBean, container) {
     this.schemaId = schemaBean.schemaId;
     var renderer;
     var children = {};
-    this.schemaBean.setValue(fillValue(this.schemaBean.getValue()));
+    this.schemaBean.setValue(initialize(this.schemaBean.getValue()));
 
     function refreshRenderer() {
         instance.schema = schemaBean.schema;
@@ -43,7 +43,7 @@ schemas.GraphicBean = function (schemaBean, container) {
         schemaMap[schemaId] = child;
     }
 
-    function isFilled(value) {
+    function isInitialized(value) {
         if (renderingBean.schema.type !== "object") {
             return true;
         }
@@ -60,7 +60,7 @@ schemas.GraphicBean = function (schemaBean, container) {
         return true;
     }
 
-    function fillValue(value) {
+    function initialize(value) {
         if (renderingBean.schema.type === "object") {
             if (!value) {
                 value = {};
@@ -78,7 +78,7 @@ schemas.GraphicBean = function (schemaBean, container) {
 
     function valueListener() {
         var value = schemaBean.getValue();
-        if (isFilled(value)) {
+        if (isInitialized(value)) {
             renderingBean.onValueChanged(value);
             var newChildren = {};
             var sbChildren = schemaBean.getChildren();
@@ -93,7 +93,7 @@ schemas.GraphicBean = function (schemaBean, container) {
             }
             children = newChildren;
         } else {
-            schemaBean.setValue(fillValue(value));
+            schemaBean.setValue(initialize(value));
         }
     }
 
@@ -102,7 +102,9 @@ schemas.GraphicBean = function (schemaBean, container) {
     };
 
     this.getValue = function () {
-        return schemaBean.getValue();
+        var version = schemas.version.getVersion(this.schema);
+        var valueCleaner = schemas.version[version].valueCleaner;
+        return valueCleaner.getCleanedValue(schemaBean);
     };
 
     this.getChildren = function () {

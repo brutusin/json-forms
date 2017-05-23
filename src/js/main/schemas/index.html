@@ -12,7 +12,9 @@
 <script src="validation/delegating-validator.js"></script>
 <script src="rendering/renderering-bean.js"></script>
 <script src="rendering/renderer.js"></script>
+<script src="rendering/value-cleaner.js"></script>
 <script src="version/draft-05/visitor.js"></script>
+<script src="version/draft-05/value-cleaner.js"></script>
 <script src="version/draft-05/initialization/initializer.js"></script>
 <script src="version/draft-05/validator/object-validator.js"></script>
 <script src="version/draft-05/validator/oneof-validator.js"></script>
@@ -25,6 +27,7 @@
 <script src="version/draft-05/renderer/array-renderer.js"></script>
 <script src="version/draft-05/renderer/renderer-factory.js"></script>
 <script src="version/draft-05/renderer/object-renderer.js"></script>
+
 <div id="div1"></div>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};

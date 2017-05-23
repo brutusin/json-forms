@@ -11,6 +11,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
         schemaId = "$";
     }
     var instance = this;
+    this.schemaResolver = schemaResolver;
     this.id = id;
     this.schemaId = schemaId;
     this.schema = schemaResolver.getSubSchema(schemaId);
