@@ -13,7 +13,6 @@ schemas.GraphicBean = function (schemaBean, container) {
     this.container = container;
     this.id = schemaBean.id;
     this.schemaId = schemaBean.schemaId;
-    var renderer;
     var children = {};
     this.schemaBean.setValue(initialize(this.schemaBean.getValue()));
 
@@ -21,7 +20,7 @@ schemas.GraphicBean = function (schemaBean, container) {
         instance.schema = schemaBean.schema;
         schemas.utils.cleanNode(container);
         var version = schemas.version.getVersion(schemaBean.schema);
-        renderer = schemas.version[version].rendererFactory.createRender(renderingBean, container);
+        instance.renderer = schemas.version[version].rendererFactory.createRender(renderingBean, container);
         valueListener();
     }
 
@@ -86,7 +85,7 @@ schemas.GraphicBean = function (schemaBean, container) {
                 for (var childSchemaId in sbChildren[childId]) {
                     var child = removeChild(children, childId, childSchemaId);
                     if (!child || child.schemaBean !== sbChildren[childId][childSchemaId]) {
-                        child = new schemas.GraphicBean(sbChildren[childId][childSchemaId], renderer.getChildContainer(childId, childSchemaId));
+                        child = new schemas.GraphicBean(sbChildren[childId][childSchemaId], instance.renderer.getChildContainer(childId, childSchemaId));
                     }
                     setChild(child, newChildren, childId, childSchemaId);
                 }

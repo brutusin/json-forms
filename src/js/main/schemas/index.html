@@ -1,5 +1,4 @@
 <meta charset="UTF-8"></meta>
-<link rel="stylesheet" href="../../../css/brutusin-json-forms.css"/>
 <script src="../pollyfills.js"></script>
 <script>
     var schemas = {};
@@ -62,6 +61,10 @@
     var schema8 =  {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string"}, "s2": {"type": "string", "readOnly": true}, "a1": {"type": "array", "items": {"type": "string"}}, "a2": {"type": "array", "items": {"type": "string"}, "readOnly": true}}};
     var schemaResolver8 = new schemas.SchemaResolver;
     schemaResolver8.updateFrom(schema8);
+    
+    var schema9 = {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"fixed":{"description":"Object supporting schema-fixed additional properties","type":"object","maxProperties":2,"additionalProperties":{"description":"Fixed-schema additional property","type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer"}}}},"free":{"description":"Object supporting schema-free additional properties","type":"object","maxProperties":3,"additionalProperties":true}}};
+        var schemaResolver9 = new schemas.SchemaResolver;
+    schemaResolver9.updateFrom(schema9);
 
     var sv1 = new schemas.SchemaBean(schemaResolver1);
     var sv2 = new schemas.SchemaBean(schemaResolver2);
@@ -71,7 +74,8 @@
     var sv6 = new schemas.SchemaBean(schemaResolver6);
     var sv7 = new schemas.SchemaBean(schemaResolver7);
     var sv8 = new schemas.SchemaBean(schemaResolver8);
+    var sv9 = new schemas.SchemaBean(schemaResolver9);
 
-    var gb = new schemas.GraphicBean(sv1, document.getElementById("f"));
+    var gb = new schemas.GraphicBean(sv9, document.getElementById("f"));
 
 </script>

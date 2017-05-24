@@ -38,10 +38,10 @@ schemas.version["draft-05"].ObjectValidator = function () {
                 }
             }
             var propCount = Object.keys(value).length;
-            if (schema.minProperties && schema.minProperties < propCount) {
+            if (schema.minProperties && schema.minProperties > propCount) {
                 errors.push(["error.minProperties", schema.minProperties, propCount]);
             }
-            if (schema.maxProperties && schema.maxProperties > propCount) {
+            if (schema.maxProperties && schema.maxProperties < propCount) {
                 errors.push(["error.maxProperties", schema.maxProperties, propCount]);
             }
             if (Array.isArray(schema.required)) {
