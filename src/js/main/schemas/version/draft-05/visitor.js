@@ -58,7 +58,7 @@ schemas.version["draft-05"].visitor = {
                 }
                 if (typeof schema.additionalProperties === "object") {
                     visit(schemaId + "[*]", schema.additionalProperties, callback);
-                } else if (typeof schema.additionalProperties === "boolean") {
+                } else if (schema.additionalProperties === true) {
                     visit(schemaId + "[*]", {}, callback);
                 }
             } else if (schema.type === "array") {
@@ -112,7 +112,7 @@ schemas.version["draft-05"].visitor = {
                             callback("." + p, "[/" + pattern + "/]", value[p]);
                         }
                     }
-                } else if (schema.hasOwnProperty("additionalProperties")) {
+                } else if (schema.additionalProperties) {
                     callback("." + p, "[*]", value[p]);
                 }
             }

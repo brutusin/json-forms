@@ -114,25 +114,27 @@ schemas.version["draft-05"].SimpleRenderer = function (renderingBean, container)
             };
         } else {
             input = document.createElement("input");
-            if (schema.type === "integer" || schema.type === "number") {
-                input.type = "number";
-                input.step = schema.step ? schema.step.toString() : "any";
-            } else if (schema.format === "date-time") {
-                try {
+            var valueRegExp;
+            try {
+                if (schema.type === "integer" || schema.type === "number") {
+                    input.type = "number";
+                    input.step = schema.step ? schema.step.toString() : "any";
+                    valueRegExp = /-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?/;
+                } else if (schema.format === "date-time") {
                     input.type = "datetime-local";
-                } catch (err) {
-                    // #46, problem in IE11. TODO polyfill?
+                } else if (schema.format === "email") {
+                    input.type = "email";
+                } else if (schema.format === "text") {
+                    input = document.createElement("textarea");
+                } else {
                     input.type = "text";
                 }
-            } else if (schema.format === "email") {
-                input.type = "email";
-            } else if (schema.format === "text") {
-                input = document.createElement("textarea");
-            } else {
+            } catch (err) {
+                // #46, problem in IE11. TODO polyfill?
                 input.type = "text";
             }
             input.setValue = function (value) {
-                if (value === null || typeof value === "undefined") {
+                if (value === null || typeof value === "undefined" || typeof value === "object" || valueRegExp && !valueRegExp.test(value)) {
                     input.value = "";
                 } else {
                     input.value = value;

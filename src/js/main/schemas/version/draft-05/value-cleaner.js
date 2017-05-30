@@ -47,7 +47,7 @@ schemas.version["draft-05"].valueCleaner = {
                         }
                     }
                     var v = removeEmptiesAndNulls(value[prop], childSchemaId, schema.required && schema.required.includes(prop));
-                    if (v !== null) {
+                    if (v !== null || schema.hasOwnProperty("minProperties") || schema.hasOwnProperty("maxProperties")) {
                         clone[prop] = v;
                         nonEmpty = true;
                     }

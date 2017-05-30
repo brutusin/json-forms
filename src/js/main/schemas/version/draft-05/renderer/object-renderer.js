@@ -175,7 +175,7 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
     renderingBean.onValueChanged = function (value) {
         for (var p in value) {
             if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
-                if (!prevValue.hasOwnProperty(p)) {
+                if (!prevValue || !prevValue.hasOwnProperty(p)) {
                     renderProperty(p);
                 }
             }

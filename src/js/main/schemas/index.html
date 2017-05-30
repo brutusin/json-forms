@@ -12,6 +12,7 @@
 <script src="validation/delegating-validator.js"></script>
 <script src="rendering/renderering-bean.js"></script>
 <script src="rendering/renderer.js"></script>
+<script src="rendering/context.js"></script>
 <script src="rendering/value-cleaner.js"></script>
 <script src="version/draft-05/visitor.js"></script>
 <script src="version/draft-05/value-cleaner.js"></script>
@@ -27,6 +28,7 @@
 <script src="version/draft-05/renderer/array-renderer.js"></script>
 <script src="version/draft-05/renderer/renderer-factory.js"></script>
 <script src="version/draft-05/renderer/object-renderer.js"></script>
+<script src="version/draft-05/renderer/oneof-renderer.js"></script>
 
 <form class="brutusin-form" id="f"></form>
 <script>
@@ -65,6 +67,10 @@
     var schema9 = {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"fixed":{"description":"Object supporting schema-fixed additional properties","type":"object","maxProperties":2,"additionalProperties":{"description":"Fixed-schema additional property","type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer"}}}},"free":{"description":"Object supporting schema-free additional properties","type":"object","maxProperties":3,"additionalProperties":true}}};
         var schemaResolver9 = new schemas.SchemaResolver;
     schemaResolver9.updateFrom(schema9);
+    
+    var schema10 = {"$schema":"http://json-schema.org/draft-03/schema#","oneOf":[{"type":"string","format":"email"},{"title":"An object","type":"object","properties":{"p1":{"type":"string","required":true,"title":"A required string"},"p2":{"type":"boolean","title":"A boolean"}}}]};
+     var schemaResolver10 = new schemas.SchemaResolver;
+    schemaResolver10.updateFrom(schema10);
 
     var sv1 = new schemas.SchemaBean(schemaResolver1);
     var sv2 = new schemas.SchemaBean(schemaResolver2);
@@ -75,7 +81,8 @@
     var sv7 = new schemas.SchemaBean(schemaResolver7);
     var sv8 = new schemas.SchemaBean(schemaResolver8);
     var sv9 = new schemas.SchemaBean(schemaResolver9);
+    var sv10 = new schemas.SchemaBean(schemaResolver10);
 
-    var gb = new schemas.GraphicBean(sv9, document.getElementById("f"));
+    var gb = new schemas.GraphicBean(sv10, document.getElementById("f"));
 
 </script>

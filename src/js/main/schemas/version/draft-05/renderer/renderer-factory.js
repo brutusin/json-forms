@@ -14,8 +14,8 @@ schemas.version["draft-05"].rendererFactory = {
             return new schemas.version["draft-05"].ArrayRenderer(renderingBean, container);
         } else if (renderingBean.schema.type === "object") {
             return new schemas.version["draft-05"].ObjectRenderer(renderingBean, container);
-        } else if (renderingBean.schema.oneof) {
-
+        } else if (renderingBean.schema.oneOf) {
+            return new schemas.version["draft-05"].OneofRenderer(renderingBean, container);
         } else {
             return new schemas.version["draft-05"].SimpleRenderer(renderingBean, container);
         }

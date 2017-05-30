@@ -15,6 +15,9 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.id = id;
     this.schemaId = schemaId;
     this.schema = schemaResolver.getSubSchema(schemaId);
+    var version = schemas.version.getVersion(instance.schema);
+    var validator = schemas.version[version].validator;
+    
     var children = {};
     var valueListeners = [];
     var schemaListeners = [];
@@ -29,11 +32,12 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     };
 
     var changedExternally = true;
+
     var childValueListener = function (child) {
         if (changedExternally) {
             var childId;
             var entry;
-            if (Array.isArray(value)) {
+            if (instance.schema.type === "array") {
                 for (var i = 0; i < value.length; i++) {
                     childId = id + "[" + i + "]";
                     if (childId === child.id) {
@@ -41,7 +45,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                         break;
                     }
                 }
-            } else {
+            } else if (instance.schema.type === "object") {
                 for (var prop in value) {
                     childId = id + "." + prop;
                     if (childId === child.id) {
@@ -49,15 +53,23 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                         break;
                     }
                 }
+            } else {
+                childId = instance.id;
             }
-            if (!child.getErrors() || Object.keys(children[childId]).length === 1) {
+            if (childId && children[childId]) {
                 if (typeof entry !== "undefined") {
                     value[entry] = child.getValue();
                 } else {
                     value = child.getValue();
+                    for (var chidSchemaId in children[childId]) {
+                        if (chidSchemaId !== child.schemaId) {
+                            children[childId][chidSchemaId].setValue(value);
+                        }
+                    }
                 }
                 fireListeners(valueListeners);
             }
+            updateErrors();
         }
     };
 
@@ -113,13 +125,25 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
         }
     }
 
+    function updateErrors() {
+        var childrenErrors = [];
+        for (var childId in children) {
+            for (var childSchemaId in children[childId]) {
+                var child = children[childId][childSchemaId];
+                if (child.getErrors()) {
+                    childrenErrors.push(child.getErrors());
+                }
+            }
+        }
+        errors = validator.validate(instance.schema, value, childrenErrors);
+        absorvedChildrenErrors = validator.isAbsorvedChildrenErrors(instance.schema, value, childrenErrors);
+    }
+
     function refresh() {
         if (instance.schema) {
             var newChildren = {};
-            var childrenErrors = [];
             var version = schemas.version.getVersion(instance.schema);
             var visitor = schemas.version[version].visitor;
-            var validator = schemas.version[version].validator;
             var newlyCreatedWithInitialValues = [];
             visitor.visitInstanceChildren(value, instance.schema, function (childRelativeId, childRelativeSchemaId, childValue) {
                 var childId = id + childRelativeId;
@@ -134,15 +158,10 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                 }
                 setChild(child, newChildren, childId, childSchemaId);
                 child.setValue(childValue);
-                var childErrors = child.getErrors();
-                if (childErrors) {
-                    childrenErrors.push(childErrors);
-                }
             });
             dispose(children);
             children = newChildren;
-            errors = validator.validate(instance.schema, value, childrenErrors);
-            absorvedChildrenErrors = validator.isAbsorvedChildrenErrors(instance.schema, value, childrenErrors);
+            updateErrors();
             var changedExternallySaved = changedExternally;
             changedExternally = true;
             for (var i = 0; i < newlyCreatedWithInitialValues.length; i++) {
@@ -178,6 +197,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
 
     this.setValue = function (v) {
         if (typeof v !== "undefined") {
+            var prevChangedExternally = changedExternally;
             changedExternally = false;
             var strV = JSON.stringify(v);
             var isChanged = strV !== JSON.stringify(value);
@@ -186,7 +206,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                 refresh();
                 fireListeners(valueListeners);
             }
-            changedExternally = true;
+            changedExternally = prevChangedExternally;
         }
     };
 
