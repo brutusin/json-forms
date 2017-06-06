@@ -22,10 +22,15 @@ schemas.version["draft-05"].OneofRenderer = function (renderingBean, container) 
             selectedContainer = childContainers[renderingBean.schemaId + "." + (select.selectedIndex - 1)];
             schemas.utils.appendChild(div, selectedContainer);
         }
-    };
-    
+    }
+
     select.onchange = function () {
-        renderingBean.setValue(null);
+        if (select.selectedIndex === 0) {
+            renderingBean.setValue(null);
+        } else {
+            var childSchema = renderingBean.getSchema(renderingBean.schemaId + "." + (select.selectedIndex - 1));
+            renderingBean.setValue(schemas.utils.initializeValue(childSchema, null));
+        }
         changeSelect();
     };
 
@@ -33,7 +38,7 @@ schemas.version["draft-05"].OneofRenderer = function (renderingBean, container) 
     schemas.utils.appendChild(select, document.createElement("option"), renderingBean);
 
 
-    for (var i = 0; i < renderingBean.schema.oneOf.length; i++) {
+    for (var i = 0; i < renderingBean.getSchema().oneOf.length; i++) {
         var option = document.createElement("option");
         var textNode = document.createTextNode(i);
         option.value = i;
@@ -60,7 +65,7 @@ schemas.version["draft-05"].OneofRenderer = function (renderingBean, container) 
         if (!schemas.rendering.context.valueChangedInRenderer) {
             var selectedIndex = 0;
             var typeErrors = [];
-            for (var i = 0; i < renderingBean.schema.oneOf.length; i++) {
+            for (var i = 0; i < renderingBean.getSchema().oneOf.length; i++) {
                 var schemaId = renderingBean.schemaId + "." + i;
                 var errors = renderingBean.getErrors(renderingBean.id, schemaId);
                 for (var id in errors) {
@@ -75,8 +80,8 @@ schemas.version["draft-05"].OneofRenderer = function (renderingBean, container) 
                     }
                 }
             }
-            if (typeErrors.length === renderingBean.schema.oneOf.length - 1) {
-                for (var i = 0; i < renderingBean.schema.oneOf.length; i++) {
+            if (typeErrors.length === renderingBean.getSchema().oneOf.length - 1) {
+                for (var i = 0; i < renderingBean.getSchema().oneOf.length; i++) {
                     if (!typeErrors.includes(i)) {
                         selectedIndex = i + 1;
                         break;

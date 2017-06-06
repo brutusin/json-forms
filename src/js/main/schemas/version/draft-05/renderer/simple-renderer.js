@@ -13,18 +13,18 @@ schemas.version["draft-05"].SimpleRenderer = function (renderingBean, container)
     if (!container) {
         throw "A html container is required to render";
     }
-    if (!renderingBean || !renderingBean.schema) {
+    if (!renderingBean || !renderingBean.getSchema()) {
         return;
     }
 
-    input = createInput(renderingBean.schema);
+    input = createInput(renderingBean.getSchema());
 
     if (renderingBean.getValue()) {
         input.setValue(renderingBean.getValue());
     }
     input.onchange = function () {
         changedExternally = false;
-        renderingBean.setValue(getInputValue(renderingBean.schema, input));
+        renderingBean.setValue(getInputValue(renderingBean.getSchema(), input));
         changedExternally = true;
     };
 

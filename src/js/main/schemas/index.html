@@ -7,6 +7,7 @@
 <script src="schema-bean.js"></script>
 <script src="graphic-bean.js"></script>
 <script src="utils.js"></script>
+<script src="form.js"></script>
 <script src="version/version.js"></script>
 <script src="validation/validator.js"></script>
 <script src="validation/delegating-validator.js"></script>
@@ -83,6 +84,7 @@
     var sv9 = new schemas.SchemaBean(schemaResolver9);
     var sv10 = new schemas.SchemaBean(schemaResolver10);
 
-    var gb = new schemas.GraphicBean(sv10, document.getElementById("f"));
+    var form = new schemas.Form(document.getElementById("f"));
+    form.setSchema({"$schema":"http://json-schema.org/draft-03/schema#","oneOf":[{"type":"string","format":"email"},{"title":"An object","type":"object","properties":{"p1":{"type":"string","required":true,"title":"A required string"},"p2":{"type":"boolean","title":"A boolean"}}}]});
 
 </script>

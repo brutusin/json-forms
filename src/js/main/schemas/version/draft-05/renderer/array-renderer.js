@@ -10,7 +10,7 @@ schemas.version["draft-05"].ArrayRenderer = function (renderingBean, container) 
     if (!container) {
         throw "A html container is required to render";
     }
-    if (!renderingBean || !renderingBean.schema) {
+    if (!renderingBean || !renderingBean.getSchema()) {
         return;
     }
     var childContainers = {};
@@ -18,7 +18,7 @@ schemas.version["draft-05"].ArrayRenderer = function (renderingBean, container) 
     var table = document.createElement("table");
     table.className = "array";
     var addButton = document.createElement("button");
-    if (renderingBean.schema.readOnly) {
+    if (renderingBean.getSchema().readOnly) {
         addButton.disabled = true;
     }
     addButton.setAttribute('type', 'button');
@@ -55,7 +55,7 @@ schemas.version["draft-05"].ArrayRenderer = function (renderingBean, container) 
         var removeButton = document.createElement("button");
         removeButton.setAttribute('type', 'button');
         removeButton.className = "remove";
-        if (renderingBean.schema.readOnly === true) {
+        if (renderingBean.getSchema().readOnly === true) {
             removeButton.disabled = true;
         }
         schemas.utils.appendChild(removeButton, document.createTextNode("x"), renderingBean);

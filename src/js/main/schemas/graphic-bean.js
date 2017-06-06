@@ -14,14 +14,15 @@ schemas.GraphicBean = function (schemaBean, container) {
     this.id = schemaBean.id;
     this.schemaId = schemaBean.schemaId;
     var children = {};
-    this.schemaBean.setValue(initialize(this.schemaBean.getValue()));
 
     function refreshRenderer() {
         instance.schema = schemaBean.schema;
         schemas.utils.cleanNode(container);
-        var version = schemas.version.getVersion(schemaBean.schema);
-        instance.renderer = schemas.version[version].rendererFactory.createRender(renderingBean, container);
-        valueListener();
+        if (schemaBean.schema) {
+            var version = schemas.version.getVersion(schemaBean.schema);
+            instance.renderer = schemas.version[version].rendererFactory.createRender(renderingBean, container);
+            valueListener();
+        }
     }
 
     function removeChild(childMap, id, schemaId) {
@@ -43,36 +44,20 @@ schemas.GraphicBean = function (schemaBean, container) {
     }
 
     function isInitialized(value) {
-        if (renderingBean.schema.type !== "object") {
+        if (renderingBean.getSchema().type !== "object") {
             return true;
         }
         if (!value) {
             return false;
         }
-        if (renderingBean.schema.properties) {
-            for (var p in renderingBean.schema.properties) {
+        if (renderingBean.getSchema().properties) {
+            for (var p in renderingBean.getSchema().properties) {
                 if (!value.hasOwnProperty(p)) {
                     return false;
                 }
             }
         }
         return true;
-    }
-
-    function initialize(value) {
-        if (renderingBean.schema.type === "object") {
-            if (!value) {
-                value = {};
-            }
-            if (renderingBean.schema.properties) {
-                for (var p in renderingBean.schema.properties) {
-                    if (!value.hasOwnProperty(p)) {
-                        value[p] = null;
-                    }
-                }
-            }
-        }
-        return value;
     }
 
     function valueListener() {
@@ -91,8 +76,6 @@ schemas.GraphicBean = function (schemaBean, container) {
                 }
             }
             children = newChildren;
-        } else {
-            schemaBean.setValue(initialize(value));
         }
     }
 

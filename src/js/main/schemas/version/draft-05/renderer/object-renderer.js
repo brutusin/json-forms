@@ -14,13 +14,13 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
     schemas.utils.appendChild(div, table, renderingBean);
     var value = renderingBean.getValue();
     var prevValue = value;
-    if (renderingBean.schema.properties) {
-        for (var p in renderingBean.schema.properties) {
+    if (renderingBean.getSchema().properties) {
+        for (var p in renderingBean.getSchema().properties) {
             renderProperty(p);
         }
     }
 
-    if (renderingBean.schema.patternProperties || renderingBean.schema.additionalProperties) {
+    if (renderingBean.getSchema().patternProperties || renderingBean.getSchema().additionalProperties) {
         var tr = document.createElement("tr");
         schemas.utils.appendChild(table, tr, renderingBean);
         var td1 = document.createElement("td");
@@ -33,7 +33,7 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
         var addInput = document.createElement("input");
         addInput.type = "text";
         var tooltip = "";
-        for (var pattern in renderingBean.schema.patternProperties) {
+        for (var pattern in renderingBean.getSchema().patternProperties) {
             if (tooltip.length > 0) {
                 tooltip += ", ";
             } else {
@@ -52,20 +52,20 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
                 return;
             }
             var v = renderingBean.getValue();
-            if (renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(propName) || v.hasOwnProperty(propName)) {
+            if (renderingBean.getSchema().properties && renderingBean.getSchema().properties.hasOwnProperty(propName) || v.hasOwnProperty(propName)) {
                 return;
             }
             var schemaId;
-            if (renderingBean.schema.patternProperties) {
-                for (var pat in renderingBean.schema.patternProperties) {
+            if (renderingBean.getSchema().patternProperties) {
+                for (var pat in renderingBean.getSchema().patternProperties) {
                     var r = RegExp(pat);
                     if (propName.search(r) !== -1) {
-                        schemaId = renderingBean.schema.patternProperties[pat];
+                        schemaId = renderingBean.getSchema().patternProperties[pat];
                         break;
                     }
                 }
             }
-            if (!schemaId && renderingBean.schema.additionalProperties) {
+            if (!schemaId && renderingBean.getSchema().additionalProperties) {
                 schemaId = renderingBean.schemaId + "[*]";
             }
             if (!schemaId) {
@@ -79,7 +79,7 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
 
         // pattern properties at the end:
         for (var p in value) {
-            if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
+            if (!(renderingBean.getSchema().properties && renderingBean.getSchema().properties.hasOwnProperty(p))) {
                 renderProperty(p);
             }
         }
@@ -90,20 +90,20 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
     function renderProperty(p) {
         var pattern;
         var schemaId;
-        if (!renderingBean.schema.properties || !renderingBean.schema.properties.hasOwnProperty(p)) {
-            if (renderingBean.schema.patternProperties) {
-                for (var pat in renderingBean.schema.patternProperties) {
-                    if (renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p)) {
+        if (!renderingBean.getSchema().properties || !renderingBean.getSchema().properties.hasOwnProperty(p)) {
+            if (renderingBean.getSchema().patternProperties) {
+                for (var pat in renderingBean.getSchema().patternProperties) {
+                    if (renderingBean.getSchema().properties && renderingBean.getSchema().properties.hasOwnProperty(p)) {
                         continue;
                     }
                     var r = RegExp(pat);
                     if (p.search(r) !== -1) {
                         pattern = p;
-                        schemaId = renderingBean.schema.patternProperties[pat];
+                        schemaId = renderingBean.getSchema().patternProperties[pat];
                         break;
                     }
                 }
-            } else if (renderingBean.schema.additionalProperties) {
+            } else if (renderingBean.getSchema().additionalProperties) {
                 pattern = ".*";
                 schemaId = renderingBean.schemaId + "[*]";
             }
@@ -174,14 +174,14 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
 
     renderingBean.onValueChanged = function (value) {
         for (var p in value) {
-            if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
+            if (!(renderingBean.getSchema().properties && renderingBean.getSchema().properties.hasOwnProperty(p))) {
                 if (!prevValue || !prevValue.hasOwnProperty(p)) {
                     renderProperty(p);
                 }
             }
         }
         for (var p in prevValue) {
-            if (!(renderingBean.schema.properties && renderingBean.schema.properties.hasOwnProperty(p))) {
+            if (!(renderingBean.getSchema().properties && renderingBean.getSchema().properties.hasOwnProperty(p))) {
                 if (!value.hasOwnProperty(p)) {
                     removeProperty(p);
                 }

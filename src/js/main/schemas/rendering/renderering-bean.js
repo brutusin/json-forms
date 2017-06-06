@@ -12,12 +12,12 @@ schemas.rendering.RenderingBean = function (schemaBean) {
 
     this.id = schemaBean.id;
     this.schemaId = schemaBean.schemaId;
-    this.schema = schemaBean.schema;
 
     this.getValue = function () {
         return schemaBean.getValue();
     };
-    
+
+
     this.setValue = function (value) {
         var vcr = schemas.rendering.context.valueChangedInRenderer;
         schemas.rendering.context.valueChangedInRenderer = true;
@@ -27,6 +27,14 @@ schemas.rendering.RenderingBean = function (schemaBean) {
 
     this.getErrors = function (id, schemaId) {
         return schemaBean.getChildren()[id][schemaId].getErrors();
+    };
+
+    this.getSchema = function (schemaId) {
+        if (schemaId) {
+            return schemaBean.schemaResolver.getSubSchema(schemaId);
+        } else {
+            return schemaBean.schema;
+        }
     };
 
     this.onValueChanged = function () {

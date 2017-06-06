@@ -23,4 +23,21 @@ schemas.utils = {
     },
     appendChild: function (parent, child, schemaBean) {
         parent.appendChild(child);
-    }};
+    },
+    initializeValue: function (schema, value) {
+        if (schema.type === "object") {
+            if (value === null) {
+                value = {};
+            }
+            if (schema.properties) {
+                for (var p in schema.properties) {
+                    if (!value.hasOwnProperty(p)) {
+                        value[p] = null;
+                    }
+                }
+            }
+        }
+        return value;
+    }
+};
+
