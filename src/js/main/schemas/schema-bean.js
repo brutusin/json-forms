@@ -225,7 +225,9 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                             if (!ret[p]) {
                                 ret[p] = [];
                             }
-                            ret[p].push(childErrors[p]);
+                            for(var i=0;i<childErrors[p].length;i++){
+                                ret[p].push(childErrors[p][i]);
+                            }
                         }
                     }
                 }

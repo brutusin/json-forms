@@ -1,7 +1,8 @@
 <meta charset="UTF-8"></meta>
 <script src="dist/js/brutusin-json-forms.js"></script>
+<script src="src/js/addon/i18n/brutusin-json-forms-lan-es_ES.js"></script>
 <form class="brutusin-form" id="f"></form>
 <script>
     var form = new brutusin.schemas.Form(document.getElementById("f"));
-    form.setSchema({"$schema":"http://json-schema.org/draft-03/schema#","oneOf":[{"type":"string","format":"email"},{"title":"An object","type":"object","properties":{"p1":{"type":"string","required":true,"title":"A required string"},"p2":{"type":"boolean","title":"A boolean"}}}]});
+    form.setSchema({"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}, "^b_.*": {"type": "boolean"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}});
 </script>

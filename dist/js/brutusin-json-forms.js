@@ -2,6 +2,7 @@ if (typeof brutusin === "undefined") {window.brutusin = new Object();} else if (
 (function(){
 "use strict";
 var schemas = {};
+brutusin.schemas = schemas;
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (searchString, position) {
         position = position || 0;
@@ -28,9 +29,21 @@ if (!String.prototype.includes) {
 if (!String.prototype.format) {
     String.prototype.format = function () {
         var formatted = this;
-        for (var i = 0; i < arguments.length; i++) {
+        function replace(i, value) {
             var regexp = new RegExp('\\{' + i + '\\}', 'gi');
-            formatted = formatted.replace(regexp, arguments[i]);
+            formatted = formatted.replace(regexp, value);
+        }
+        var index = 0;
+        for (var i = 0; i < arguments.length; i++) {
+            if (Array.isArray(arguments[i])) {
+                for (var j = 0; j < arguments[i].length; j++) {
+                    replace(index, arguments[i][j]);
+                    index++;
+                }
+            } else {
+                replace(index, arguments[i]);
+                index++;
+            }
         }
         return formatted;
     };
@@ -121,18 +134,42 @@ schemas.Form = function (parentNode) {
         sr.updateFrom(schema);
         this.setValue(this.getValue());
     };
-    
+
     this.setValue = function (value) {
         value = schemas.utils.initializeValue(sr.getSubSchema("$"), value);
         gb.setValue(value);
     };
-    
+
     this.getValue = function () {
         return gb.getValue();
     };
-    
+
     this.getErrors = function () {
-        return gb.getErrors();
+        var errors = gb.getErrors();
+        if (!errors) {
+            return null;
+        }
+        var ret = {};
+        for (var id in errors) {
+            ret[id] = [];
+            var idErrors = errors[id];
+            for (var i = 0; i < idErrors.length; i++) {
+                var errorEntry = idErrors[i];
+                var errorId;
+                var params = [];
+                if (typeof errorEntry === "string") {
+                    errorId = errorEntry;
+                } else {
+                    errorId = errorEntry[0];
+                    for (var j = 1; j < errorEntry.length; j++) {
+                        params.push(errorEntry[j]);
+                    }
+                }
+                var message = schemas.utils.i18n.getTranslation(errorId).format(params);
+                ret[id].push({id: errorId, message: message});
+            }
+        }
+        return ret;
     };
 };
 /* global schemas */
@@ -532,7 +569,9 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                             if (!ret[p]) {
                                 ret[p] = [];
                             }
-                            ret[p].push(childErrors[p]);
+                            for(var i=0;i<childErrors[p].length;i++){
+                                ret[p].push(childErrors[p][i]);
+                            }
                         }
                     }
                 }
@@ -674,17 +713,64 @@ schemas.SchemaResolver = function () {
 
 /* global schemas */
 schemas.utils = {
+    defaultLocale: {language: "en", country: "GB"},
+    getLocale: function () {
+        var bestLocale;
+        if (!bestLocale) {
+            bestLocale = getBestAvailableLocale();
+        }
+        return bestLocale;
+
+        function getBrowserLocale() {
+            var locale;
+            if (navigator.languages && Array.isArray(navigator.languages)) {
+                locale = navigator.languages[0];
+            } else if (navigator.userLanguage) {
+                locale = navigator.userLanguage;
+            } else {
+                locale = navigator.language;
+            }
+            if (locale && locale.length === 5) {
+                return {language: locale.substr(0, 2).toLowerCase(), country: locale.substr(3, 5).toUpperCase()};
+            }
+        }
+
+        function getBestAvailableLocale() {
+            var browserLocale = getBrowserLocale();
+            if (browserLocale) {
+                if (schemas.utils.i18n.translations.hasOwnProperty(browserLocale.language)) {
+                    if (schemas.utils.i18n.translations[browserLocale.language].hasOwnProperty(browserLocale.country)) {
+                        return browserLocale;
+                    } else {
+                        return {language: browserLocale.language, country: Object.keys(schemas.utils.i18n.translations[browserLocale.language])[0]};
+                    }
+                } else {
+                    return schemas.utils.defaultLocale;
+                }
+            }
+        }
+    },
     i18n: {
         translations: {},
-        setTranslations: function (translations) {
-            if (!translations) {
-                throw "A translation map is required";
+        setTranslations: function (language, country, translations) {
+            for (var entryId in translations) {
+                this.setTranslation(entryId, language, country, translations[entryId]);
             }
-            this.translations = translations;
+        },
+        setTranslation: function (entryId, language, country, value) {
+            if (!schemas.utils.i18n.translations[language]) {
+                schemas.utils.i18n.translations[language] = {};
+            }
+            if (!schemas.utils.i18n.translations[language][country]) {
+                schemas.utils.i18n.translations[language][country] = {};
+            }
+            schemas.utils.i18n.translations[language][country][entryId] = value;
         },
         getTranslation: function (entryId) {
-            if (this.translations[entryId]) {
-                return this.translations[entryId];
+            var locale = schemas.utils.getLocale();
+            var translations = schemas.utils.i18n.translations[locale.language][locale.country];
+            if (translations[entryId]) {
+                return translations[entryId];
             } else {
                 return "{$" + entryId + "}";
             }
@@ -700,7 +786,7 @@ schemas.utils = {
     },
     initializeValue: function (schema, value) {
         if (schema.type === "object") {
-            if (value === null) {
+            if (value === null || typeof value !== "object") {
                 value = {};
             }
             if (schema.properties) {
@@ -713,6 +799,7 @@ schemas.utils = {
         }
         return value;
     }
+
 };
 
 
@@ -1306,7 +1393,9 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
         td2.className = "prop-value";
         schemas.utils.appendChild(tr, td1, renderingBean);
         tr.propertyName = p;
-        schemas.utils.appendChild(td1, document.createTextNode(p), renderingBean);
+        var name = p;
+        
+        schemas.utils.appendChild(td1, document.createTextNode(name), renderingBean);
         schemas.utils.appendChild(tr, td2, renderingBean);
         childContainers[renderingBean.id + "." + p] = {};
         childContainers[renderingBean.id + "." + p][renderingBean.schemaId + "." + p] = td2;
@@ -2032,5 +2121,40 @@ schemas.version.getVersion = function (schema) {
     }
     return version;
 };
-brutusin.schemas = schemas;
+/* global brutusin */
+
+if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["schemas"]) {
+    throw new Error("brutusin-json-forms.js is required");
+}
+(function () {
+    var schemas = brutusin["schemas"];
+
+    schemas.utils.i18n.setTranslations("en", "GB", {
+        "error": "Validation error",
+        "error.type": "Invalid value type '{1}', expected '{0}'",
+        "error.required": "This field is required",
+        "error.enum": "Invalid value",
+        "error.minItems": "At least `{0}` items are required",
+        "error.maxItems": "At most `{0}` items are allowed",
+        "error.additionalItems": "Additional items are not allowed",
+        "error.uniqueItems": "Array items must be unique",
+        "error.multipleOf": "Value must be multiple of `{0}`",
+        "error.maximum": "Value must be lower or equal than `{0}`",
+        "error.exclusiveMaximum": "Value must be lower than `{0}`",
+        "error.minimum": "Value must be greater or equal than `{0}`",
+        "error.exclusiveMinimum": "Value must be greater than `{0}`",
+        "error.invalidProperty": "Invalid property in object `{0}`",
+        "error.minProperties": "At least `{0}` properties are required",
+        "error.maxProperties": "At most `{0}` properties are allowed",
+        "error.oneOf": "The value must be valid against one and only one possible schema",
+        "error.pattern": "Value does not match pattern: `{0}`",
+        "error.pattern.email": "Value is not a valid email address",
+        "error.minLength": "Value must be at least `{0}` characters long",
+        "error.maxLength": "Value must be at most `{0}` characters long",
+        "addItem": "Add item",
+        "addProperty": "Add property",
+        "true": "True",
+        "false": "False"
+    });
+}());
 })();

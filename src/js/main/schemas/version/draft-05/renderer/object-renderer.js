@@ -123,7 +123,9 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean, container)
         td2.className = "prop-value";
         schemas.utils.appendChild(tr, td1, renderingBean);
         tr.propertyName = p;
-        schemas.utils.appendChild(td1, document.createTextNode(p), renderingBean);
+        var name = p;
+        
+        schemas.utils.appendChild(td1, document.createTextNode(name), renderingBean);
         schemas.utils.appendChild(tr, td2, renderingBean);
         childContainers[renderingBean.id + "." + p] = {};
         childContainers[renderingBean.id + "." + p][renderingBean.schemaId + "." + p] = td2;

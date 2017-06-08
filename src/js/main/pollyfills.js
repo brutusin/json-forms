@@ -24,9 +24,21 @@ if (!String.prototype.includes) {
 if (!String.prototype.format) {
     String.prototype.format = function () {
         var formatted = this;
-        for (var i = 0; i < arguments.length; i++) {
+        function replace(i, value) {
             var regexp = new RegExp('\\{' + i + '\\}', 'gi');
-            formatted = formatted.replace(regexp, arguments[i]);
+            formatted = formatted.replace(regexp, value);
+        }
+        var index = 0;
+        for (var i = 0; i < arguments.length; i++) {
+            if (Array.isArray(arguments[i])) {
+                for (var j = 0; j < arguments[i].length; j++) {
+                    replace(index, arguments[i][j]);
+                    index++;
+                }
+            } else {
+                replace(index, arguments[i]);
+                index++;
+            }
         }
         return formatted;
     };
