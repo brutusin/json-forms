@@ -9,8 +9,7 @@
 <script src="utils.js"></script>
 <script src="form.js"></script>
 <script src="version/version.js"></script>
-<script src="validation/validator.js"></script>
-<script src="validation/delegating-validator.js"></script>
+<script src="validation.js"></script>
 <script src="rendering/renderering-bean.js"></script>
 <script src="rendering/renderer.js"></script>
 <script src="rendering/context.js"></script>
@@ -73,18 +72,18 @@
      var schemaResolver10 = new schemas.SchemaResolver;
     schemaResolver10.updateFrom(schema10);
 
-    var sv1 = new schemas.SchemaBean(schemaResolver1);
-    var sv2 = new schemas.SchemaBean(schemaResolver2);
-    var sv3 = new schemas.SchemaBean(schemaResolver3);
-    var sv4 = new schemas.SchemaBean(schemaResolver4);
-    var sv5 = new schemas.SchemaBean(schemaResolver5);
-    var sv6 = new schemas.SchemaBean(schemaResolver6);
-    var sv7 = new schemas.SchemaBean(schemaResolver7);
-    var sv8 = new schemas.SchemaBean(schemaResolver8);
-    var sv9 = new schemas.SchemaBean(schemaResolver9);
-    var sv10 = new schemas.SchemaBean(schemaResolver10);
+//    var sv1 = new schemas.SchemaBean(schemaResolver1);
+//    var sv2 = new schemas.SchemaBean(schemaResolver2);
+//    var sv3 = new schemas.SchemaBean(schemaResolver3);
+//    var sv4 = new schemas.SchemaBean(schemaResolver4);
+//    var sv5 = new schemas.SchemaBean(schemaResolver5);
+//    var sv6 = new schemas.SchemaBean(schemaResolver6);
+//    var sv7 = new schemas.SchemaBean(schemaResolver7);
+//    var sv8 = new schemas.SchemaBean(schemaResolver8);
+//    var sv9 = new schemas.SchemaBean(schemaResolver9);
+//    var sv10 = new schemas.SchemaBean(schemaResolver10);
 
     var form = new schemas.Form(document.getElementById("f"));
-    form.setSchema({"$schema":"http://json-schema.org/draft-03/schema#","oneOf":[{"type":"string","format":"email"},{"title":"An object","type":"object","properties":{"p1":{"type":"string","required":true,"title":"A required string"},"p2":{"type":"boolean","title":"A boolean"}}}]});
+    form.setSchema(schema2);
 
 </script>

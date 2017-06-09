@@ -5,23 +5,15 @@ if (!schemas.version) {
 if (!schemas.version["draft-05"]) {
     schemas.version["draft-05"] = {};
 }
-schemas.version["draft-05"].SimpleRenderer = function (renderingBean, container) {
+schemas.version["draft-05"].SimpleRenderer = function (renderingBean) {
 
-    var input;
+    var input = createInput(renderingBean.getSchema());
     var changedExternally = true; // to avoid cyclic notifications of the change
-
-    if (!container) {
-        throw "A html container is required to render";
-    }
-    if (!renderingBean || !renderingBean.getSchema()) {
-        return;
-    }
-
-    input = createInput(renderingBean.getSchema());
 
     if (renderingBean.getValue()) {
         input.setValue(renderingBean.getValue());
     }
+    
     input.onchange = function () {
         changedExternally = false;
         renderingBean.setValue(getInputValue(renderingBean.getSchema(), input));
@@ -33,8 +25,10 @@ schemas.version["draft-05"].SimpleRenderer = function (renderingBean, container)
             input.setValue(value);
         }
     };
-
-    schemas.utils.appendChild(container, input, renderingBean);
+    
+    this.getRootNode = function () {
+        return input;
+    };
 
     function createInput(schema) {
         var input;

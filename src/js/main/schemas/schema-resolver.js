@@ -74,4 +74,6 @@ schemas.SchemaResolver = function () {
             }
         }
     };
+    
+    this.updateFrom({});
 };

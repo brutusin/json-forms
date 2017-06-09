@@ -55,17 +55,20 @@ schemas.utils = {
         },
         getTranslation: function (entryId) {
             var locale = schemas.utils.getLocale();
-            var translations = schemas.utils.i18n.translations[locale.language][locale.country];
-            if (translations[entryId]) {
-                return translations[entryId];
+            if (schemas.utils.i18n.translations[locale.language] &&
+                    schemas.utils.i18n.translations[locale.language][locale.country] &&
+                    schemas.utils.i18n.translations[locale.language][locale.country][entryId]) {
+                return schemas.utils.i18n.translations[locale.language][locale.country][entryId];
             } else {
                 return "{$" + entryId + "}";
             }
         }
     },
     cleanNode: function (container) {
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
+        if (container) {
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
         }
     },
     appendChild: function (parent, child, schemaBean) {
