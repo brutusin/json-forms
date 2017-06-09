@@ -99,8 +99,8 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean) {
         }
 
         function renderProperty(p) {
-            var pattern;
-            var schemaId;
+            var schemaId = renderingBean.schemaId + "." + p;
+
             if (!renderingBean.getSchema().properties || !renderingBean.getSchema().properties.hasOwnProperty(p)) {
                 if (renderingBean.getSchema().patternProperties) {
                     for (var pat in renderingBean.getSchema().patternProperties) {
@@ -109,62 +109,53 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean) {
                         }
                         var r = RegExp(pat);
                         if (p.search(r) !== -1) {
-                            pattern = p;
                             schemaId = renderingBean.getSchema().patternProperties[pat];
                             break;
                         }
                     }
                 } else if (renderingBean.getSchema().additionalProperties) {
-                    pattern = ".*";
                     schemaId = renderingBean.schemaId + "[*]";
                 }
             }
-            if (pattern) {
-                renderPatternProperty(p, schemaId);
-            } else {
-                renderSimpleProperty(p);
-            }
-        }
 
-        function renderSimpleProperty(p) {
             var tr = document.createElement("tr");
             var td1 = document.createElement("td");
             td1.className = "prop-name";
             var td2 = document.createElement("td");
-            td2.className = "prop-value";
+            td2.className = "prop-action";
+            var actionButton = document.createElement("button");
+            actionButton.setAttribute('type', 'button');
+            var v = renderingBean.getValue();
+            var txt;
+            if (typeof v === "object" && v && v.hasOwnProperty(p)) {
+                txt = "x";
+            } else {
+                txt = "+";
+            }
+            actionButton.onclick = function () {
+                if (typeof v !== "object" || v === null) {
+                    v = {};
+                }
+                if (v.hasOwnProperty(p)) {
+                    delete v[p];
+                } else {
+                    v[p] = null;
+                }
+                renderingBean.setValue(v);
+            };
+            schemas.utils.appendChild(actionButton, document.createTextNode(txt), renderingBean);
+            schemas.utils.appendChild(td2, actionButton, renderingBean);
+            var td3 = document.createElement("td");
+            td3.className = "prop-value";
             schemas.utils.appendChild(tr, td1, renderingBean);
+            schemas.utils.appendChild(tr, td2, renderingBean);
+            schemas.utils.appendChild(tr, td3, renderingBean);
             tr.propertyName = p;
             var name = p;
 
             schemas.utils.appendChild(td1, document.createTextNode(name), renderingBean);
-            schemas.utils.appendChild(tr, td2, renderingBean);
             childContainers[renderingBean.id + "." + p] = {};
-            childContainers[renderingBean.id + "." + p][renderingBean.schemaId + "." + p] = td2;
-            schemas.utils.appendChild(table, tr, renderingBean);
-        }
-
-        function renderPatternProperty(p, schemaId) {
-            var tr = document.createElement("tr");
-            var td1 = document.createElement("td");
-            td1.className = "prop-name";
-            var td2 = document.createElement("td");
-            td2.className = "prop-value";
-            schemas.utils.appendChild(tr, td1, renderingBean);
-            tr.propertyName = p;
-            schemas.utils.appendChild(td1, document.createTextNode(p), renderingBean);
-            var removeButton = document.createElement("button");
-            removeButton.setAttribute('type', 'button');
-            removeButton.className = "remove";
-            removeButton.onclick = function () {
-                var v = renderingBean.getValue();
-                delete v[p];
-                renderingBean.setValue(v);
-            };
-            schemas.utils.appendChild(removeButton, document.createTextNode("x"), renderingBean);
-            schemas.utils.appendChild(td1, removeButton, renderingBean);
-            schemas.utils.appendChild(tr, td2, renderingBean);
-            childContainers[renderingBean.id + "." + p] = {};
-            childContainers[renderingBean.id + "." + p][schemaId] = td2;
+            childContainers[renderingBean.id + "." + p][schemaId] = td3;
             schemas.utils.appendChild(table, tr, renderingBean);
         }
     }
