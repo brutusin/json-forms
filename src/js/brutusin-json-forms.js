@@ -177,7 +177,6 @@ if (typeof brutusin === "undefined") {
             } else if (s.media) {
                 input = document.createElement("input");
                 input.type = "file";
-                appendChild(input, option, s);
                 // XXX TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
@@ -345,8 +344,8 @@ if (typeof brutusin === "undefined") {
             if (s.required) {
                 input = document.createElement("input");
                 input.type = "checkbox";
-                if (value === true) {
-                    input.checked = true;
+                if (value === true || value !== false && s.default) {
+                    input.checked = true;    
                 }
             } else {
                 input = document.createElement("select");
@@ -747,6 +746,7 @@ if (typeof brutusin === "undefined") {
             if (s.readOnly)
                 addButton.disabled = true;
             addButton.setAttribute('type', 'button');
+            addButton.className = "addItem";
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
                     return BrutusinForms.messages["minItems"].format(s.minItems);
