@@ -222,6 +222,10 @@ if (typeof brutusin === "undefined") {
                         // #46, problem in IE11. TODO polyfill?
                         input.type = "text";
                     }
+                } else if (s.format === "date") {
+                    input.type = "date";
+                } else if (s.format === "time") {
+                    input.type = "time";
                 } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
