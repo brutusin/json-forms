@@ -9,7 +9,7 @@ if ("undefined" === typeof brutusin || "undefined" === typeof brutusin["schemas"
     schemas.utils.i18n.setTranslations("es", "ES", {
         "error": "Error de validación",
         "error.type": "Tipo inválido '{1}', esperado '{0}'",
-        "error.required": "Este campo es obligatorio",
+        "error.required": "El campo '{0}' es obligatorio",
         "error.enum": "Valor inválido",
         "error.minItems": "Se requiere un mínimo de `{0}` elementos",
         "error.maxItems": "Se admiten a lo sumo `{0}` elementos",

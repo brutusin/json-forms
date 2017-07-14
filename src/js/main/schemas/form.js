@@ -46,4 +46,8 @@ schemas.Form = function (parentNode) {
         }
         return ret;
     };
+
+    this.getContainers = function (id) {
+        return gb.getContainers(id);
+    };
 };

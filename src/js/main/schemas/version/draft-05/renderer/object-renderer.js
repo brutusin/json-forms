@@ -65,6 +65,9 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean) {
                     return;
                 }
                 var v = renderingBean.getValue();
+                if (typeof v !== "object" || v === null) {
+                    v = {};
+                }
                 if (renderingBean.getSchema().properties && renderingBean.getSchema().properties.hasOwnProperty(propName) || v.hasOwnProperty(propName)) {
                     return;
                 }
@@ -100,6 +103,7 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean) {
 
         function renderProperty(p) {
             var schemaId = renderingBean.schemaId + "." + p;
+            var ignoreTitle = false;
 
             if (!renderingBean.getSchema().properties || !renderingBean.getSchema().properties.hasOwnProperty(p)) {
                 if (renderingBean.getSchema().patternProperties) {
@@ -110,13 +114,21 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean) {
                         var r = RegExp(pat);
                         if (p.search(r) !== -1) {
                             schemaId = renderingBean.getSchema().patternProperties[pat];
+                            ignoreTitle = true;
                             break;
                         }
                     }
                 } else if (renderingBean.getSchema().additionalProperties) {
                     schemaId = renderingBean.schemaId + "[*]";
+                    ignoreTitle = true;
                 }
             }
+            var propertySchema = renderingBean.getSchema(schemaId);
+            var name = p;
+            if (!ignoreTitle && propertySchema.title) {
+                name = propertySchema.title;
+            }
+            name += ":";
 
             var tr = document.createElement("tr");
             var td1 = document.createElement("td");
@@ -151,9 +163,12 @@ schemas.version["draft-05"].ObjectRenderer = function (renderingBean) {
             schemas.utils.appendChild(tr, td2, renderingBean);
             schemas.utils.appendChild(tr, td3, renderingBean);
             tr.propertyName = p;
-            var name = p;
-
             schemas.utils.appendChild(td1, document.createTextNode(name), renderingBean);
+            if (Array.isArray(renderingBean.getSchema().required) && renderingBean.getSchema().required.includes(p)) {
+                var sup = document.createElement("sup");
+                schemas.utils.appendChild(sup, document.createTextNode("*"), renderingBean);
+                schemas.utils.appendChild(td1, sup, renderingBean);
+            }
             childContainers[renderingBean.id + "." + p] = {};
             childContainers[renderingBean.id + "." + p][schemaId] = td3;
             schemas.utils.appendChild(table, tr, renderingBean);

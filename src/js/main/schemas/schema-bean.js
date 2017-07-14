@@ -17,7 +17,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
     this.schema = schemaResolver.getSubSchema(schemaId);
     var version = schemas.version.getVersion(instance.schema);
     var validator = schemas.version[version].validator;
-    
+
     var children = {};
     var valueListeners = [];
     var schemaListeners = [];
@@ -149,15 +149,19 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                 var childId = id + childRelativeId;
                 var childSchemaId = schemaId + childRelativeSchemaId;
                 var child = removeChild(children, childId, childSchemaId);
+                var withInitialValue = false;
                 if (!child) {
                     child = new schemas.SchemaBean(schemaResolver, childId, childSchemaId);
                     child.addValueListener(childValueListener);
                     if (child.getValue() !== null) {
+                        withInitialValue = true;
                         newlyCreatedWithInitialValues.push(child);
                     }
                 }
                 setChild(child, newChildren, childId, childSchemaId);
-                child.setValue(childValue);
+                if (!withInitialValue || childValue !== null) {
+                    child.setValue(childValue);
+                }
             });
             dispose(children);
             children = newChildren;
@@ -225,7 +229,7 @@ schemas.SchemaBean = function (schemaResolver, id, schemaId) {
                             if (!ret[p]) {
                                 ret[p] = [];
                             }
-                            for(var i=0;i<childErrors[p].length;i++){
+                            for (var i = 0; i < childErrors[p].length; i++) {
                                 ret[p].push(childErrors[p][i]);
                             }
                         }

@@ -13,7 +13,7 @@ schemas.version["draft-05"].SimpleRenderer = function (renderingBean) {
     if (renderingBean.getValue()) {
         input.setValue(renderingBean.getValue());
     }
-    
+
     input.onchange = function () {
         changedExternally = false;
         renderingBean.setValue(getInputValue(renderingBean.getSchema(), input));
@@ -25,7 +25,7 @@ schemas.version["draft-05"].SimpleRenderer = function (renderingBean) {
             input.setValue(value);
         }
     };
-    
+
     this.getRootNode = function () {
         return input;
     };

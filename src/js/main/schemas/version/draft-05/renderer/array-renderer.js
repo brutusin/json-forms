@@ -9,13 +9,16 @@ schemas.version["draft-05"].ArrayRenderer = function (renderingBean) {
 
     var childContainers;
     var rootNode;
+    var removeButtons;
+    var addButton;
 
     function refresh() {
         childContainers = {};
+        removeButtons = [];
         rootNode = document.createElement("div");
         var table = document.createElement("table");
         table.className = "array";
-        var addButton = document.createElement("button");
+        addButton = document.createElement("button");
         if (renderingBean.getSchema().readOnly) {
             addButton.disabled = true;
         }
@@ -54,6 +57,7 @@ schemas.version["draft-05"].ArrayRenderer = function (renderingBean) {
             if (renderingBean.getSchema().readOnly === true) {
                 removeButton.disabled = true;
             }
+            removeButtons.push(removeButton);
             schemas.utils.appendChild(removeButton, document.createTextNode("x"), renderingBean);
             childContainers[renderingBean.id + "[" + i + "]"] = {};
             childContainers[renderingBean.id + "[" + i + "]"][renderingBean.schemaId + "[#]"] = td3;

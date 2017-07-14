@@ -113,7 +113,6 @@ schemas.GraphicBean = function (schemaBean) {
         schemaBean.addSchemaListener(listener);
     };
 
-   
     this.removeSchemaListener = function (listener) {
         schemaBean.removeSchemaListener(listener);
     };
@@ -122,9 +121,30 @@ schemas.GraphicBean = function (schemaBean) {
         schemaBean.addDisposeListener(listener);
     };
 
-    
+
     this.removeDisposeListener = function (listener) {
         schemaBean.removeDisposeListener(listener);
+    };
+
+    this.getContainers = function (id) {
+
+        if (id === this.id) {
+            return [container];
+        } else if (id.startsWith(this.id)) {
+            var containers = [];
+            for (var childrenId in children) {
+                if (id.startsWith(childrenId)) {
+                    for (var childrenSchemaId in children[childrenId]) {
+                        var cons = children[childrenId][childrenSchemaId].getContainers(id);
+                        for (var i = 0; i < cons.length; i++) {
+                            containers.push(cons[i]);
+                        }
+                    }
+                }
+            }
+            return containers;
+        }
+
     };
 
     refreshRenderer();
@@ -138,5 +158,4 @@ schemas.GraphicBean = function (schemaBean) {
     schemaBean.addDisposeListener(function () {
         schemas.utils.cleanNode(container);
     });
-
 };

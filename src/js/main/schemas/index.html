@@ -2,6 +2,7 @@
 <script src="../pollyfills.js"></script>
 <script>
     var schemas = {};
+    var brutusin = {schemas:schemas};
 </script>
 <script src="schema-resolver.js"></script>
 <script src="schema-bean.js"></script>
@@ -29,48 +30,49 @@
 <script src="version/draft-05/renderer/renderer-factory.js"></script>
 <script src="version/draft-05/renderer/object-renderer.js"></script>
 <script src="version/draft-05/renderer/oneof-renderer.js"></script>
+<script src="../../addon/i18n/brutusin-json-forms-lan-en_GB.js"></script>
 
 <form class="brutusin-form" id="f"></form>
 <script>
     var schema1 = {"type": "object", "patternProperties": {"^ref_.*": {"type": "number"}, "^b_.*": {"type": "boolean"}}, "properties": {"number": {"type": "integer"}, "name": {"type": "string"}}};
-    var schemaResolver1 = new schemas.SchemaResolver;
-    schemaResolver1.updateFrom(schema1);
+//    var schemaResolver1 = new schemas.SchemaResolver;
+//    schemaResolver1.updateFrom(schema1);
 
-    var schema2 = {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "required": ["pageNum"], "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems": true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}};
-    var schemaResolver2 = new schemas.SchemaResolver;
-    schemaResolver2.updateFrom(schema2);
+    var schema2 = {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "required": ["pageNum", "selectedFacetValues"], "properties": {"pageNum": {"type": "integer", "title": "Page number", "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details", "default": 1, "required": true}, "pageSize": {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]}, "selectedFacetValues": {"type": "array", "title": "Query terms", "minItems": 2, "uniqueItems": true, "items": {"description": "Query item", "type": "object", "properties": {"facetName": {"type": "string", "title": "Field name", "description": "Indexed field name", "required": true}, "matchAllNull": {"type": "boolean", "title": "Match nulls"}, "matchAllNotNull": {"type": "boolean", "title": "Match not nulls"}, "facetValues": {"type": "array", "title": "Field values", "items": {"type": "object", "properties": {"value": {"type": "string", "title": "Value"}}}}, "included": {"type": "boolean", "title": "Included"}}}}, "sorts": {"type": "array", "title": "Sorting", "items": {"type": "object", "properties": {"fieldName": {"type": "string", "title": "Field name"}, "ascending": {"type": "boolean", "title": "Ascending"}}}}}};
+//    var schemaResolver2 = new schemas.SchemaResolver;
+//    schemaResolver2.updateFrom(schema2);
 
     var schema3 = {"type": "array", "additionalItems": true, "items": [{"type": "number"}, {"type": "string"}, {"type": "string", "enum": ["Street", "Avenue", "Boulevard"]}, {"type": "string", "enum": ["NW", "NE", "SW", "SE"]}]};
-    var schemaResolver3 = new schemas.SchemaResolver;
-    schemaResolver3.updateFrom(schema3);
+//    var schemaResolver3 = new schemas.SchemaResolver;
+//    schemaResolver3.updateFrom(schema3);
 
     var schema4 = {"$schema": "http://json-schema.org/draft-03/schema#", "oneOf": [{"type": "number", "required": true, "multipleOf": 3, "title": "A multiple of 3"}, {"title": "An object", "type": "object", "properties": {"p1": {"type": "string", "required": true, "title": "A required string"}, "p2": {"type": "boolean", "title": "A boolean"}}}]};
-    var schemaResolver4 = new schemas.SchemaResolver;
-    schemaResolver4.updateFrom(schema4);
+//    var schemaResolver4 = new schemas.SchemaResolver;
+//    schemaResolver4.updateFrom(schema4);
 
     var schema5 = {"definitions": {"address": {"type": "object", "properties": {"street_address": {"type": "string"}, "city": {"type": "string"}, "state": {"type": "string"}}, "required": ["street_address", "city", "state"]}}, "$ref": "#/definitions/address"};
-    var schemaResolver5 = new schemas.SchemaResolver;
-    schemaResolver5.updateFrom(schema5);
+//    var schemaResolver5 = new schemas.SchemaResolver;
+//    schemaResolver5.updateFrom(schema5);
 
     var schema6 = {"type": "integer", "title": "Page size", "description": "Number of records per page", "required": true, "default": 50, "enum": [10, 25, 50, 100]};
-    var schemaResolver6 = new schemas.SchemaResolver;
-    schemaResolver6.updateFrom(schema6);
+//    var schemaResolver6 = new schemas.SchemaResolver;
+//    schemaResolver6.updateFrom(schema6);
 
     var schema7 =  {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"prop1": {"type": "string", "title": "A short string", "description": "A short string property whose input is rendered as `input`"}, "prop2": {"type": "string", "title": "A long text", "format": "text", "description": "A long text property whose input is rendered as `textarea`"}}}   ;
-    var schemaResolver7 = new schemas.SchemaResolver;
-    schemaResolver7.updateFrom(schema7);
+//    var schemaResolver7 = new schemas.SchemaResolver;
+//    schemaResolver7.updateFrom(schema7);
 
     var schema8 =  {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"s1": {"type": "string"}, "s2": {"type": "string", "readOnly": true}, "a1": {"type": "array", "items": {"type": "string"}}, "a2": {"type": "array", "items": {"type": "string"}, "readOnly": true}}};
-    var schemaResolver8 = new schemas.SchemaResolver;
-    schemaResolver8.updateFrom(schema8);
+//    var schemaResolver8 = new schemas.SchemaResolver;
+//    schemaResolver8.updateFrom(schema8);
     
     var schema9 = {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"fixed":{"description":"Object supporting schema-fixed additional properties","type":"object","maxProperties":2,"additionalProperties":{"description":"Fixed-schema additional property","type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer"}}}},"free":{"description":"Object supporting schema-free additional properties","type":"object","maxProperties":3,"additionalProperties":true}}};
-        var schemaResolver9 = new schemas.SchemaResolver;
-    schemaResolver9.updateFrom(schema9);
+//        var schemaResolver9 = new schemas.SchemaResolver;
+//    schemaResolver9.updateFrom(schema9);
     
     var schema10 = {"$schema":"http://json-schema.org/draft-03/schema#","oneOf":[{"type":"string","format":"email"},{"title":"An object","type":"object","properties":{"p1":{"type":"string","required":true,"title":"A required string"},"p2":{"type":"boolean","title":"A boolean"}}}]};
-     var schemaResolver10 = new schemas.SchemaResolver;
-    schemaResolver10.updateFrom(schema10);
+//     var schemaResolver10 = new schemas.SchemaResolver;
+//    schemaResolver10.updateFrom(schema10);
 
 //    var sv1 = new schemas.SchemaBean(schemaResolver1);
 //    var sv2 = new schemas.SchemaBean(schemaResolver2);
@@ -84,6 +86,6 @@
 //    var sv10 = new schemas.SchemaBean(schemaResolver10);
 
     var form = new schemas.Form(document.getElementById("f"));
-    form.setSchema(schema1);
+    form.setSchema(schema2);
 
 </script>
