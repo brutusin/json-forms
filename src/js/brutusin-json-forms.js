@@ -831,8 +831,8 @@ if (typeof brutusin === "undefined") {
 
         obj.getData = function () {
             function removeEmptiesAndNulls(object, s) {
-                if (ss === null) {
-                    ss = SCHEMA_ANY;
+                if (s === null) {
+                    s = SCHEMA_ANY;
                 }
                 if (s.$ref) {
                     s = getDefinition(s.$ref);
