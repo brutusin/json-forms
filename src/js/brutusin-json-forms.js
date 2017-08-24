@@ -204,7 +204,7 @@ if (typeof brutusin === "undefined") {
                     }
                 }
                 if (s.enum.length === 1)
-                    input.selectedIndex = 1;
+                    input.selectedIndex = 0;
                 else
                     input.selectedIndex = selectedIndex;
             } else {
