@@ -1311,7 +1311,7 @@ if (typeof brutusin === "undefined") {
 
         function cleanSchemaMap(schemaId) {
             for (var prop in schemaMap) {
-                if (schemaId.startsWith(prop)) {
+                if (prop.startsWith(schemaId)) {
                     delete schemaMap[prop];
                 }
             }
