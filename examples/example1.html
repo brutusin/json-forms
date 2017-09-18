@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="ISO-8859-1">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../dist/css/brutusin-json-forms.min.css">
+
+        <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="../dist/js/brutusin-json-forms.js"></script>
+        <script type="text/javascript" charset="utf8" src="../dist/js/brutusin-json-forms-bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div id="formDialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title pull-left"></h4>
+                        <div class="btn-toolbar pull-right formDialogControlsGroup">
+                            <button type="button" class="btn btn-sm btn-warning" id="formDialogCancel" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="formDialogBody" class="modal-body">
+                        <div id="formDialogContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        $(document).ready(function() {
+            var formSchema = {
+				"$schema": "http://json-schema.org/draft-03/schema#",
+				"type": "object",
+				"properties": {
+					"speciesList": {
+						"type": "array",
+						"title": "List of species",
+						"items": {
+							"type": "object",
+							"properties": {
+								"species": {
+									"title": "Species supported",
+									"description": "Changes in this property (`$.speciesList[#].species`) trigger the resolution of the actual (depending on the values being selected) schema of a dependent property (`$.speciesList[#].subspecies`)",
+									"type": "string",
+									"enum": [
+										"human",
+										"dog",
+										"cat"
+									],
+									"required": true
+								},
+								"subspecies": {
+									"dependsOn": [
+										"species"
+									]
+								}
+							}
+						}
+					}
+				}
+			};
+
+            var BrutusinForms = brutusin["json-forms"];
+            var schemaResolver = function(names, data, cb) {
+				var schemas = new Object();
+				var schema = new Object();
+				var idx = data.speciesList.length - 1;
+			  
+				if (data.speciesList[idx].species === "human") {
+					schema.type = "null"; // no such property for humans
+				} else {
+					schema.type = "string";
+					if (data.speciesList[idx].species === "dog") {
+						schema.title = "Dog breed";
+						schema.enum = ["bulldog", "labrador"]
+					} else {
+						schema.title = "Cat breed";
+						schema.enum = ["siamese", "persian"]
+					}
+				}
+				schemas["$.speciesList[#].subspecies"] = schema;
+				setTimeout(function(){cb(schemas)},500); // in order to show asynchrony
+			};
+
+            var form =  BrutusinForms.create(formSchema);
+            form.schemaResolver = schemaResolver;
+
+            form.render(document.getElementById("formDialogContainer"));
+
+            var dialog = $("#formDialog");
+            dialog.modal();
+         });
+    </script>
+</html>
