@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="ISO-8859-1">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../dist/css/brutusin-json-forms.min.css">
+
+        <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="../dist/js/brutusin-json-forms.js"></script>
+        <script type="text/javascript" charset="utf8" src="../dist/js/brutusin-json-forms-bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div id="formDialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title pull-left"></h4>
+                        <div class="btn-toolbar pull-right formDialogControlsGroup">
+                            <button type="button" class="btn btn-sm btn-warning" id="formDialogCancel" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="formDialogBody" class="modal-body">
+                        <div id="formDialogContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        $(document).ready(function() {
+            var formSchema = {
+                "$schema": "http://json-schema.org/draft-03/schema#",
+                "type": "object",
+                "definitions": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "required": true,
+                        "pattern": "^[A-Za-z][0-9a-zA-Z-_ ]{7,}$",
+                        "description": "Mandatory alphanumeric starting with an alphabet. Space, hyphen and underscore allowed. Min length: 8"
+                    },
+                    "options": {
+                        "type": "string",
+                        "title": "Options",
+                        "required": true,
+						"enum": ["OPTION-1", "OPTION-2", "OPTION-3"],
+                        "description": "Mandatory option"
+                    },
+                    "level2Array": {
+                        "type": "array",
+                        "title": "Level-2 Array",
+                        "description": "List of Level-2 items",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "$ref": "#/definitions/name"
+                                },
+                            },
+                        },
+                    },
+                },
+                "properties": {
+                    "name": {
+                        "$ref": "#/definitions/name"
+                    },
+                    "level1Array": {
+                        "type": "array",
+                        "title": "Level-1 Array",
+                        "description": "List of Level-1 items",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "option": {
+                                    "$ref": "#/definitions/options"
+                                },
+                                "level2Array": {
+                                    "dependsOn": [ "option" ]
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+
+            var BrutusinForms = brutusin["json-forms"];
+            var schemaResolver = function(names, data, cb) {
+                var schemas = new Object();
+                var schema = { "$ref": "#/definitions/level2Array" };
+                var optIdx;
+
+				if(data && data.level1Array && data.level1Array.length) {
+					optIdx = data.level1Array.length-1;
+					if(data.level1Array[optIdx].option !== "OPTION-1") {
+						schema = { type: "null" };
+					}
+				}
+
+                schemas["$.level1Array[#].level2Array"] = schema;
+                setTimeout(function(){cb(schemas)},500);
+            };
+
+            var form =  BrutusinForms.create(formSchema);
+            form.schemaResolver = schemaResolver;
+
+            form.render(document.getElementById("formDialogContainer"));
+
+            var dialog = $("#formDialog");
+            dialog.modal();
+         });
+    </script>
+</html>

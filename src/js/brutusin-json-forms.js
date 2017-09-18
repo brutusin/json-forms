@@ -177,6 +177,7 @@ if (typeof brutusin === "undefined") {
             } else if (s.media) {
                 input = document.createElement("input");
                 input.type = "file";
+                appendChild(input, option, s);
                 // XXX TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
@@ -204,7 +205,7 @@ if (typeof brutusin === "undefined") {
                     }
                 }
                 if (s.enum.length === 1)
-                    input.selectedIndex = 0;
+                    input.selectedIndex = 1;
                 else
                     input.selectedIndex = selectedIndex;
             } else {
@@ -222,10 +223,6 @@ if (typeof brutusin === "undefined") {
                         // #46, problem in IE11. TODO polyfill?
                         input.type = "text";
                     }
-                } else if (s.format === "date") {
-                    input.type = "date";
-                } else if (s.format === "time") {
-                    input.type = "time";
                 } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
@@ -750,7 +747,6 @@ if (typeof brutusin === "undefined") {
             if (s.readOnly)
                 addButton.disabled = true;
             addButton.setAttribute('type', 'button');
-            addButton.className = "addItem";
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
                     return BrutusinForms.messages["minItems"].format(s.minItems);
@@ -1311,7 +1307,7 @@ if (typeof brutusin === "undefined") {
 
         function cleanSchemaMap(schemaId) {
             for (var prop in schemaMap) {
-                if (prop.startsWith(schemaId)) {
+                if (prop.startsWith(schemaId)) { // 02_AddLevel1Item_Delete_AgainAdd.png
                     delete schemaMap[prop];
                 }
             }

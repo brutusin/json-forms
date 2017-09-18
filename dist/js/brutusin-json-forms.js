@@ -827,8 +827,8 @@ if (typeof brutusin === "undefined") {
 
         obj.getData = function () {
             function removeEmptiesAndNulls(object, s) {
-                if (ss === null) {
-                    ss = SCHEMA_ANY;
+                if (!s) { // 03_AddLevel2Item_SelectOPTION-2.png
+                    s = SCHEMA_ANY; // 03_AddLevel2Item_SelectOPTION-2.png
                 }
                 if (s.$ref) {
                     s = getDefinition(s.$ref);
@@ -1307,7 +1307,7 @@ if (typeof brutusin === "undefined") {
 
         function cleanSchemaMap(schemaId) {
             for (var prop in schemaMap) {
-                if (schemaId.startsWith(prop)) {
+                if (prop.startsWith(schemaId)) { // 02_AddLevel1Item_Delete_AgainAdd.png
                     delete schemaMap[prop];
                 }
             }
@@ -1409,7 +1409,7 @@ if (typeof brutusin === "undefined") {
                             throw ("Node '" + name + "' is of type array");
                         }
                         var element = currentToken.substring(1, currentToken.length - 1);
-                        if (element.equals("#")) {
+                        if (element === "#") { // 01_elementEquals.png
                             for (var i = 0; i < data.length; i++) {
                                 var child = data[i];
                                 visit(name + currentToken, queue.slice(0), child, data, i);
