@@ -834,7 +834,7 @@ if (typeof brutusin === "undefined") {
                 if (s === null) {
                     s = SCHEMA_ANY;
                 }
-                if (s.$ref) {
+                if (s && s.$ref) {
                     s = getDefinition(s.$ref);
                 }
                 if (object instanceof Array) {
@@ -856,15 +856,15 @@ if (typeof brutusin === "undefined") {
                             continue;
                         }
                         var ss = null;
-                        if (s.hasOwnProperty("properties") && s.properties.hasOwnProperty(prop)) {
+                        if (s && s.hasOwnProperty("properties") && s.properties.hasOwnProperty(prop)) {
                             ss = s.properties[prop];
                         }
-                        if (ss === null && s.hasOwnProperty("additionalProperties")) {
+                        if (ss === null && s && s.hasOwnProperty("additionalProperties")) {
                             if (typeof s.additionalProperties === 'object') {
                                 ss = s.additionalProperties;
                             }
                         }
-                        if (ss === null && s.hasOwnProperty("patternProperties")) {
+                        if (ss === null && s && s.hasOwnProperty("patternProperties")) {
                             for (var p in s.patternProperties) {
                                 var r = RegExp(p);
                                 if (prop.search(r) !== -1) {
@@ -879,7 +879,7 @@ if (typeof brutusin === "undefined") {
                             nonEmpty = true;
                         }
                     }
-                    if (nonEmpty || s.required) {
+                    if (nonEmpty || s && s.required) {
                         return clone;
                     } else {
                         return null;
@@ -1346,7 +1346,7 @@ if (typeof brutusin === "undefined") {
                 BrutusinForms.onResolutionFinished(source);
             };
             BrutusinForms.onResolutionStarted(source);
-            obj.schemaResolver(arr, obj.getData(), cb);
+            obj.schemaResolver(arr, obj.getData(), cb, source);
 
 
         }
