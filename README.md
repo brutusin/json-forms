@@ -8,6 +8,7 @@
 > I am currently not having time to maintain this project, so first of all my apologies if some issues have been unresponded.
 Branch v2 contains a completely new rearchitecture of the project, that I started several months ago but left unfinished. If someone is interested in continuing my work I will be happy to guide them
 
+---
 **Table of Contents:** 
 
 - [org.brutusin:json-forms](#)
