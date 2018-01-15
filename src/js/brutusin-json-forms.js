@@ -190,11 +190,25 @@ if (typeof brutusin === "undefined") {
                 var selectedIndex = 0;
                 for (var i = 0; i < s.enum.length; i++) {
                     var option = document.createElement("option");
-                    var textNode = document.createTextNode(s.enum[i]);
-                    option.value = s.enum[i];
+                    
+                    var optionText = undefined;
+                    var optionValue = undefined;
+                    if( typeof s.enum[i] === 'object'){
+                        optionText = s.enum[i]['text'];
+                        optionValue = s.enum[i]['value'];
+                    }
+                    optionText = optionText !== undefined ? optionText : s.enum[i];
+                    optionValue = optionValue !== undefined ? optionValue : optionText;
+                    
+                    // var textNode = document.createTextNode(s.enum[i]);
+                    // option.value = s.enum[i];
+                    var textNode = document.createTextNode(optionText);
+                    option.value = optionValue;
+                    
                     appendChild(option, textNode, s);
                     appendChild(input, option, s);
-                    if (value && s.enum[i] === value) {
+                    // if (value && s.enum[i] === value) {
+                    if (value && optionValue === value) {
                         selectedIndex = i;
                         if (!s.required) {
                             selectedIndex++;
