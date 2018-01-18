@@ -1649,8 +1649,11 @@ if (typeof brutusin === "undefined") {
             // Render new appended properties
             if( newAppendedPropSchemaId !== undefined ) {
                 var rendered = [];
-                var value = tbody.getRootNode() === document ? data : initialValue;
-                
+                var value = tbody.getRootNode() !== document && initialValue ? initialValue : data;
+                if( !value ){
+                    value = {};
+                    value[dependsOnProp] = newValue;
+                }
                 for( var p in schemaMap[newAppendedPropSchemaId] ) {
                     if( ( parentSchema.properties && parentSchema.properties.hasOwnProperty(p) ) || rendered.indexOf(p) >= 0){
                         continue;
