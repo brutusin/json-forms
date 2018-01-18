@@ -132,7 +132,6 @@ if (typeof brutusin === "undefined") {
         var schemaMap = new Object();
         var dependencyMap = new Object();
         var renderInfoMap = new Object();
-        var appendedPropertiesDependencies = [];
         var container;
         var data;
         var error;
@@ -1102,10 +1101,6 @@ if (typeof brutusin === "undefined") {
                     var dependsOnProp = schema.appendedProperties.dependsOn;
                     var appendix = schema.appendedProperties.appendix;
                     
-                    if(appendedPropertiesDependencies.indexOf(name + '.' + dependsOnProp) === -1){
-                        appendedPropertiesDependencies.push(name + '.' + dependsOnProp);
-                    }
-                    
                     for (var option in appendix) {
                         var optionSchemaId = name + "{" + dependsOnProp + "}" + "[\'" + option + "\']";
                         pseudoSchema.appendedProperties[option] = optionSchemaId;
@@ -1650,10 +1645,12 @@ if (typeof brutusin === "undefined") {
             if( newAppendedPropSchemaId !== undefined ) {
                 var rendered = [];
                 var value = tbody.getRootNode() !== document && initialValue ? initialValue : data;
+                
                 if( !value ){
                     value = {};
                     value[dependsOnProp] = newValue;
                 }
+                
                 // data = value;
                 for( var p in schemaMap[newAppendedPropSchemaId] ) {
                     if( ( parentSchema.properties && parentSchema.properties.hasOwnProperty(p) ) || rendered.indexOf(p) >= 0){
