@@ -1654,12 +1654,13 @@ if (typeof brutusin === "undefined") {
                     value = {};
                     value[dependsOnProp] = newValue;
                 }
+                // data = value;
                 for( var p in schemaMap[newAppendedPropSchemaId] ) {
                     if( ( parentSchema.properties && parentSchema.properties.hasOwnProperty(p) ) || rendered.indexOf(p) >= 0){
                         continue;
                     }
                     
-                    appendProperty(value, tbody, newAppendedPropSchemaId + "." + p , p, value[p]);
+                    appendProperty(data, tbody, newAppendedPropSchemaId + "." + p , p, value[p]);
                     rendered.push(p);
                 }
             }
