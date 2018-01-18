@@ -1107,7 +1107,7 @@ if (typeof brutusin === "undefined") {
                     }
                     
                     for (var option in appendix) {
-                        var optionSchemaId = name + "{" + dependsOnProp + "}" + "[" + option + "]";
+                        var optionSchemaId = name + "{" + dependsOnProp + "}" + "[\'" + option + "\']";
                         pseudoSchema.appendedProperties[option] = optionSchemaId;
                         populateSchemaMap(optionSchemaId, appendix[option]);
                         for (var appendedProp in appendix[option]) {
