@@ -854,7 +854,7 @@ if (typeof brutusin === "undefined") {
                     return clone;
                 } else if (object === "") {
                     return null;
-                } else if (object instanceof Object) {
+                } else if (object instanceof Object && !(object instanceof File)) {
                     var clone = new Object();
                     var nonEmpty = false;
                     for (var prop in object) {
