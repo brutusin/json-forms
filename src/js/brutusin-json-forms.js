@@ -230,12 +230,40 @@ if (typeof brutusin === "undefined") {
                     input.type = "email";
                 } else if (s.format === "text") {
                     input = document.createElement("textarea");
+                } else if (s.format === "htmltext") {
+                    input = document.createElement("textarea");
+                    input.name = "htmltext";
                 } else {
                     input.type = "text";
                 }
                 if (value !== null && typeof value !== "undefined") {
+                    
+                    if (s.format === "date")
+                    {
+                        try
+                        {
+                            var date = new Date(value);
+                            //console.log(date);
+
+                            var year = date.getFullYear(); // This will work as long as year is 1000 or bigger.
+                            var month = date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1;
+                            var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+
+                            input.value = year + "-" + month + "-" + day;
+                            //console.log(input.value);
+                        }
+                        catch(err)
+                        {
+                            console.warn("The date is not valid");
+                            input.value = value;
+                        }
+                    }
+                    else
+                    {
+                        input.value = value;
+                    }
+
                     // readOnly?
-                    input.value = value;
                     if (s.readOnly)
                         input.disabled = true;
 
@@ -338,6 +366,7 @@ if (typeof brutusin === "undefined") {
             input.id = getInputId();
             inputCounter++;
             appendChild(container, input, s);
+
             return parentObject;
         };
 
