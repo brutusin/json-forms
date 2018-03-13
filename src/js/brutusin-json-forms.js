@@ -1241,13 +1241,7 @@ if (typeof brutusin === "undefined") {
         }
 
         function getInitialValue(id) {
-            var ret;
-            try {
-                eval("ret = initialValue" + id.substring(1));
-            } catch (e) {
-                ret = null;
-            }
-            return ret;
+            return initialValue;
         }
 
         function getValue(schema, input) {
