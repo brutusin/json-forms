@@ -1242,10 +1242,10 @@ if (typeof brutusin === "undefined") {
 
         function getInitialValue(id) {
             if(id.substring(1).length) {
-				return null;
-			} else {
-				return initialValue;
-			}
+                return null;
+            } else {
+                return initialValue;
+            }
         }
 
         function getValue(schema, input) {
