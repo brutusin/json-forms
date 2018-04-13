@@ -411,6 +411,11 @@ if (typeof brutusin === "undefined") {
                 var propId = schemaId + "." + i;
                 var ss = getSchema(propId);
                 var textNode = document.createTextNode(ss.title);
+
+                // If there is only 1 option render it by itself
+                if (s.oneOf.length === 1)
+                    return render(null, container, propId, parentObject, propertyProvider, value);
+
                 option.value = s.oneOf[i];
                 appendChild(option, textNode, s);
                 appendChild(input, option, s);
