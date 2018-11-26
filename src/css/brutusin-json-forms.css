@@ -110,3 +110,30 @@ form.brutusin-form .error {
 form.brutusin-form .error-message {
     color: red;
 }
+
+/*
+  Fix icons
+  Glyphicons not supported on Bootstrap 4
+  Using Themify icons
+*/
+
+.glyphicon {
+  font-family: 'themify';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.glyphicon-remove::before {
+  content: "\e605";
+}
+.glyphicon-info-sign::before {
+  content: "\e717";
+}
+.glyphicon-refresh::before {
+  content: "\e619";
+}
