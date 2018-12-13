@@ -194,7 +194,9 @@ if (typeof brutusin === "undefined") {
                     option.value = s.enum[i];
                     appendChild(option, textNode, s);
                     appendChild(input, option, s);
+                    var assignmentMade = false;
                     if (value && s.enum[i] === value) {
+                        assignmentMade = true;
                         selectedIndex = i;
                         if (!s.required) {
                             selectedIndex++;
@@ -203,10 +205,8 @@ if (typeof brutusin === "undefined") {
                             input.disabled = true;
                     }
                 }
-                if (s.enum.length === 1)
-                    input.selectedIndex = 0;
-                else
-                    input.selectedIndex = selectedIndex;
+                input.unableToAssignValue = (value && !assignmentMade);
+                input.selectedIndex = selectedIndex;
             } else {
                 input = document.createElement("input");
                 if (s.type === "integer" || s.type === "number") {
@@ -263,6 +263,10 @@ if (typeof brutusin === "undefined") {
                                 return BrutusinForms.messages["required"];
                             }
                         }
+                        if (input.hasOwnProperty("unableToAssignValue") &&
+                            input.unableToAssignValue) {
+                            return BrutusinForms.messages["invalidValue"];
+                        }
                     } else {
                         if (s.pattern && !s.pattern.test(value)) {
                             return BrutusinForms.messages["pattern"].format(s.pattern.source);
@@ -315,6 +319,11 @@ if (typeof brutusin === "undefined") {
                     data = value;
                 }
                 onDependencyChanged(schemaId, input);
+
+                if (input.hasOwnProperty("unableToAssignValue") && value) {
+                    delete input.unableToAssignValue;
+                    BrutusinForms.onValidationSuccess(input);
+                }
             };
 
             if (s.description) {
