@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 
@@ -161,7 +161,7 @@ if (typeof brutusin === "undefined") {
 
         renderers["string"] = function (container, id, parentObject, propertyProvider, value) {
             /// TODO change the handler for when there is a 'media'
-            /// specifier so it becomes a file element. 
+            /// specifier so it becomes a file element.
             var schemaId = getSchemaId(id);
             var parentId = getParentSchemaId(schemaId);
             var s = getSchema(schemaId);
@@ -194,7 +194,9 @@ if (typeof brutusin === "undefined") {
                     option.value = s.enum[i];
                     appendChild(option, textNode, s);
                     appendChild(input, option, s);
+                    var assignmentMade = false;
                     if (value && s.enum[i] === value) {
+                        assignmentMade = true;
                         selectedIndex = i;
                         if (!s.required) {
                             selectedIndex++;
@@ -203,10 +205,8 @@ if (typeof brutusin === "undefined") {
                             input.disabled = true;
                     }
                 }
-                if (s.enum.length === 1)
-                    input.selectedIndex = 0;
-                else
-                    input.selectedIndex = selectedIndex;
+                input.unableToAssignValue = (value && !assignmentMade);
+                input.selectedIndex = selectedIndex;
             } else {
                 input = document.createElement("input");
                 if (s.type === "integer" || s.type === "number") {
@@ -263,6 +263,10 @@ if (typeof brutusin === "undefined") {
                                 return BrutusinForms.messages["required"];
                             }
                         }
+                        if (input.hasOwnProperty("unableToAssignValue") &&
+                            input.unableToAssignValue) {
+                            return BrutusinForms.messages["invalidValue"];
+                        }
                     } else {
                         if (s.pattern && !s.pattern.test(value)) {
                             return BrutusinForms.messages["pattern"].format(s.pattern.source);
@@ -315,6 +319,11 @@ if (typeof brutusin === "undefined") {
                     data = value;
                 }
                 onDependencyChanged(schemaId, input);
+
+                if (input.hasOwnProperty("unableToAssignValue") && value) {
+                    delete input.unableToAssignValue;
+                    BrutusinForms.onValidationSuccess(input);
+                }
             };
 
             if (s.description) {
@@ -327,7 +336,7 @@ if (typeof brutusin === "undefined") {
 //        if (s.required) {
 //            input.required = true;
 //        }
-//       
+//
 //        if (s.minimum) {
 //            input.min = s.minimum;
 //        }
@@ -349,7 +358,7 @@ if (typeof brutusin === "undefined") {
                 input = document.createElement("input");
                 input.type = "checkbox";
                 if (value === true || value !== false && s.default) {
-                    input.checked = true;    
+                    input.checked = true;
                 }
             } else {
                 input = document.createElement("select");
@@ -436,6 +445,23 @@ if (typeof brutusin === "undefined") {
             appendChild(container, input, s);
             appendChild(container, display, s);
 
+        };
+
+        renderers["allOf"] = function (container, id, parentObject, propertyProvider, value) {
+            var schemaId = getSchemaId(id);
+            var s = getSchema(schemaId);
+            for (var i = 0; i < s.allOf.length; i++) {
+                var propId = schemaId + "." + i;
+                var ss = getSchema(propId);
+                if (!ss.hasOwnProperty("type")) {
+                    if (ss.hasOwnProperty("properties")) {
+                        ss.type = "object";
+                    }
+                }
+                var schemaDiv = document.createElement("div");
+                render(null, schemaDiv, id + "." + i, parentObject, propertyProvider, value);
+                appendChild(container, schemaDiv, ss);
+            }
         };
 
         renderers["object"] = function (container, id, parentObject, propertyProvider, value) {
@@ -978,6 +1004,10 @@ if (typeof brutusin === "undefined") {
                 for (var i in schema.oneOf) {
                     renameRequiredPropeties(schema.oneOf[i]);
                 }
+            } else if (schema.hasOwnProperty("allOf")) {
+                for (i in schema.allOf) {
+                    renameRequiredPropeties(schema.allOf[i]);
+                }
             } else if (schema.hasOwnProperty("$ref")) {
                 var newSchema = getDefinition(schema["$ref"]);
                 renameRequiredPropeties(newSchema);
@@ -996,13 +1026,13 @@ if (typeof brutusin === "undefined") {
                 if (schema.patternProperties) {
                     for (var pat in schema.patternProperties) {
                         var s = schema.patternProperties[pat];
-                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf")) {
+                        if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") || s.hasOwnProperty("oneOf") || s.hasOwnProperty("allOf")) {
                             renameRequiredPropeties(schema.patternProperties[pat]);
                         }
                     }
                 }
                 if (schema.additionalProperties) {
-                    if (schema.additionalProperties.hasOwnProperty("type") || schema.additionalProperties.hasOwnProperty("oneOf")) {
+                    if (schema.additionalProperties.hasOwnProperty("type") || schema.additionalProperties.hasOwnProperty("oneOf") || schema.additionalProperties.hasOwnProperty("allOf")) {
                         renameRequiredPropeties(schema.additionalProperties);
 
                     }
@@ -1026,6 +1056,14 @@ if (typeof brutusin === "undefined") {
                     var childProp = name + "." + i;
                     pseudoSchema.oneOf[i] = childProp;
                     populateSchemaMap(childProp, schema.oneOf[i]);
+                }
+            } else if (schema.hasOwnProperty("allOf")) {
+                pseudoSchema.allOf = new Array();
+                pseudoSchema.type = "allOf";
+                for (i in schema.allOf) {
+                    childProp = name + "." + i;
+                    pseudoSchema.allOf[i] = childProp;
+                    populateSchemaMap(childProp, schema.allOf[i]);
                 }
             } else if (schema.hasOwnProperty("$ref")) {
                 var refSchema = getDefinition(schema["$ref"]);
@@ -1070,7 +1108,7 @@ if (typeof brutusin === "undefined") {
                         var s = schema.patternProperties[pat];
 
                         if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") ||
-                                s.hasOwnProperty("oneOf")) {
+                                s.hasOwnProperty("oneOf") || s.hasOwnProperty("allOf")) {
                             populateSchemaMap(patChildProp, schema.patternProperties[pat]);
                         } else {
                             populateSchemaMap(patChildProp, SCHEMA_ANY);
@@ -1081,7 +1119,8 @@ if (typeof brutusin === "undefined") {
                     var childProp = name + "[*]";
                     pseudoSchema.additionalProperties = childProp;
                     if (schema.additionalProperties.hasOwnProperty("type") ||
-                            schema.additionalProperties.hasOwnProperty("oneOf")) {
+                        schema.additionalProperties.hasOwnProperty("oneOf") ||
+                        schema.additionalProperties.hasOwnProperty("allOf")) {
                         populateSchemaMap(childProp, schema.additionalProperties);
                     } else {
                         populateSchemaMap(childProp, SCHEMA_ANY);
@@ -1099,10 +1138,10 @@ if (typeof brutusin === "undefined") {
                 for (var i = 0; i < schema.dependsOn.length; i++) {
                     if (!schema.dependsOn[i]) {
                         arr[i] = "$";
-                        // Relative cases 
+                        // Relative cases
                     } else if (schema.dependsOn[i].startsWith("$")) {
                         arr[i] = schema.dependsOn[i];
-                        // Relative cases 
+                        // Relative cases
                     } else if (name.endsWith("]")) {
                         arr[i] = name + "." + schema.dependsOn[i];
                     } else {
@@ -1255,7 +1294,7 @@ if (typeof brutusin === "undefined") {
                 return input.getValue();
             }
             var value;
-            
+
             if (input.tagName.toLowerCase() === "select") {
                 value = input.options[input.selectedIndex].value;
             } else {
