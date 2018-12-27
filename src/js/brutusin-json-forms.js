@@ -190,11 +190,25 @@ if (typeof brutusin === "undefined") {
                 var selectedIndex = 0;
                 for (var i = 0; i < s.enum.length; i++) {
                     var option = document.createElement("option");
-                    var textNode = document.createTextNode(s.enum[i]);
-                    option.value = s.enum[i];
+                    
+                    var optionText = undefined;
+                    var optionValue = undefined;
+                    if( typeof s.enum[i] === 'object'){
+                        optionText = s.enum[i]['text'];
+                        optionValue = s.enum[i]['value'];
+                    }
+                    optionText = optionText !== undefined ? optionText : s.enum[i];
+                    optionValue = optionValue !== undefined ? optionValue : optionText;
+                    
+                    // var textNode = document.createTextNode(s.enum[i]);
+                    // option.value = s.enum[i];
+                    var textNode = document.createTextNode(optionText);
+                    option.value = optionValue;
+                    
                     appendChild(option, textNode, s);
                     appendChild(input, option, s);
-                    if (value && s.enum[i] === value) {
+                    // if (value && s.enum[i] === value) {
+                    if (value && optionValue === value) {
                         selectedIndex = i;
                         if (!s.required) {
                             selectedIndex++;
@@ -303,18 +317,20 @@ if (typeof brutusin === "undefined") {
             };
 
             input.onchange = function () {
-                var value;
+                var value, old;
                 try {
                     value = getValue(s, input);
                 } catch (error) {
                     value = null;
                 }
                 if (parentObject) {
+                    old = parentObject[propertyProvider.getValue()];
                     parentObject[propertyProvider.getValue()] = value;
                 } else {
                     data = value;
                 }
                 onDependencyChanged(schemaId, input);
+                renderAppendedProperties(schemaId, old, value);
             };
 
             if (s.description) {
@@ -439,17 +455,7 @@ if (typeof brutusin === "undefined") {
         };
 
         renderers["object"] = function (container, id, parentObject, propertyProvider, value) {
-
-            function createStaticPropertyProvider(propname) {
-                var ret = new Object();
-                ret.getValue = function () {
-                    return propname;
-                };
-                ret.onchange = function (oldName) {
-                };
-                return ret;
-            }
-
+            
             function addAdditionalProperty(current, table, id, name, value, pattern) {
                 var schemaId = getSchemaId(id);
                 var s = getSchema(schemaId);
@@ -848,7 +854,7 @@ if (typeof brutusin === "undefined") {
                     return clone;
                 } else if (object === "") {
                     return null;
-                } else if (object instanceof Object) {
+                } else if (object instanceof Object && !(object instanceof File)) {
                     var clone = new Object();
                     var nonEmpty = false;
                     for (var prop in object) {
@@ -1062,6 +1068,7 @@ if (typeof brutusin === "undefined") {
                         populateSchemaMap(childProp, subSchema);
                     }
                 }
+                
                 if (schema.patternProperties) {
                     pseudoSchema.patternProperties = new Object();
                     for (var pat in schema.patternProperties) {
@@ -1077,6 +1084,7 @@ if (typeof brutusin === "undefined") {
                         }
                     }
                 }
+                
                 if (schema.additionalProperties) {
                     var childProp = name + "[*]";
                     pseudoSchema.additionalProperties = childProp;
@@ -1085,6 +1093,21 @@ if (typeof brutusin === "undefined") {
                         populateSchemaMap(childProp, schema.additionalProperties);
                     } else {
                         populateSchemaMap(childProp, SCHEMA_ANY);
+                    }
+                }
+                
+                if (schema.appendedProperties && schema.appendedProperties.hasOwnProperty("dependsOn") && schema.appendedProperties.hasOwnProperty("appendix")) {
+                    pseudoSchema.appendedProperties = new Object();
+                    var dependsOnProp = schema.appendedProperties.dependsOn;
+                    var appendix = schema.appendedProperties.appendix;
+                    
+                    for (var option in appendix) {
+                        var optionSchemaId = name + "{" + dependsOnProp + "}" + "[\'" + option + "\']";
+                        pseudoSchema.appendedProperties[option] = optionSchemaId;
+                        populateSchemaMap(optionSchemaId, appendix[option]);
+                        for (var appendedProp in appendix[option]) {
+                            populateSchemaMap(optionSchemaId + "." + appendedProp, appendix[option][appendedProp]);
+                        }
                     }
                 }
             } else if (schema.type === "array") {
@@ -1324,11 +1347,10 @@ if (typeof brutusin === "undefined") {
         }
 
         function onDependencyChanged(name, source) {
-
             var arr = dependencyMap[name];
             if (!arr || !obj.schemaResolver) {
                 return;
-            }
+            } 
             var cb = function (schemas) {
                 if (schemas) {
                     for (var id in schemas) {
@@ -1347,8 +1369,6 @@ if (typeof brutusin === "undefined") {
             };
             BrutusinForms.onResolutionStarted(source);
             obj.schemaResolver(arr, obj.getData(), cb);
-
-
         }
 
         function Expression(exp) {
@@ -1406,6 +1426,18 @@ if (typeof brutusin === "undefined") {
                         name = "$";
                         var currentToken = queue.shift();
                     }
+                    
+                    // processing appendedProperties schemaId
+                    if( /^\$\{(.+)\}$/.test(currentToken) ) {
+                        var optionToken = queue.shift();
+                        if( !/^\[(.+)\]$/.test(optionToken) ) {
+                            queue.splice(0,0,optionToken);
+                        } else {
+                            name = currentToken + optionToken;
+                            currentToken = queue.shift();
+                        }
+                    }
+                    
                     if (!currentToken) {
                         visitor(data, parentData, property);
                     } else if (Array.isArray(data)) {
@@ -1524,6 +1556,110 @@ if (typeof brutusin === "undefined") {
                     }
                 }
                 return ret;
+            }
+        }
+
+        function createStaticPropertyProvider(propname) {
+            var ret = new Object();
+            ret.getValue = function () {
+                return propname;
+            };
+            ret.onchange = function (oldName) {
+            };
+            return ret;
+        }
+
+        function appendProperty(current, tbody, id, name, value){
+            var propId = getSchemaId(id);
+            var propSchema = getSchema(propId);
+            if( !propSchema )
+                return;
+            
+            var tr = document.createElement("tr");
+            var td1 = document.createElement("td");
+            td1.className = "prop-name";
+            var td2 = document.createElement("td");
+            td2.className = "prop-value";
+
+            appendChild(tbody, tr, propSchema);
+            appendChild(tr, td1, propSchema);
+            appendChild(tr, td2, propSchema);
+            render(td1, td2, propId, current, createStaticPropertyProvider(name), value);
+        }
+        
+        function renderAppendedProperties(schemaId, oldValue, newValue){
+            var schemaIdRegex = /^(.+)\.(.+)$/;
+            var matches = schemaIdRegex.exec(schemaId);
+            if( !matches ) {
+                return;
+            }
+            
+            var parentSchemaId = matches[1];
+            var dependsOnProp = matches[2];
+            
+            var appendedPropPrefix = parentSchemaId + "{" + dependsOnProp + "}"
+            var parentSchema = getSchema(parentSchemaId);
+            if(!parentSchema || !parentSchema.appendedProperties) {
+                return;
+            }
+            var isAppendedDependency = false;
+            for(var key in parentSchema.appendedProperties) {
+                if(parentSchema.appendedProperties[key].startsWith(appendedPropPrefix)){
+                    isAppendedDependency = true;
+                    break;
+                }
+            }
+            if(!isAppendedDependency){
+                return;
+            }
+            
+            var oldAppendedPropSchemaId = parentSchema.appendedProperties[oldValue];
+            var newAppendedPropSchemaId = parentSchema.appendedProperties[newValue];
+            if( !oldAppendedPropSchemaId && !newAppendedPropSchemaId ) {
+                return;
+            }
+            
+            try {
+                var tbody = renderInfoMap[schemaId].container.parentElement.parentElement;
+                var current = renderInfoMap[schemaId].parentObject;
+            } catch (err) {
+                return;
+            }
+            
+            // Clear old appended properties
+            if( oldAppendedPropSchemaId !== undefined ) {
+                for(var renderInfoKey in renderInfoMap) {
+                    if( renderInfoKey.startsWith(oldAppendedPropSchemaId) ) {
+                        var renderInfo = renderInfoMap[renderInfoKey];
+                        if(renderInfo){
+                            var tr = renderInfo.container.parentElement;
+                            tbody.removeChild(tr);
+                            delete renderInfoMap[renderInfoKey];
+                            cleanData(renderInfoKey);
+                        }
+                    }
+                }
+            }
+            
+            // Render new appended properties
+            if( newAppendedPropSchemaId !== undefined ) {
+                var rendered = [];
+                var value = tbody.getRootNode() !== document && initialValue ? initialValue : data;
+                
+                if( !value ){
+                    value = {};
+                    value[dependsOnProp] = newValue;
+                }
+                
+                // data = value;
+                for( var p in schemaMap[newAppendedPropSchemaId] ) {
+                    if( ( parentSchema.properties && parentSchema.properties.hasOwnProperty(p) ) || rendered.indexOf(p) >= 0){
+                        continue;
+                    }
+                    
+                    appendProperty(data, tbody, newAppendedPropSchemaId + "." + p , p, value[p]);
+                    rendered.push(p);
+                }
             }
         }
     };
