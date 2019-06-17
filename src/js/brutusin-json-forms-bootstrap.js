@@ -130,7 +130,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                 var tagName = element.tagName.toLowerCase();
                 if (tagName === "input" && schema.type === "string" && schema.format === format) {
                     if (inputType) {
-                        element.type = inputType;
+                        element.setAttribute("type", inputType);
                     }
                     if (glyphicon) {
                         var parent = element.parentNode;
