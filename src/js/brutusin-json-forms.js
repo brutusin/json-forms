@@ -827,20 +827,24 @@ if (typeof brutusin === "undefined") {
         };
 
         obj.getData = function () {
-            function removeEmptiesAndNulls(object, s) {
+            function removeEmptiesAndNulls(object, s, id) {
                 if (s === null) {
                     s = SCHEMA_ANY;
                 }
                 if (s.$ref) {
                     s = getDefinition(s.$ref);
                 }
+                if (s.hasOwnProperty('dependsOn')) {
+                  s = getSchema(getSchemaId(id));
+                  return removeEmptiesAndNulls(object, s, id);
+                }
                 if (object instanceof Array) {
-                    if (object.length === 0) {
+                    if (object.length === 0 || !s.hasOwnProperty("items")) {
                         return null;
                     }
                     var clone = new Array();
                     for (var i = 0; i < object.length; i++) {
-                        clone[i] = removeEmptiesAndNulls(object[i], s.items);
+                        clone[i] = removeEmptiesAndNulls(object[i], s.items, id + "[" + i + "]");
                     }
                     return clone;
                 } else if (object === "") {
@@ -870,7 +874,7 @@ if (typeof brutusin === "undefined") {
                                 }
                             }
                         }
-                        var value = removeEmptiesAndNulls(object[prop], ss);
+                        var value = removeEmptiesAndNulls(object[prop], ss, id+"."+prop);
                         if (value !== null) {
                             clone[prop] = value;
                             nonEmpty = true;
@@ -888,7 +892,7 @@ if (typeof brutusin === "undefined") {
             if (!container) {
                 return null;
             } else {
-                return removeEmptiesAndNulls(data, schema);
+                return removeEmptiesAndNulls(data, schema, "$");
             }
         };
 
