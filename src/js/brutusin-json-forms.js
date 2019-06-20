@@ -203,10 +203,7 @@ if (typeof brutusin === "undefined") {
                             input.disabled = true;
                     }
                 }
-                if (s.enum.length === 1)
-                    input.selectedIndex = 0;
-                else
-                    input.selectedIndex = selectedIndex;
+                input.selectedIndex = selectedIndex;
             } else {
                 input = document.createElement("input");
                 if (s.type === "integer" || s.type === "number") {
