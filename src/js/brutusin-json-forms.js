@@ -848,7 +848,7 @@ if (typeof brutusin === "undefined") {
                     return clone;
                 } else if (object === "") {
                     return null;
-                } else if (object instanceof Object) {
+                } else if (object instanceof Object && !(object instanceof File)) {
                     var clone = new Object();
                     var nonEmpty = false;
                     for (var prop in object) {
@@ -1251,6 +1251,16 @@ if (typeof brutusin === "undefined") {
         }
 
         function getValue(schema, input) {
+            if(schema.$id === "$.Document") {
+            input.type = 'file';
+            input.getValue = function(){
+              if(input.value && input.files.length ){
+                return input.files[0];
+              } else {
+                return null;
+              }
+            };
+           }
             if (typeof input.getValue === "function") {
                 return input.getValue();
             }
