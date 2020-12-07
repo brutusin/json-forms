@@ -177,7 +177,6 @@ if (typeof brutusin === "undefined") {
             } else if (s.media) {
                 input = document.createElement("input");
                 input.type = "file";
-                appendChild(input, option, s);
                 // XXX TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
@@ -205,7 +204,7 @@ if (typeof brutusin === "undefined") {
                     }
                 }
                 if (s.enum.length === 1)
-                    input.selectedIndex = 1;
+                    input.selectedIndex = 0;
                 else
                     input.selectedIndex = selectedIndex;
             } else {
@@ -223,6 +222,10 @@ if (typeof brutusin === "undefined") {
                         // #46, problem in IE11. TODO polyfill?
                         input.type = "text";
                     }
+                } else if (s.format === "date") {
+                    input.type = "date";
+                } else if (s.format === "time") {
+                    input.type = "time";
                 } else if (s.format === "email") {
                     input.type = "email";
                 } else if (s.format === "text") {
@@ -345,8 +348,8 @@ if (typeof brutusin === "undefined") {
             if (s.required) {
                 input = document.createElement("input");
                 input.type = "checkbox";
-                if (value === true) {
-                    input.checked = true;
+                if (value === true || value !== false && s.default) {
+                    input.checked = true;    
                 }
             } else {
                 input = document.createElement("select");
@@ -747,6 +750,7 @@ if (typeof brutusin === "undefined") {
             if (s.readOnly)
                 addButton.disabled = true;
             addButton.setAttribute('type', 'button');
+            addButton.className = "addItem";
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
                     return BrutusinForms.messages["minItems"].format(s.minItems);
@@ -827,8 +831,8 @@ if (typeof brutusin === "undefined") {
 
         obj.getData = function () {
             function removeEmptiesAndNulls(object, s) {
-                if (ss === null) {
-                    ss = SCHEMA_ANY;
+                if (s === null) {
+                    s = SCHEMA_ANY;
                 }
                 if (s.$ref) {
                     s = getDefinition(s.$ref);
@@ -844,7 +848,7 @@ if (typeof brutusin === "undefined") {
                     return clone;
                 } else if (object === "") {
                     return null;
-                } else if (object instanceof Object) {
+                } else if (object instanceof Object  && !(object instanceof File)) {
                     var clone = new Object();
                     var nonEmpty = false;
                     for (var prop in object) {
@@ -1193,7 +1197,7 @@ if (typeof brutusin === "undefined") {
                 } else if (propertyProvider) {
                     renderTitle(titleContainer, propertyProvider.getValue(), s);
                 }
-                if (!value) {
+                if (typeof value === "undefined" || value === null) {
                     if (typeof initialValue !== "undefined" && initialValue !== null) {
                         value = getInitialValue(id);
                     } else {
@@ -1247,6 +1251,16 @@ if (typeof brutusin === "undefined") {
         }
 
         function getValue(schema, input) {
+            if(schema.$id === "$.Document") {
+            input.type = 'file';
+            input.getValue = function(){
+              if(input.value && input.files.length ){
+                return input.files[0];
+              } else {
+                return null;
+              }
+             };
+            }
             if (typeof input.getValue === "function") {
                 return input.getValue();
             }
@@ -1307,7 +1321,7 @@ if (typeof brutusin === "undefined") {
 
         function cleanSchemaMap(schemaId) {
             for (var prop in schemaMap) {
-                if (schemaId.startsWith(prop)) {
+                if (prop.startsWith(schemaId)) {
                     delete schemaMap[prop];
                 }
             }
