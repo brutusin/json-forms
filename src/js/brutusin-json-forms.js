@@ -1253,7 +1253,7 @@ if (typeof brutusin === "undefined") {
         function getValue(schema, input) {
             if(schema.$id === "$.Document") {
             input.type = 'file';
-            input.getValue = function(){
+            input.getValue = function() {
               if(input.value && input.files.length ){
                 return input.files[0];
               } else {
