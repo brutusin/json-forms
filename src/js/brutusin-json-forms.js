@@ -277,6 +277,13 @@ if (typeof brutusin === "undefined") {
                                 return BrutusinForms.messages["maxLength"].format(s.maxLength);
                             }
                         }
+                        //Add a default regex pattern matching for email validation, or else user could use
+                        //the `pattern` field for their own custom regex pattern
+                        if (!s.pattern && s.format === "email") {
+                            if (!value.match(/[^@\s]+@[^@\s]+\.[^@\s]+/)) {
+                                return BrutusinForms.messages["email"];
+                            }
+                        }
                     }
                     if (value !== null && !isNaN(value)) {
                         if (s.multipleOf && value % s.multipleOf !== 0) {
