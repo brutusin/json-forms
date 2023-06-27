@@ -228,6 +228,8 @@ if (typeof brutusin === "undefined") {
                     input.type = "time";
                 } else if (s.format === "email") {
                     input.type = "email";
+                } else if (s.format === "password") {
+                    input.type = "password";
                 } else if (s.format === "text") {
                     input = document.createElement("textarea");
                 } else {
