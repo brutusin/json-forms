@@ -76,6 +76,7 @@ if (typeof brutusin === "undefined") {
         "exclusiveMaximum": "Value must be **lower than** `{0}`",
         "minProperties": "At least `{0}` properties are required",
         "maxProperties": "At most `{0}` properties are allowed",
+        "email": "The email must at least consists an asterisk (@), following by a domain name with a dot (.)",
         "uniqueItems": "Array items must be unique",
         "addItem": "Add item",
         "true": "True",
