@@ -321,6 +321,9 @@ if (typeof brutusin === "undefined") {
                 input.title = s.description;
                 input.placeholder = s.description;
             }
+            if (s.class) {
+                input.className = s.class;
+            }            
 //        if (s.pattern) {
 //            input.pattern = s.pattern;
 //        }
