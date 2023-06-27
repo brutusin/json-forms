@@ -76,6 +76,7 @@ if (typeof brutusin === "undefined") {
         "exclusiveMaximum": "Value must be **lower than** `{0}`",
         "minProperties": "At least `{0}` properties are required",
         "maxProperties": "At most `{0}` properties are allowed",
+        "email": "The email must at least consists an asterisk (@), following by a domain name with a dot (.)",
         "uniqueItems": "Array items must be unique",
         "addItem": "Add item",
         "true": "True",
@@ -252,9 +253,15 @@ if (typeof brutusin === "undefined") {
                             if (parentSchema && parentSchema.type === "object") {
                                 if (parentSchema.required) {
                                     return BrutusinForms.messages["required"];
+                                } else if (parentSchema.requiredProperties) {
+                                    for (var i = 0; i < parentSchema.requiredProperties.length; i++) {
+                                        if (parentSchema.requiredProperties[i] === s.$id.substring(2)) {
+                                            return BrutusinForms.messages["required"];
+                                        }
+                                    }
                                 } else {
                                     for (var prop in parentObject) {
-                                        if (parentObject[prop] !== null) {
+                                        if (parentObject[prop] === null) {
                                             return BrutusinForms.messages["required"];
                                         }
                                     }
@@ -277,7 +284,6 @@ if (typeof brutusin === "undefined") {
                                 return BrutusinForms.messages["maxLength"].format(s.maxLength);
                             }
                         }
-                        //Issue#90
                         //Add a default regex pattern matching for email validation, or else user could use
                         //the `pattern` field for their own custom regex pattern
                         if (!s.pattern && s.format === "email") {
@@ -1214,6 +1220,9 @@ if (typeof brutusin === "undefined") {
                 if (!value) {
                     if (typeof initialValue !== "undefined" && initialValue !== null) {
                         value = getInitialValue(id);
+                        if (value === null && typeof s.default !== "undefined") {
+                            value = s.default;
+                        }
                     } else {
                         value = s.default;
                     }
