@@ -1214,6 +1214,9 @@ if (typeof brutusin === "undefined") {
                 if (!value) {
                     if (typeof initialValue !== "undefined" && initialValue !== null) {
                         value = getInitialValue(id);
+                        if (value === null && typeof s.default !== "undefined") {
+                            value = s.default;
+                        }
                     } else {
                         value = s.default;
                     }
