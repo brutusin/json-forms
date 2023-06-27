@@ -335,6 +335,9 @@ if (typeof brutusin === "undefined") {
                 input.title = s.description;
                 input.placeholder = s.description;
             }
+            if (s.class) {
+                input.className = s.class;
+            }
 //        if (s.pattern) {
 //            input.pattern = s.pattern;
 //        }
@@ -401,6 +404,9 @@ if (typeof brutusin === "undefined") {
             };
             input.schema = schemaId;
             input.id = getInputId();
+            if (s.class) {
+                input.className = s.class;
+            }
             inputCounter++;
             if (s.description) {
                 input.title = s.description;
