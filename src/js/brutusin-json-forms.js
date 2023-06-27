@@ -252,9 +252,15 @@ if (typeof brutusin === "undefined") {
                             if (parentSchema && parentSchema.type === "object") {
                                 if (parentSchema.required) {
                                     return BrutusinForms.messages["required"];
+                                    } else if (parentSchema.requiredProperties) {
+                                    for (var i = 0; i < parentSchema.requiredProperties.length; i++) {
+                                        if (parentSchema.requiredProperties[i] === s.$id.substring(2)) {
+                                            return BrutusinForms.messages["required"];
+                                        }
+                                    }
                                 } else {
                                     for (var prop in parentObject) {
-                                        if (parentObject[prop] !== null) {
+                                        if (parentObject[prop] === null) {
                                             return BrutusinForms.messages["required"];
                                         }
                                     }
