@@ -364,7 +364,29 @@ if (typeof brutusin === "undefined") {
             var schemaId = getSchemaId(id);
             var s = getSchema(schemaId);
             var input;
-            if (s.required) {
+            if (s.format === "radio") {
+                input = document.createElement("div");
+                for (var i = 0; i < s.enum.length; i++) {
+                    var radioInput = document.createElement("input");
+                    radioInput.type = "radio";
+                    radioInput.name = s.$id.substring(2);
+                    radioInput.value = s.enum[i];
+                    radioInput.id = s.enum[i];
+                    var label = document.createElement("label");
+                    label.htmlFor = s.enum[i];
+                    var labelText = document.createTextNode(s.enum[i]);
+                    appendChild(label, labelText);
+                    if (value && s.enum[i] === value) {
+                        radioInput.checked = true;
+                    }
+                    if (s.readOnly) {
+                        radioInput.disabled = true;
+                    }
+                    appendChild(input, label);
+                    appendChild(input, radioInput, s);
+                }
+            }
+            else if (s.required) {
                 input = document.createElement("input");
                 input.type = "checkbox";
                 if (value === true || value !== false && s.default) {

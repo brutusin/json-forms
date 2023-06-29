@@ -64,7 +64,12 @@ form.brutusin-form table, form.brutusin-form input, form.brutusin-form select, f
     width: 100% !important;
     min-width: 80px;
 }
-form.brutusin-form input[type=checkbox]{
+
+form.brutusin-form input[type=radio] {
+    margin: 0 15px 0 10px;
+}
+
+form.brutusin-form input[type=checkbox], form.brutusin-form input[type=radio] {
     width: auto !important;
     min-width: auto !important;
 }
