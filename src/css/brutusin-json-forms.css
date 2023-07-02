@@ -110,3 +110,55 @@ form.brutusin-form .error {
 form.brutusin-form .error-message {
     color: red;
 }
+
+.brutusin-card {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.25rem;
+}
+
+.brutusin-card-header {
+    padding: 0.5rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0,0,0,.03);
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.brutusin-card-body {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+.brutusin-card-header a[data-toggle="collapse"]:after {
+    font-family:'Bootstrap-icons';
+    display: inline-block;
+    content: "\F229";
+    transition: all linear 0.25s;
+    margin-left: 0.7rem;
+}
+
+.brutusin-card-header a[data-toggle="collapse"].collapsed:after {
+    transform: rotate(-180deg);
+}
+
+#expand-btn.btn-link:focus, #expand-btn.btn-link:hover {
+    text-decoration: unset;
+}
+
+#expand-btn {
+    display: flex;
+    padding: 6px 0;
+}
