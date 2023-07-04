@@ -33,7 +33,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
     BrutusinForms.addDecorator(function (element, schema) {
         if (element.tagName) {
             var tagName = element.tagName.toLowerCase();
-            if (tagName === "input" && element.type !== "checkbox" || tagName === "textarea") {
+            if (tagName === "input" && (element.type !== "checkbox" && element.type !== "radio") || tagName === "textarea") {
                 element.className += " form-control";
             } else if (tagName === "select") {
                 element.className += " chosen-select form-control";
