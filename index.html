@@ -112,7 +112,12 @@
                     {"type":"object","properties":{"prop1":{"type":"integer"},"prop2":{"type":"integer","required":true},"prop3":{"type":"integer","required":true},"composite1":{"type":"object","properties":{"nested1":{"type":"number","required":true},"nested2":{"type":"number","required":true}},"required":["nested1","nested2"]},"composite2":{"type":"object","properties":{"nested1":{"type":"number","required":true},"nested2":{"type":"number","required":true}},"required":["nested1","nested2"]}},"required":["prop1","prop2","composite1"]},
                     null,
                     null,
-                    "Required properties supported in both v3 and v4+ spec formats. Last one format takes preference. More info [here](https://github.com/brutusin/json-forms/issues/56)"]
+                    "Required properties supported in both v3 and v4+ spec formats. Last one format takes preference. More info [here](https://github.com/brutusin/json-forms/issues/56)"],
+                ["Additional input type format",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"password":{"title":"Password","type":"string","format":"password","description":"Password field would have the text masked.","required":true},"email":{"title":"Email","type":"string","format":"email","description":"Email field would need to follow the format of name@domain.com in order to pass the validation.","required":true},"date":{"title":"Date","type":"string","format":"date","description":"Use the date picker to pick the date.","required":true},"time":{"title":"Time","type":"string","format":"time","description":"Use the time picker to pick the time.","required":true}}},
+                    null,
+                    null,
+                    "Additional input type format such as `password`, `email`, `date` and `time`."]
             ];
 
             var selectedTab = "schema";
