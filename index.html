@@ -31,11 +31,13 @@
         <script src="//rawgit.com/brutusin/json-forms/master/dist/js/brutusin-json-forms-bootstrap.min.js"></script>
         <script lang="javascript">
             var BrutusinForms = brutusin["json-forms"];
-            BrutusinForms.bootstrap.addFormatDecorator("inputstream", "file", "glyphicon-search", function (element) {
+            BrutusinForms.bootstrap.addFormatDecorator("inputstream", "file", "glyphicon-search", null, function (element) {
                 alert("user callback on element " + element)
             });
             BrutusinForms.bootstrap.addFormatDecorator("color", "color");
             BrutusinForms.bootstrap.addFormatDecorator("date", "date");
+            //Title decorator
+            BrutusinForms.bootstrap.addFormatDecorator(null, null, null, ":");
             var codeMirrors = new Object();
             var input = new Object();
             var inputString = new Object();

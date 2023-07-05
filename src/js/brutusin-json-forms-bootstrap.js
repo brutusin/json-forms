@@ -124,7 +124,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
     });
     BrutusinForms.bootstrap = new Object();
 // helper button for string (with format) fields
-    BrutusinForms.bootstrap.addFormatDecorator = function (format, inputType, glyphicon, cb) {
+    BrutusinForms.bootstrap.addFormatDecorator = function (format, inputType, glyphicon, titleDecorator, cb) {
         BrutusinForms.addDecorator(function (element, schema) {
             if (element.tagName) {
                 var tagName = element.tagName.toLowerCase();
@@ -154,6 +154,13 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                         };
                         td.appendChild(searchButton);
                     }
+                }
+            }
+
+            if (element instanceof Text) {
+                var tagName = element.parentElement.tagName.toLowerCase();
+                if (tagName === "label" && titleDecorator) {
+                    element.textContent = element.textContent + titleDecorator;
                 }
             }
         });
