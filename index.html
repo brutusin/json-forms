@@ -6,7 +6,8 @@
         <link rel="stylesheet" href="lib/codemirror/codemirror.css">
         <link rel="stylesheet" href="lib/bootstrap-select/css/bootstrap-select.min.css">
         <link rel="stylesheet" href="lib/octicons/octicons.css">
-        <link rel="stylesheet" href='//rawgit.com/brutusin/json-forms/master/dist/css/brutusin-json-forms.min.css'/>
+        <link rel="stylesheet" href='src/css/brutusin-json-forms.css'/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
         <style>
             img {
@@ -27,8 +28,8 @@
         <!--
         <script src="//rawgit.com/brutusin/json-forms/master/dist/js/brutusin-json-forms.min.js"></script>
          -->
-        <script src="//rawgit.com/brutusin/json-forms/master/src/js/brutusin-json-forms.js"></script>
-        <script src="//rawgit.com/brutusin/json-forms/master/dist/js/brutusin-json-forms-bootstrap.min.js"></script>
+        <script src="src/js/brutusin-json-forms.js"></script>
+        <script src="src/js/brutusin-json-forms-bootstrap.js"></script>
         <script lang="javascript">
             var BrutusinForms = brutusin["json-forms"];
             BrutusinForms.bootstrap.addFormatDecorator("inputstream", "file", "glyphicon-search", function (element) {
@@ -112,7 +113,12 @@
                     {"type":"object","properties":{"prop1":{"type":"integer"},"prop2":{"type":"integer","required":true},"prop3":{"type":"integer","required":true},"composite1":{"type":"object","properties":{"nested1":{"type":"number","required":true},"nested2":{"type":"number","required":true}},"required":["nested1","nested2"]},"composite2":{"type":"object","properties":{"nested1":{"type":"number","required":true},"nested2":{"type":"number","required":true}},"required":["nested1","nested2"]}},"required":["prop1","prop2","composite1"]},
                     null,
                     null,
-                    "Required properties supported in both v3 and v4+ spec formats. Last one format takes preference. More info [here](https://github.com/brutusin/json-forms/issues/56)"]
+                    "Required properties supported in both v3 and v4+ spec formats. Last one format takes preference. More info [here](https://github.com/brutusin/json-forms/issues/56)"],
+                ["Radio button",
+                    {"$schema": "http://json-schema.org/draft-03/schema#", "type": "object", "properties": {"radio1": {"type": "boolean","format": "radio","title": "Animal", "required": true, "enum": ["Dog", "Cat", "Bird"]}}},
+                    null,
+                    null,
+                    "Boolean supporting radio type. Must define `format` and `enum` fields."]
             ];
 
             var selectedTab = "schema";
@@ -300,6 +306,5 @@
             );
 
         </script>
-    </div>
-</body>
+    </body>
 </html> 
