@@ -65,7 +65,7 @@ form.brutusin-form table, form.brutusin-form input, form.brutusin-form select, f
     min-width: 80px;
 }
 
-form.brutusin-form input[type=radio] {
+form.brutusin-form input[type=radio], form.brutusin-form input[type=checkbox] {
     margin: 0 15px 0 10px;
 }
 
