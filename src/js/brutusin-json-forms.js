@@ -885,6 +885,9 @@ if (typeof brutusin === "undefined") {
                     if (object.length === 0) {
                         return null;
                     }
+                    if (s.format === "checkbox") {
+                        return object;
+                    }
                     var clone = new Array();
                     for (var i = 0; i < object.length; i++) {
                         clone[i] = removeEmptiesAndNulls(object[i], s.items);
@@ -1330,6 +1333,19 @@ if (typeof brutusin === "undefined") {
                     value = input.checked;
                     if (!value) {
                         value = false;
+                    }
+                } else if (schema.format === "checkbox") {
+                    var checkboxValue = [];
+                    for (var i = 0; i < input.childElementCount; i++) {
+                        if (input.childNodes[i].tagName === "INPUT" && input.childNodes[i].checked) {
+                            checkboxValue.push(input.childNodes[i].value);
+                        }
+                    }
+                    if (checkboxValue.length !== 0) {
+                        value = checkboxValue;
+                    }
+                    else {
+                        value = null;
                     }
                 } else if (input.tagName.toLowerCase() === "select") {
                     if (input.value === "true") {
