@@ -919,9 +919,11 @@ if (typeof brutusin === "undefined") {
                         }
                         var value = removeEmptiesAndNulls(object[prop], ss);
                         //Check if user assign an empty String in the default field, if true return empty string instead of null
+                        if (ss !== null) {
                             if (ss.default == "" && value === null) {
                                 value = "";
                             }
+                        }
                         if (value !== null) {
                             clone[prop] = value;
                             nonEmpty = true;
