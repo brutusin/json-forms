@@ -32,11 +32,13 @@
         <script src="src/js/brutusin-json-forms-bootstrap.js"></script>
         <script lang="javascript">
             var BrutusinForms = brutusin["json-forms"];
-            BrutusinForms.bootstrap.addFormatDecorator("inputstream", "file", "glyphicon-search", function (element) {
+            BrutusinForms.bootstrap.addFormatDecorator("inputstream", "file", "glyphicon-search", null, function (element) {
                 alert("user callback on element " + element)
             });
             BrutusinForms.bootstrap.addFormatDecorator("color", "color");
             BrutusinForms.bootstrap.addFormatDecorator("date", "date");
+            //Title decorator
+            BrutusinForms.bootstrap.addFormatDecorator(null, null, null, ":");
             var codeMirrors = new Object();
             var input = new Object();
             var inputString = new Object();
@@ -119,6 +121,11 @@
                     null,
                     null,
                     "Boolean supporting radio and checkbox type. Must define `format` and `enum` fields."]
+                ["Additional input type format",
+                    {"$schema":"http://json-schema.org/draft-03/schema#","type":"object","properties":{"password":{"title":"Password","type":"string","format":"password","description":"Password field would have the text masked.","required":true},"email":{"title":"Email","type":"string","format":"email","description":"Email field would need to follow the format of name@domain.com in order to pass the validation.","required":true},"date":{"title":"Date","type":"string","format":"date","description":"Use the date picker to pick the date.","required":true},"time":{"title":"Time","type":"string","format":"time","description":"Use the time picker to pick the time.","required":true}}},
+                    null,
+                    null,
+                    "Additional input type format such as `password`, `email`, `date` and `time`."]
             ];
 
             var selectedTab = "schema";
