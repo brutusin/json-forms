@@ -50,6 +50,37 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
             }
         }
     });
+
+    //Collapsible form
+    BrutusinForms.addDecorator(function (element, schema) {
+        if (schema !== undefined) {
+            if (schema.collapsible !== undefined && schema.collapsible === true) {
+                var parentElement = element.parentElement;
+                var tagName = parentElement.tagName.toLowerCase();
+                if (tagName === "form") {
+                    parentElement.className += " brutusin-card-body";
+                    var formParentElement = parentElement.parentElement;
+
+                    var divCard = document.createElement("div");
+                    divCard.className = "brutusin-card";
+                    divCard.innerHTML = "<div class='brutusin-card-header'><a id='expand-btn' class='btn btn-link' data-toggle='collapse' data-target='#brutusin-form-collapsible' aria-expanded='true' aria-controls='brutusin-form-collapsible'></a></div>";
+
+                    var divCardBody = document.createElement("div");
+                    divCardBody.className = "collapse in";
+                    divCardBody.id = "brutusin-form-collapsible";
+                    divCardBody.setAttribute("aria-expanded", "true");
+                    divCardBody.appendChild(parentElement);
+                    divCard.appendChild(divCardBody);
+                    
+                    formParentElement.appendChild(divCard);
+
+                    if (schema.title !== undefined) {
+                        document.getElementById("expand-btn").textContent = schema.title;
+                    }
+                }
+            } 
+        }
+    });
     
 
 // Description help icon
