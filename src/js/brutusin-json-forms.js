@@ -938,6 +938,7 @@ if (typeof brutusin === "undefined") {
                     return object;
                 }
             }
+
             if (!container) {
                 return null;
             } else {
@@ -1355,6 +1356,14 @@ if (typeof brutusin === "undefined") {
                         value = false;
                     } else {
                         value = null;
+                    }
+                } else if (schema.format === "radio") {
+                    value = null;
+                    for (var i = 0; i < input.childElementCount; i++) {
+                        if (input.childNodes[i].tagName === "INPUT" && input.childNodes[i].checked) {
+                            value = input.childNodes[i].value;
+                            break;
+                        }
                     }
                 }
             } else if (schema.type === "any") {
