@@ -1292,13 +1292,24 @@ if (typeof brutusin === "undefined") {
         }
 
         function getInitialValue(id) {
-            var ret;
-            try {
-                eval("ret = initialValue" + id.substring(1));
-            } catch (e) {
-                ret = null;
+            var fields = id.substring(2).split('.');
+            var initialValueClone = initialValue;
+            for(var i = 0; i < fields.length; i++) {
+                var field = fields[i];
+                if (field != "") {
+                    if (field.substring(field.length - 1) === "]") {
+                        //Get the index from the array in the field
+                        var arrayIndex = parseInt(field.substring(field.lastIndexOf("[") + 1, field.length - 1));
+                        //Substring off the square bracket from the field
+                        field = field.substring(0, field.lastIndexOf("["));
+                        initialValueClone = initialValueClone[field][arrayIndex];
+                    } else {
+                        initialValueClone = initialValueClone[field];
+                    }
+                }
             }
-            return ret;
+
+            return initialValueClone;
         }
 
         function getValue(schema, input) {
