@@ -418,6 +418,20 @@ if (typeof brutusin === "undefined") {
                     input.selectedIndex = 2;
                 }
             }
+
+            input.getValidationError = function () {
+                try {
+                    var value = getValue(s, input);
+                    if (value === null) {
+                        if (s.required) {
+                            return BrutusinForms.messages["required"];
+                        }
+                    } 
+                } catch (error) {
+                    return BrutusinForms.messages["invalidValue"];
+                }
+            };
+
             input.onchange = function () {
                 if (parentObject) {
                     parentObject[propertyProvider.getValue()] = getValue(s, input);

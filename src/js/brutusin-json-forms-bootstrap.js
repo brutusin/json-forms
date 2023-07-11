@@ -250,6 +250,14 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
     BrutusinForms.onValidationError = function (element, message) {
 
         setTimeout(function () {
+            if (element.tagName === "DIV" && element.childElementCount !== 0) {
+                for (var i = 0; i < element.childElementCount; i++) {
+                    if (element.childNodes[i].tagName === "INPUT") {
+                        element = element.childNodes[i];
+                        break;
+                    }
+                }
+            }
             var dataToggle = element.getAttribute("data-toggle");
             var dataTrigger = element.getAttribute("data-trigger");
             var dataContent = element.getAttribute("data-content");
