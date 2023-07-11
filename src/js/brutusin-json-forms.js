@@ -395,6 +395,28 @@ if (typeof brutusin === "undefined") {
                     appendChild(input, radioInput, s);
                 }
             }
+            else if (s.format === "checkbox") {
+                input = document.createElement("div");
+                for (var i = 0; i < s.enum.length; i++) {
+                    checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = s.enum[i];
+                    checkbox.value = s.enum[i];
+
+                    var label = document.createElement("label");
+                    label.htmlFor = s.enum[i];
+                    var labelText = document.createTextNode(s.enum[i]);
+                    appendChild(label, labelText);
+                    if (value && s.enum[i] === value) {
+                        checkbox.checked = true;
+                    }
+                    if (s.readOnly) {
+                        checkbox.disabled = true;
+                    }
+                    appendChild(input, label);
+                    appendChild(input, checkbox, s);
+                }
+            }
             else if (s.required) {
                 input = document.createElement("input");
                 input.type = "checkbox";
