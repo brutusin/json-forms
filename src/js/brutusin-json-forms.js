@@ -77,6 +77,7 @@ if (typeof brutusin === "undefined") {
         "minProperties": "At least `{0}` properties are required",
         "maxProperties": "At most `{0}` properties are allowed",
         "email": "The email must at least consists an asterisk (@), following by a domain name with a dot (.)",
+        "url": "The URL provided is not a valid URL.",
         "uniqueItems": "Array items must be unique",
         "addItem": "Add item",
         "true": "True",
@@ -231,6 +232,8 @@ if (typeof brutusin === "undefined") {
                     input.type = "email";
                 } else if (s.format === "password") {
                     input.type = "password";
+                } else if (s.format === "url") {
+                    input.type = "url";
                 } else if (s.format === "text") {
                     input = document.createElement("textarea");
                 } else {
@@ -291,6 +294,12 @@ if (typeof brutusin === "undefined") {
                         if (!s.pattern && s.format === "email") {
                             if (!value.match(/[^@\s]+@[^@\s]+\.[^@\s]+/)) {
                                 return BrutusinForms.messages["email"];
+                            }
+                        }
+
+                        if (!s.pattern && s.format === "url") {
+                            if (!value.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/)) {
+                                return BrutusinForms.messages["url"];
                             }
                         }
                     }
@@ -386,6 +395,28 @@ if (typeof brutusin === "undefined") {
                     appendChild(input, radioInput, s);
                 }
             }
+            else if (s.format === "checkbox") {
+                input = document.createElement("div");
+                for (var i = 0; i < s.enum.length; i++) {
+                    checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = s.enum[i];
+                    checkbox.value = s.enum[i];
+
+                    var label = document.createElement("label");
+                    label.htmlFor = s.enum[i];
+                    var labelText = document.createTextNode(s.enum[i]);
+                    appendChild(label, labelText);
+                    if (value && s.enum[i] === value) {
+                        checkbox.checked = true;
+                    }
+                    if (s.readOnly) {
+                        checkbox.disabled = true;
+                    }
+                    appendChild(input, label);
+                    appendChild(input, checkbox, s);
+                }
+            }
             else if (s.required) {
                 input = document.createElement("input");
                 input.type = "checkbox";
@@ -418,6 +449,20 @@ if (typeof brutusin === "undefined") {
                     input.selectedIndex = 2;
                 }
             }
+
+            input.getValidationError = function () {
+                try {
+                    var value = getValue(s, input);
+                    if (value === null) {
+                        if (s.required) {
+                            return BrutusinForms.messages["required"];
+                        }
+                    } 
+                } catch (error) {
+                    return BrutusinForms.messages["invalidValue"];
+                }
+            };
+
             input.onchange = function () {
                 if (parentObject) {
                     parentObject[propertyProvider.getValue()] = getValue(s, input);
@@ -922,8 +967,10 @@ if (typeof brutusin === "undefined") {
                         }
                         var value = removeEmptiesAndNulls(object[prop], ss);
                         //Check if user assign an empty String in the default field, if true return empty string instead of null
-                        if (ss.default == "" && value === null) {
-                            value = "";
+                        if (ss !== null) {
+                            if (ss.default == "" && value === null) {
+                                value = "";
+                            }
                         }
                         if (value !== null) {
                             clone[prop] = value;
@@ -939,6 +986,7 @@ if (typeof brutusin === "undefined") {
                     return object;
                 }
             }
+
             if (!container) {
                 return null;
             } else {
@@ -1179,7 +1227,7 @@ if (typeof brutusin === "undefined") {
                     if (schema.type !== "any" && schema.type !== "object" && schema.type !== "array") {
                         titleLabel.htmlFor = getInputId();
                     }
-                    var titleNode = document.createTextNode(title + ":");
+                    var titleNode = document.createTextNode(title);
                     appendChild(titleLabel, titleNode, schema);
                     if (schema.description) {
                         titleLabel.title = schema.description;
@@ -1240,6 +1288,10 @@ if (typeof brutusin === "undefined") {
             renderInfoMap[schemaId].value = value;
             clear(titleContainer);
             clear(container);
+            if (s === undefined) {
+                data = new Object();
+                return;
+            }
             //console.log(id,s,value);
             var r = renderers[s.type];
             if (r && !s.dependsOn) {
@@ -1295,13 +1347,24 @@ if (typeof brutusin === "undefined") {
         }
 
         function getInitialValue(id) {
-            var ret;
-            try {
-                eval("ret = initialValue" + id.substring(1));
-            } catch (e) {
-                ret = null;
+            var fields = id.substring(2).split('.');
+            var initialValueClone = initialValue;
+            for(var i = 0; i < fields.length; i++) {
+                var field = fields[i];
+                if (field != "") {
+                    if (field.substring(field.length - 1) === "]") {
+                        //Get the index from the array in the field
+                        var arrayIndex = parseInt(field.substring(field.lastIndexOf("[") + 1, field.length - 1));
+                        //Substring off the square bracket from the field
+                        field = field.substring(0, field.lastIndexOf("["));
+                        initialValueClone = initialValueClone[field][arrayIndex];
+                    } else {
+                        initialValueClone = initialValueClone[field];
+                    }
+                }
             }
-            return ret;
+
+            return initialValueClone;
         }
 
         function getValue(schema, input) {
@@ -1354,6 +1417,14 @@ if (typeof brutusin === "undefined") {
                         value = false;
                     } else {
                         value = null;
+                    }
+                } else if (schema.format === "radio") {
+                    value = null;
+                    for (var i = 0; i < input.childElementCount; i++) {
+                        if (input.childNodes[i].tagName === "INPUT" && input.childNodes[i].checked) {
+                            value = input.childNodes[i].value;
+                            break;
+                        }
                     }
                 }
             } else if (schema.type === "any") {
