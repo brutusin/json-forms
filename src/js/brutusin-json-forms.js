@@ -407,8 +407,12 @@ if (typeof brutusin === "undefined") {
                     label.htmlFor = s.enum[i];
                     var labelText = document.createTextNode(s.enum[i]);
                     appendChild(label, labelText);
-                    if (value && s.enum[i] === value) {
-                        checkbox.checked = true;
+                    if (value) {
+                        for (var j = 0; j < value.length; j++) {
+                            if (s.enum[i] === value[j]) {
+                                checkbox.checked = true;
+                            }
+                        }
                     }
                     if (s.readOnly) {
                         checkbox.disabled = true;
