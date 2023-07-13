@@ -36,7 +36,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
             if (tagName === "input" && (element.type !== "checkbox" && element.type !== "radio") || tagName === "textarea") {
                 element.className += " form-control";
             } else if (tagName === "select") {
-                element.className += " chosen-select form-control";
+                element.className += " form-control";
             } else if (tagName === "button") {
                 if (element.className === "remove") {
                     element.className += " glyphicon glyphicon-remove";
@@ -66,7 +66,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                     divCard.innerHTML = "<div class='brutusin-card-header'><a id='expand-btn' class='btn btn-link' data-toggle='collapse' data-target='#brutusin-form-collapsible' aria-expanded='true' aria-controls='brutusin-form-collapsible'></a></div>";
 
                     var divCardBody = document.createElement("div");
-                    divCardBody.className = "collapse in";
+                    divCardBody.className = "collapse show";
                     divCardBody.id = "brutusin-form-collapsible";
                     divCardBody.setAttribute("aria-expanded", "true");
                     divCardBody.appendChild(parentElement);
