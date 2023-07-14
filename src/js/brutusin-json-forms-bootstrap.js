@@ -44,9 +44,7 @@ if (("undefined" === typeof $ || "undefined" === typeof $.fn || "undefined" === 
                         element.removeChild(element.firstChild);
                     }
                 }
-                element.className += " btn btn-primary  btn-xs";
-            } else if (tagName === "form") {
-                element.className += " form-inline";
+                element.className += " btn btn-warning btn-sm";
             }
         }
     });
