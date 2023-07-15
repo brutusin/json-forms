@@ -15,6 +15,9 @@
  * 
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
+a, a:hover, a:visited, a:active, a:focus {
+    text-decoration: none !important;
+}
 .add-pattern-div{
     margin-top: 6px;
 }
@@ -64,7 +67,12 @@ form.brutusin-form table, form.brutusin-form input, form.brutusin-form select, f
     width: 100% !important;
     min-width: 80px;
 }
-form.brutusin-form input[type=checkbox]{
+
+form.brutusin-form input[type=radio], form.brutusin-form input[type=checkbox] {
+    margin: 0 15px 0 10px;
+}
+
+form.brutusin-form input[type=checkbox], form.brutusin-form input[type=radio] {
     width: auto !important;
     min-width: auto !important;
 }
@@ -109,4 +117,76 @@ form.brutusin-form .error {
 }
 form.brutusin-form .error-message {
     color: red;
+}
+.brutusin-form .dropdown.bootstrap-select.form-control {
+    width: 100% !important;
+}
+.brutusin-form .bootstrap-select>.dropdown-toggle {
+    height: calc(1.5em + .75rem + 2px);
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.brutusin-form.form-inline label {
+    justify-content: end;
+}
+.container {
+    padding-top: 10px;
+    padding-bottom: 30px;
+}
+blockquote {
+    border-left: 0.5rem solid #dedede;
+    padding-left: 20px;
+}
+
+.brutusin-card {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.25rem;
+}
+
+.brutusin-card-header {
+    padding: 0.5rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0,0,0,.03);
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.brutusin-card-body {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+.brutusin-card-header a[data-toggle="collapse"]:after {
+    font-family:'Bootstrap-icons';
+    display: inline-block;
+    content: "\F229";
+    transition: all linear 0.25s;
+    margin-left: 0.7rem;
+}
+
+.brutusin-card-header a[data-toggle="collapse"].collapsed:after {
+    transform: rotate(-180deg);
+}
+
+#expand-btn.btn-link:focus, #expand-btn.btn-link:hover {
+    text-decoration: unset;
+}
+
+#expand-btn {
+    display: flex;
+    padding: 6px 0;
 }
